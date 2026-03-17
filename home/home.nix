@@ -19,7 +19,6 @@
     flatpak
     kdePackages.kate
     kdePackages.kdeconnect-kde
-    vscode
   ];
 
   # ═══════════════════════════════════════════════════════════
@@ -116,6 +115,26 @@
       url."https://github.com/" = {
         insteadOf = "git://github.com/";
       };
+    };
+  };
+
+    # ═══════════════════════════════════════════════════════════
+  # VSCode 配置
+  # ═══════════════════════════════════════════════════════════
+  programs.vscode = {
+    enable = true;
+
+    # 可选：安装扩展
+    extensions = with pkgs.vscode-extensions; [
+      # 例如：
+      # ms-python.python
+      # ms-vscode.cpptools
+    ];
+
+    # 可选：用户设置
+    userSettings = {
+      "editor.fontSize" = 14;
+      "workbench.colorTheme" = "Default Dark+";
     };
   };
 
