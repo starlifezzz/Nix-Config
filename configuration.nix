@@ -25,6 +25,7 @@
     
     # 内核配置
     kernelPackages = pkgs.linuxPackages_zen; # 使用最新内核
+    # kernelPackages =  pkgs.linuxPackages_latest; # 使用最新内核
     kernelParams = [
       "video=1920x1080@60"
       # "processor.max_cstate=1"
@@ -103,8 +104,6 @@
     displayManager.setupCommands = ''
       export GTK_IM_MODULE=fcitx
       export QT_IM_MODULE=fcitx
-      export XMODIFIERS=@im=fcitx
-      export QT_QPA_PLATFORM=wayland
     '';
   };
   
@@ -202,8 +201,28 @@
      vulkan-tools      # 包含 vulkaninfo
      libva-utils       # 包含 vainfo
      radeontop         # AMD GPU 监控
+     lm_sensors        # 硬件传感器
+     htop              # 系统监控
+     btop              # 高级系统监控
+     pciutils          # 包含 lspci
+
   ];
 
+  hardware.sensor.iio.enable = true;
+
+  # AMD 显卡硬件加速配置
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+    extraPackages = with pkgs; [
+      mesa
+      mesa.drivers
+      rocmPackages.clr.icd
+    ];
+    extraPackages32 = with pkgs; [
+      driversi686Linux.mesa
+    ];
+  };
   services.dbus.enable = true;
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -381,5 +400,8 @@
 
   # AMD CPU 电源管理
   powerManagement.cpuFreqGovernor = "ondemand";  # 动态频率调节
-}
 
+  # 传感器模块自动加载
+  boot.kernelModules = [ "k10temp" "i2c_dev" "i2c_piix4" ];
+
+}

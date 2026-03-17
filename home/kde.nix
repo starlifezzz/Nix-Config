@@ -19,29 +19,35 @@
     style.name = "org.kde.breezetwilight.desktop";
   };
 
-  # KDE 配置文件
-  xdg.configFile = {
-    "gtk-3.0/settings.ini" = {
-      text = ''
-        [Settings]
-      '';
-      force = true;
-    };
 
-    "gtk-4.0/settings.ini" = {
-      text = ''
-        [Settings]
-      '';
-      force = true;
-    };
+  # KWin Wayland 输入法配置
+  xdg.configFile."kwinrc" = {
+    text = ''
+      [Desktops]
+      Number=1
+      Rows=1
 
-    "gtk-2.0/gtkrc" = {
-      text = ''
-        gtk-icon-theme-name="Papirus"
-        gtk-font-name="LXGW WenKai Screen 10"
-      '';
-      force = true;
-    };
+      [ElectricBorders]
+      BottomLeft=ApplicationLauncher
+
+      [Tiling]
+      padding=4
+
+      [Wayland]
+      InputMethod=/run/current-system/sw/share/applications/org.fcitx.Fcitx5.desktop
+      VirtualKeyboardEnabled=true
+    '';
+    force = true;
+  };
+
+
+    # 设置 GTK 主题环境变量
+  home.sessionVariables = {
+    GTK_FONT_NAME = "LXGW WenKai Screen 11";
+    # 在 Wayland 下清空这些变量，让 Wayland 协议直接处理
+    GTK_IM_MODULE = "";
+    QT_IM_MODULE = "";
+    XMODIFIERS = "@im=fcitx";
   };
 
 }
