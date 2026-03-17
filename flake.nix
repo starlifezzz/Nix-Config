@@ -13,20 +13,25 @@
     # };
   };
 
-  outputs = { nixpkgs, home-manager, ... }@inputs: {
+  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
+      specialArgs = { inherit inputs; };
       modules = [
         ./configuration.nix
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.users.zhangchongjie = import ./home/home.nix;
+          home-manager.users.zhangchongjie = {
+            imports = [
+              ./home
+            ];
+          };
           
           # 添加系统级优化
           system.autoUpgrade = {
-            enable = false;  # 禁用自动升级，手动控制
+            enable = false;
             allowReboot = false;
           };
         }
