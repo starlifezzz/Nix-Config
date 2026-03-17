@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, kdePackages, ... }:
 
 {
   # ═══════════════════════════════════════════════════════════
@@ -18,7 +18,6 @@
     # 其他
     flatpak
     # kdePackages.kate
-    kdePackages.kdeconnect-kde
   ];
 
   # ═══════════════════════════════════════════════════════════

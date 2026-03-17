@@ -151,6 +151,7 @@
      zellij
      lxgw-wenkai-screen
      lxgw-wenkai
+     kdePackages.kdeconnect-kde
      clash-verge-rev
      neofetch
      timeshift
