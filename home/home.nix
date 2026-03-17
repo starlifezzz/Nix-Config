@@ -17,7 +17,7 @@
 
     # 其他
     flatpak
-    kdePackages.kate
+    # kdePackages.kate
     kdePackages.kdeconnect-kde
   ];
 
