@@ -92,7 +92,7 @@
     '';
   };
 
-  # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════════
   # Git 配置
   # ═══════════════════════════════════════════════════════════
   programs.git = {
@@ -110,10 +110,24 @@
 
       core = {
         editor = "vim";
+        autocrlf = "input";  # 防止 Windows 换行符问题
+      };
+
+      pull = {
+        rebase = true;  # 默认使用 rebase
       };
 
       url."https://github.com/" = {
         insteadOf = "git://github.com/";
+      };
+      
+      # 添加常用的 git 别名
+      alias = {
+        co = "checkout";
+        br = "branch";
+        ci = "commit";
+        st = "status";
+        last = "log -1 HEAD";
       };
     };
   };

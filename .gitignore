@@ -1,2 +1,18 @@
 *.swp
 *~
+
+# NixOS 生成的文件
+result
+result-*
+
+# 编辑器
+.vscode/
+.idea/
+*.bak
+
+# 临时文件
+*.tmp
+*.log
+
+# 敏感信息（可选）
+# secrets/

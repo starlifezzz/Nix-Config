@@ -197,7 +197,7 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.11"; # Did you read the comment?
 
-  nix.settings = {
+   nix.settings = {
     # 将您的用户名和 root 设为可信用户
     trusted-users = [ "root" "zhangchongjie" ];
     # 配置二进制缓存镜像，可以添加多个，优先级从高到低
@@ -210,6 +210,20 @@
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
     experimental-features = [ "nix-command" "flakes"];
+    
+    # 自动垃圾回收
+    auto-optimise-store = true;
+    
+    # 保留较少的 generations
+    keep-derivations = true;
+    keep-outputs = true;
+  };
+
+  # 启用 nix-gc 服务定期清理
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 7d";  # 删除 7 天前的 generations
   };
 
 
@@ -271,6 +285,9 @@
   # 防火墙配置
   networking.firewall = {
     enable = true;
+    
+    # 允许 ICMP (ping)
+    allowPing = true;
 
     # KDE Connect
     allowedTCPPortRanges = [
@@ -282,7 +299,40 @@
 
     # ⭐ 只开放 API 端口（用于控制面板）
     allowedTCPPorts = [ 9090 ];
+    
+    # 拒绝其他所有入站连接
+    checkReversePath = true;
   };
+
+  # 安全加固
+  security.sudo.wheelNeedsPassword = true;  # wheel 组需要密码
+  security.doas.enable = false;  # 禁用 doas（如果不需要）
+
+
+  # 性能优化
+  boot.kernel.sysctl = {
+    # 网络优化
+    "net.ipv4.tcp_fastopen" = 3;
+    "net.ipv4.tcp_congestion_control" = "bbr";  # 使用 BBR 拥塞控制
+    "net.core.default_qdisc" = "cake";
+    
+    # 内存优化
+    "vm.swappiness" = 10;  # 减少 swap 使用
+    "vm.vfs_cache_pressure" = 50;
+  };
+
+# 配置BTRFS的压缩功能
+    fileSystems."/" =
+    { device = "/dev/disk/by-uuid/1418cb46-1d6c-4f9e-a9a3-925c71782521";
+      fsType = "btrfs";
+      options = [ "subvol=@" "compress=zstd" ];
+    };
+
+  fileSystems."/home" =
+    { device = "/dev/disk/by-uuid/ec2a8628-f764-4371-98f2-220e1a2f8d0f";
+      fsType = "btrfs";
+      options = [ "compress=zstd" ];
+    };
 
 }
 

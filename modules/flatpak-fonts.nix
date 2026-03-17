@@ -133,9 +133,5 @@ in
       deps = [ "users" "groups" ];
     };
 
-    # 4. 确保 Flatpak 可以访问用户字体目录
-    systemd.tmpfiles.rules = [
-      "d /home/${targetUser}/.local/share/fonts 0755 ${targetUser} users -"
-    ];
   };
 }
