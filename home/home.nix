@@ -95,7 +95,7 @@
     # ═══════════════════════════════════════════════════════════
   # Git 配置
   # ═══════════════════════════════════════════════════════════
-  programs.git = {
+ programs.git = {
     enable = true;
 
     settings = {
@@ -111,6 +111,7 @@
       core = {
         editor = "vim";
         autocrlf = "input";  # 防止 Windows 换行符问题
+        filemode = true;  # 跟踪文件权限
       };
 
       pull = {
@@ -128,6 +129,16 @@
         ci = "commit";
         st = "status";
         last = "log -1 HEAD";
+      };
+      
+      # 安全优化
+      push = {
+        default = "simple";  # 使用简单推送模式
+        autoSetupRemote = true;  # 自动设置 upstream
+      };
+      
+      fetch = {
+        prune = true;  # 自动清理远程分支
       };
     };
   };

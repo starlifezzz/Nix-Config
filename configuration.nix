@@ -19,17 +19,17 @@
   boot.loader.systemd-boot = {
     enable = true;
     configurationLimit = 10;  # 限制引导条目数量为10个
-    consoleMode = "max";      # 使用最大可用分辨率
+    # consoleMode = "max";      # 使用最大可用分辨率
     # 或者指定具体分辨率
-    # consoleMode = "1920x1080";
+    consoleMode = "1920x1080";
   };
 
   # 设置内核参数以提高显示质量
   boot.kernelParams = [
     # 设置帧缓冲区分辨率
-#     "video=1920x1080@60"
+    "video=1920x1080@60"
     # 或者使用auto
-    "video=efifb:auto"
+    # "video=efifb:auto"
   ];
 
 
@@ -308,6 +308,9 @@
   security.sudo.wheelNeedsPassword = true;  # wheel 组需要密码
   security.doas.enable = false;  # 禁用 doas（如果不需要）
 
+  # SSD 优化 - 启用定期 TRIM
+  services.fstrim.enable = true;
+
 
   # 性能优化
   boot.kernel.sysctl = {
@@ -320,19 +323,5 @@
     "vm.swappiness" = 10;  # 减少 swap 使用
     "vm.vfs_cache_pressure" = 50;
   };
-
-# 配置BTRFS的压缩功能
-    fileSystems."/" =
-    { device = "/dev/disk/by-uuid/1418cb46-1d6c-4f9e-a9a3-925c71782521";
-      fsType = "btrfs";
-      options = [ "subvol=@" "compress=zstd" ];
-    };
-
-  fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/ec2a8628-f764-4371-98f2-220e1a2f8d0f";
-      fsType = "btrfs";
-      options = [ "compress=zstd" ];
-    };
-
 }
 

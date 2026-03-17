@@ -13,11 +13,6 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
-  fileSystems."/" =
-    { device = "/dev/disk/by-uuid/1418cb46-1d6c-4f9e-a9a3-925c71782521";
-      fsType = "btrfs";
-      options = [ "subvol=@" ];
-    };
 
   fileSystems."/boot" =
     { device = "/dev/disk/by-uuid/D905-253B";
@@ -25,9 +20,17 @@
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
+  # 配置BTRFS的压缩功能
+    fileSystems."/" =
+    { device = "/dev/disk/by-uuid/1418cb46-1d6c-4f9e-a9a3-925c71782521";
+      fsType = "btrfs";
+      options = [ "subvol=@" "compress=zstd" ];
+    };
+
   fileSystems."/home" =
     { device = "/dev/disk/by-uuid/ec2a8628-f764-4371-98f2-220e1a2f8d0f";
       fsType = "btrfs";
+      options = [ "compress=zstd" ];
     };
 
   swapDevices = [ ];
