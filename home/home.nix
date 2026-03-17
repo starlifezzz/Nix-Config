@@ -31,6 +31,26 @@
       set -gx CLASH_PORT 7897
     '';
 
+ shellAliases = {
+      ll = "ls -la";
+      la = "ls -A";
+      rebuild = "sudo -E nixos-rebuild switch";
+      rebuild-test = "sudo -E nixos-rebuild test";
+      hm-switch = "home-manager switch";
+      rebuild-flake = "rebuild-flake";
+      rebuild-offline = "rebuild-offline";
+      
+      # 新增实用别名
+      c = "clear";
+      s = "sudo";
+      sk = "sudo killall -9";
+      update = "sudo nixos-rebuild switch --flake /etc/nixos#nixos";
+      gc = "sudo nix-collect-garbage -d";
+      optimise = "sudo nix-store --optimise";
+      
+      # 目录导航使用 Fish 函数（避免特殊字符问题）
+    };
+
     functions = {
       # 开启代理
       proxy_on = ''
@@ -74,27 +94,17 @@
       rebuild-offline = ''
         sudo -E nixos-rebuild switch --flake /etc/nixos#nixos --offline
       '';
-    };
-
-    shellAliases = {
-      ll = "ls -la";
-      la = "ls -A";
-      rebuild = "sudo -E nixos-rebuild switch";
-      rebuild-test = "sudo -E nixos-rebuild test";
-      hm-switch = "home-manager switch";
-      rebuild-flake = "rebuild-flake";
-      rebuild-offline = "rebuild-offline";
       
-      # 新增实用别名
-      c = "clear";
-      ".." = "cd ..";
-      "..." = "cd ../..";
-      "...." = "cd ../../..";
-      s = "sudo";
-      sk = "sudo killall -9";
-      update = "sudo nixos-rebuild switch --flake /etc/nixos#nixos";
-      gc = "sudo nix-collect-garbage -d";
-      optimise = "sudo nix-store --optimise";
+      # 目录导航函数
+      cdup = ''
+        cd ..
+      '';
+      cd2up = ''
+        cd ../..
+      '';
+      cd3up = ''
+        cd ../../..
+      '';
     };
 
     interactiveShellInit = ''

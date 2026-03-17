@@ -209,7 +209,6 @@
     # 配置二进制缓存镜像，可以添加多个，优先级从高到低
     substituters = [
       "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
-      "https://mirror.pku.edu.cn/nix-channels/store"
       "https://mirrors.ustc.edu.cn/nix-channels/store"
       "https://mirrors.cernet.edu.cn/nix-channels/store"
       "https://cache.nixos.org"
