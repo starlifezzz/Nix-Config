@@ -1,4 +1,3 @@
-# /etc/nixos/home.nix
 { config, pkgs, inputs, ... }:
 
 {
@@ -10,7 +9,7 @@
   home.stateVersion = "25.11";
 
   # ═══════════════════════════════════════════════════════════
-  # 用户软件包（仅纯用户级，系统级已在 configuration.nix）
+  # 用户软件包
   # ═══════════════════════════════════════════════════════════
   home.packages = with pkgs; [
     # 浏览器
@@ -114,11 +113,9 @@
         editor = "vim";
       };
 
-      # 🔴 Git 协议替代（提高 GitHub 访问稳定性）
       url."https://github.com/" = {
         insteadOf = "git://github.com/";
       };
-
     };
   };
 
@@ -126,12 +123,11 @@
   # 环境变量
   # ═══════════════════════════════════════════════════════════
   home.sessionVariables = {
-  XDG_DATA_DIRS = "/nix/var/nix/profiles/default/share:/run/current-system/sw/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share";
-};
+    XDG_DATA_DIRS = "/nix/var/nix/profiles/default/share:/run/current-system/sw/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share";
+  };
 
   # ═══════════════════════════════════════════════════════════
   # 启用 Home Manager
   # ═══════════════════════════════════════════════════════════
   programs.home-manager.enable = true;
-
 }
