@@ -158,6 +158,7 @@
      bleachbit
      git
      home-manager
+     vscode
   ];
 
   # 确保桌面环境正确集成
