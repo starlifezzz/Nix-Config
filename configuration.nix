@@ -157,6 +157,7 @@
      qt6Packages.fcitx5-configtool
      bleachbit
      git
+     home-manager
   ];
 
   # 确保桌面环境正确集成
