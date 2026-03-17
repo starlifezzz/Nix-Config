@@ -29,10 +29,10 @@
         XftHintStyle=hintslight
         XftSubPixel=none
         accentColorFromWallpaper=true
-        font=Noto Sans CJK SC,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-        menuFont=Noto Sans CJK SC,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-        smallestReadableFont=Noto Sans CJK SC,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-        toolBarFont=Noto Sans CJK SC,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+        font=lxgw-wenkai-screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+        menuFont=lxgw-wenkai-screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+        smallestReadableFont=lxgw-wenkai-screen,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+        toolBarFont=lxgw-wenkai-screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
 
         [Icons]
         Theme=Papirus
@@ -60,7 +60,7 @@
         [WM]
         activeBackground=227,229,231
         activeBlend=227,229,231
-        activeFont=Noto Sans CJK SC,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+        activeFont=lxgw-wenkai-screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
         activeForeground=35,38,41
         inactiveBackground=239,240,241
         inactiveBlend=239,240,241
@@ -450,7 +450,7 @@
       force = true;
     };
 
-        "gtk-3.0/settings.ini" = {
+    "gtk-3.0/settings.ini" = {
       text = ''
         [Settings]
       '';
@@ -463,6 +463,14 @@
       '';
       force = true;
     };
+
+    "gtk-2.0/gtkrc" = {
+      text = ''
+        gtk-icon-theme-name="Papirus"
+        gtk-font-name="LXGW WenKai Screen 10"
+      '';
+      force = true;
+    };
   };
 
   # 桌面小部件配置
@@ -472,25 +480,14 @@
   #   RightButton;NoModifier=org.kde.contextmenu
   # '';
 
-  # 字体配置（需要确保系统已安装相应字体）
   fonts.fontconfig.enable = true;
   home.packages = with pkgs; [
     # 中文字体
-    noto-fonts-cjk-sans
-    noto-fonts-cjk-serif
+    lxgw-wenkai-screen
     # 英文字体
-    hack-font
+    lxgw-wenkai-screen
     # 图标主题
     papirus-icon-theme
   ];
 
-  # 强制覆盖已存在的文件
-  home.file.".gtkrc-2.0" = {
-    force = true;
-  };
-
-  home.file.".local/share/icons/Papirus" = {
-    force = true;
-    source = "${pkgs.papirus-icon-theme}/share/icons/Papirus";
-  };
 }

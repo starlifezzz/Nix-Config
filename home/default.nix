@@ -5,5 +5,6 @@
   imports = [
     ./home.nix
     ./kde.nix
+    ./font.nix
   ];
 }

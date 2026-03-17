@@ -60,7 +60,7 @@
     defaultFonts = {
       # 衬线字体 (Serif)
       serif = [
-        "LXGW WenKai"        # 霞鹜文楷
+        "LXGW WenKai Screen"        # 霞鹜文楷屏幕版
         "Noto Serif CJK SC"  # Noto 衬线中文简体
         "Noto Serif"         # Noto 衬线
         "DejaVu Serif"       # DejaVu 衬线
@@ -79,7 +79,7 @@
         "JetBrains Mono"    # JetBrains Mono
         "Fira Code"         # Fira Code
         "Hack"             # Hack
-        "LXGW WenKai Mono"  # 霞鹜文楷等宽
+        "LXGW WenKai Screen"  # 霞鹜文楷屏幕版
         "DejaVu Sans Mono"  # DejaVu 等宽
       ];
 
@@ -105,7 +105,7 @@
       <alias>
         <family>serif</family>
         <prefer>
-          <family>LXGW WenKai</family>
+          <family>LXGW WenKai Screen</family>
           <family>Noto Serif CJK SC</family>
           <family>Noto Serif</family>
           <family>DejaVu Serif</family>
@@ -115,7 +115,7 @@
         <family>monospace</family>
         <prefer>
           <family>JetBrains Mono</family>
-          <family>LXGW WenKai Mono</family>
+          <family>LXGW WenKai Screen</family>
           <family>Fira Code</family>
           <family>DejaVu Sans Mono</family>
         </prefer>
@@ -143,7 +143,7 @@
           <string>serif</string>
         </test>
         <edit name="family" mode="prepend" binding="strong">
-          <string>LXGW WenKai</string>
+          <string>LXGW WenKai Screen</string>
           <string>Noto Serif CJK SC</string>
         </edit>
       </match>
@@ -156,7 +156,7 @@
           <string>monospace</string>
         </test>
         <edit name="family" mode="prepend" binding="strong">
-          <string>LXGW WenKai Mono</string>
+          <string>LXGW WenKai Screen</string>
           <string>JetBrains Mono</string>
         </edit>
       </match>
