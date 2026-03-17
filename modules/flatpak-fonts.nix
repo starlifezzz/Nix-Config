@@ -4,11 +4,16 @@ with lib;
 
 let
   cfg = config.services.flatpak-fonts;
-  username = "zhangchongjie";  # 硬编码用户名
 in
 {
   options.services.flatpak-fonts = {
-    enable = mkEnableOption (mdDoc "自动复制系统字体到用户目录供Flatpak使用");
+    # enable = mkEnableOption (mdDoc "自动复制系统字体到用户目录供Flatpak使用");
+    enable = mkEnableOption "...";
+    userName = mkOption {
+      type = types.str;
+      default = "";
+      description = "目标用户名，留空则对所有用户生效";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -139,101 +144,101 @@ in
     ];
 
     # 3. 系统激活脚本
-    system.activationScripts.setupFlatpakFonts = {
-      text = ''
-        echo "🔄 设置 Flatpak 字体..."
+    # system.activationScripts.setupFlatpakFonts = {
+    #   text = ''
+    #     echo "🔄 设置 Flatpak 字体..."
 
-        USER_HOME="/home/${username}"
-        USER_FONT_DIR="$USER_HOME/.local/share/fonts"
+    #     USER_HOME="/home/${username}"
+    #     USER_FONT_DIR="$USER_HOME/.local/share/fonts"
 
-        if [ -d "$USER_HOME" ]; then
-          echo "  为用户 ${username} 复制字体..."
+    #     if [ -d "$USER_HOME" ]; then
+    #       echo "  为用户 ${username} 复制字体..."
 
-          # 创建字体目录
-          mkdir -p "$USER_FONT_DIR"
+    #       # 创建字体目录
+    #       mkdir -p "$USER_FONT_DIR"
 
-          # 计数器
-          NEW_FONT_COUNT=0
-          EXISTING_FONT_COUNT=0
+    #       # 计数器
+    #       NEW_FONT_COUNT=0
+    #       EXISTING_FONT_COUNT=0
 
-          # 函数：检查文件是否已存在
-          font_exists() {
-            local font_path="$1"
-            local font_name="$(basename "$font_path")"
+    #       # 函数：检查文件是否已存在
+    #       font_exists() {
+    #         local font_path="$1"
+    #         local font_name="$(basename "$font_path")"
 
-            # 检查文件是否存在
-            [ -f "$USER_FONT_DIR/$font_name" ] && return 0
+    #         # 检查文件是否存在
+    #         [ -f "$USER_FONT_DIR/$font_name" ] && return 0
 
-            # 检查是否有相同字体文件但不同扩展名的情况
-            local base_name="''${font_name%.*}"
-            [ -f "$USER_FONT_DIR/''${base_name}.ttf" ] && return 0
-            [ -f "$USER_FONT_DIR/''${base_name}.ttc" ] && return 0
-            [ -f "$USER_FONT_DIR/''${base_name}.otf" ] && return 0
+    #         # 检查是否有相同字体文件但不同扩展名的情况
+    #         local base_name="''${font_name%.*}"
+    #         [ -f "$USER_FONT_DIR/''${base_name}.ttf" ] && return 0
+    #         [ -f "$USER_FONT_DIR/''${base_name}.ttc" ] && return 0
+    #         [ -f "$USER_FONT_DIR/''${base_name}.otf" ] && return 0
 
-            return 1
-          }
+    #         return 1
+    #       }
 
-          echo "  从字体包复制字体..."
+    #       echo "  从字体包复制字体..."
 
-          # 直接从字体包复制字体
-          copy_fonts_from_package() {
-            local pkg_path="$1"
-            local pkg_name="$2"
+    #       # 直接从字体包复制字体
+    #       copy_fonts_from_package() {
+    #         local pkg_path="$1"
+    #         local pkg_name="$2"
 
-            if [ -d "$pkg_path" ]; then
-              echo "    处理: $pkg_name"
-              find "$pkg_path" -type f \( -name "*.ttf" -o -name "*.ttc" -o -name "*.otf" \) 2>/dev/null | \
-                while read FONT; do
-                  FONT_NAME=$(basename "$FONT")
-                  if font_exists "$FONT"; then
-                    echo "      ⏭️ 跳过已存在: $FONT_NAME"
-                    EXISTING_FONT_COUNT=$((EXISTING_FONT_COUNT + 1))
-                    continue
-                  fi
+    #         if [ -d "$pkg_path" ]; then
+    #           echo "    处理: $pkg_name"
+    #           find "$pkg_path" -type f \( -name "*.ttf" -o -name "*.ttc" -o -name "*.otf" \) 2>/dev/null | \
+    #             while read FONT; do
+    #               FONT_NAME=$(basename "$FONT")
+    #               if font_exists "$FONT"; then
+    #                 echo "      ⏭️ 跳过已存在: $FONT_NAME"
+    #                 EXISTING_FONT_COUNT=$((EXISTING_FONT_COUNT + 1))
+    #                 continue
+    #               fi
 
-                  if cp -f "$FONT" "$USER_FONT_DIR/$FONT_NAME" 2>/dev/null; then
-                    echo "      ✓ 复制: $FONT_NAME"
-                    NEW_FONT_COUNT=$((NEW_FONT_COUNT + 1))
-                  fi
-                done
-            fi
-          }
+    #               if cp -f "$FONT" "$USER_FONT_DIR/$FONT_NAME" 2>/dev/null; then
+    #                 echo "      ✓ 复制: $FONT_NAME"
+    #                 NEW_FONT_COUNT=$((NEW_FONT_COUNT + 1))
+    #               fi
+    #             done
+    #         fi
+    #       }
 
-          # Noto字体
-          copy_fonts_from_package "${pkgs.noto-fonts}" "Noto字体"
+    #       # Noto字体
+    #       copy_fonts_from_package "${pkgs.noto-fonts}" "Noto字体"
 
-          # DejaVu字体
-          copy_fonts_from_package "${pkgs.dejavu_fonts}" "DejaVu字体"
+    #       # DejaVu字体
+    #       copy_fonts_from_package "${pkgs.dejavu_fonts}" "DejaVu字体"
 
-          # 霞鹜文楷
-          copy_fonts_from_package "${pkgs.lxgw-wenkai}" "霞鹜文楷"
+    #       # 霞鹜文楷
+    #       copy_fonts_from_package "${pkgs.lxgw-wenkai}" "霞鹜文楷"
 
-          # 霞鹜文楷屏幕版
-          copy_fonts_from_package "${pkgs.lxgw-wenkai-screen}" "霞鹜文楷屏幕版"
+    #       # 霞鹜文楷屏幕版
+    #       copy_fonts_from_package "${pkgs.lxgw-wenkai-screen}" "霞鹜文楷屏幕版"
 
-          # 更改所有权
-          chown -R ${username}:users "$USER_FONT_DIR"
-          chmod 755 "$USER_FONT_DIR"
+    #       # 更改所有权
+    #       chown -R ${username}:users "$USER_FONT_DIR"
+    #       chmod 755 "$USER_FONT_DIR"
 
-          # 统计字体数量
-          TOTAL_FONT_COUNT=$(find "$USER_FONT_DIR" -type f \( -name "*.ttf" -o -name "*.ttc" -o -name "*.otf" \) 2>/dev/null | wc -l)
+    #       # 统计字体数量
+    #       TOTAL_FONT_COUNT=$(find "$USER_FONT_DIR" -type f \( -name "*.ttf" -o -name "*.ttc" -o -name "*.otf" \) 2>/dev/null | wc -l)
 
-          if [ "$NEW_FONT_COUNT" -gt 0 ]; then
-            echo "    创建字体缓存..."
-            sudo -u ${username} fc-cache -f "$USER_FONT_DIR" 2>/dev/null || true
-            echo "    复制了 $NEW_FONT_COUNT 个新字体，跳过了 $EXISTING_FONT_COUNT 个已存在字体"
-          elif [ "$EXISTING_FONT_COUNT" -gt 0 ]; then
-            echo "    所有 $EXISTING_FONT_COUNT 个字体已存在，无需复制"
-          fi
+    #       if [ "$NEW_FONT_COUNT" -gt 0 ]; then
+    #         echo "    创建字体缓存..."
+    #         sudo -u ${username} fc-cache -f "$USER_FONT_DIR" 2>/dev/null || true
+    #         echo "    复制了 $NEW_FONT_COUNT 个新字体，跳过了 $EXISTING_FONT_COUNT 个已存在字体"
+    #       elif [ "$EXISTING_FONT_COUNT" -gt 0 ]; then
+    #         echo "    所有 $EXISTING_FONT_COUNT 个字体已存在，无需复制"
+    #       fi
 
-          echo "    总计 $TOTAL_FONT_COUNT 个字体文件在: $USER_FONT_DIR"
-        else
-          echo "  警告: 用户 ${username} 的主目录不存在，跳过"
-        fi
+    #       echo "    总计 $TOTAL_FONT_COUNT 个字体文件在: $USER_FONT_DIR"
+    #     else
+    #       echo "  警告: 用户 ${username} 的主目录不存在，跳过"
+    #     fi
 
-        echo "✅ Flatpak 字体设置完成"
-      '';
-      deps = [ "users" "groups" ];
-    };
+    #     echo "✅ Flatpak 字体设置完成"
+    #   '';
+    #   deps = [ "users" "groups" ];
+    # };
   };
 }
