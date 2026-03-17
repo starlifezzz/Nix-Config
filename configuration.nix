@@ -27,9 +27,15 @@
     kernelPackages = pkgs.linuxPackages_zen; # 使用最新内核
     kernelParams = [
       "video=1920x1080@60"
-      "processor.max_cstate=1"
-      "idle=mwait"
-      "amd_pstate=active"
+      # "processor.max_cstate=1"
+      # "idle=mwait"
+      # "amd_pstate=active"
+      # "radeon.si_support=1"      # 启用 radeon 对 SI 卡支持
+      # "amdgpu.si_support=0"      # 禁用 amdgpu 对 SI 卡支持
+      # "radeon.cik_support=1"     # 启用 radeon 对 CIK 卡支持（R9 370 是 CIK）
+      # "amdgpu.cik_support=0"     # 禁用 amdgpu 对 CIK 卡支持
+      # "radeon.modeset=1"         # 启用内核模式设置
+      # "radeon.dpm=1"             # 启用动态电源管理
     ];
     
     # 内核参数优化
@@ -157,7 +163,7 @@
   users.users.zhangchongjie = {
     isNormalUser = true; # 普通用户
     description = "zhangchongjie";
-    extraGroups = [ "networkmanager" "wheel" "flatpak" ];
+    extraGroups = [ "networkmanager" "wheel" "flatpak" "video" "render"];
     shell = pkgs.fish; # fish shell启用
   };
   # Fish Shell（系统级）
@@ -192,6 +198,10 @@
      git
      home-manager
      vscode
+     mesa              # 包含 glxinfo
+     vulkan-tools      # 包含 vulkaninfo
+     libva-utils       # 包含 vainfo
+     radeontop         # AMD GPU 监控
   ];
 
   services.dbus.enable = true;
