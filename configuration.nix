@@ -19,9 +19,9 @@
   boot.loader.systemd-boot = {
     enable = true;
     configurationLimit = 10;  # 限制引导条目数量为10个
-    # consoleMode = "max";      # 使用最大可用分辨率
+    consoleMode = "max";      # 使用最大可用分辨率
     # 或者指定具体分辨率
-    consoleMode = "1920x1080";
+    # consoleMode = "1920x1080";
   };
 
   # 设置内核参数以提高显示质量
