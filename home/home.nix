@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   # ═══════════════════════════════════════════════════════════
@@ -118,12 +118,16 @@
     };
   };
 
-
   # ═══════════════════════════════════════════════════════════
   # 环境变量
   # ═══════════════════════════════════════════════════════════
   home.sessionVariables = {
-    XDG_DATA_DIRS = "/nix/var/nix/profiles/default/share:/run/current-system/sw/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share";
+    XDG_DATA_DIRS = lib.makeSearchPath "" [
+      "/nix/var/nix/profiles/default/share"
+      "/run/current-system/sw/share"
+      "/var/lib/flatpak/exports/share"
+      "$HOME/.local/share/flatpak/exports/share"
+    ];
   };
 
   # ═══════════════════════════════════════════════════════════

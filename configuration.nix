@@ -216,7 +216,10 @@
   # 启用 Flatpak 支持
   services.flatpak.enable = true;
   # Flatpak字体设置
-  services.flatpak-fonts.enable = true;
+  services.flatpak-fonts = {
+    enable = true;
+    userName = "zhangchongjie";  # 明确指定用户名
+  };
 
   # 配置XDG Portal - 这是关键
   xdg.portal = {
