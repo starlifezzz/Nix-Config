@@ -12,37 +12,52 @@
       ./modules/fonts.nix  #系统字体配置
     ];
 
-  # Bootloader.
-#   boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-    # 在boot.loader部分添加
-  boot.loader.systemd-boot = {
-    enable = true;
-    configurationLimit = 10;  # 限制引导条目数量为10个
-    consoleMode = "max";      # 使用最大可用分辨率
-    # 或者指定具体分辨率
-    # consoleMode = "1920x1080";
+  # 启动配置
+  boot = {
+    loader = {
+      systemd-boot = {
+        enable = true;#启动引导
+        configurationLimit = 10;#启动引导文件数量限制
+        consoleMode = "max";#显示模式
+      };
+      efi.canTouchEfiVariables = true;#允许修改efi变量
+    };
+    
+    # 内核配置
+    kernelPackages = pkgs.linuxPackages_zen; # 使用最新内核
+    kernelParams = [
+      "video=1920x1080@60"
+      "processor.max_cstate=1"
+      "idle=mwait"
+      "amd_pstate=active"
+    ];
+    
+    # 内核参数优化
+    kernel.sysctl = {
+      # 网络优化
+      "net.ipv4.tcp_fastopen" = 3;
+      "net.ipv4.tcp_congestion_control" = "bbr";
+      "net.core.default_qdisc" = "cake";
+      "net.core.rmem_max" = 134217728;
+      "net.core.wmem_max" = 134217728;
+      
+      # 内存优化
+      "vm.swappiness" = 1;
+      "vm.vfs_cache_pressure" = 100;
+      "vm.dirty_ratio" = 10;
+      "vm.dirty_background_ratio" = 5;
+      
+      # 文件系统优化
+      "fs.inotify.max_user_watches" = 524288;
+      "fs.file-max" = 2097152;
+    };
   };
-
-  # 设置内核参数以提高显示质量
-  boot.kernelParams = [
-    # 设置帧缓冲区分辨率
-    "video=1920x1080@60"
-    # 或者使用auto
-    # "video=efifb:auto"
-    # Zen 内核优化参数（AMD CPU）
-    "processor.max_cstate=1"     # 减少 CPU C-state 延迟（提高响应性）
-    "idle=mwait"                 # AMD CPU 使用 mwait 指令（比 poll 更节能）
-    "amd_pstate=active" 
-  ];
-
 
 
   # Use latest kernel.
-  boot.kernelPackages = pkgs.linuxPackages_zen;
+  # boot.kernelPackages = pkgs.linuxPackages_zen;
 
 
-  networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -50,7 +65,6 @@
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Enable networking
-  networking.networkmanager.enable = true;
 
   # Set your time zone.
   time.timeZone = "Asia/Shanghai";
@@ -70,34 +84,49 @@
     LC_TIME = "zh_CN.UTF-8";
   };
 
-  # 输入法配置（使用正确的语法）
-  i18n.inputMethod = {
+
+  # 桌面环境配置
+  services.xserver = {
     enable = true;
-    type = "fcitx5";
-    fcitx5 = {
-      addons = with pkgs; [
-        fcitx5-rime
-        qt6Packages.fcitx5-chinese-addons
-        qt6Packages.fcitx5-configtool
-      ];
-      # 如果使用 Wayland 会话，启用 Wayland 前端
-      waylandFrontend = true;
-    };
+    
+    # 键盘布局
+    xkb.layout = "cn";
+    xkb.variant = "";
+    
+    # 输入法环境变量
+    displayManager.setupCommands = ''
+      export GTK_IM_MODULE=fcitx
+      export QT_IM_MODULE=fcitx
+      export XMODIFIERS=@im=fcitx
+      export QT_QPA_PLATFORM=wayland
+    '';
   };
+  
+  # Fcitx5 输入法
+  i18n.inputMethod = {
+    enable = true; # 启用输入法
+    type = "fcitx5"; 
+    fcitx5.addons = with pkgs; [ # 添加输入法扩展包
+      fcitx5-rime
+      qt6Packages.fcitx5-chinese-addons
+      qt6Packages.fcitx5-configtool
+    ];
+  };
+
 
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
-  services.xserver.enable = true;
+  # services.xserver.enable = true;
 
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
 
   # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "cn";
-    variant = "";
-  };
+  # services.xserver.xkb = {
+  #   layout = "cn";
+  #   variant = "";
+  # };
 
   # Enable CUPS to print documents.
   #打印服务
@@ -124,17 +153,15 @@
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
 
-   # 启用 fish shell 支持
-  programs.fish.enable = true;
-
+  # 用户配置
   users.users.zhangchongjie = {
-    isNormalUser = true;
+    isNormalUser = true; # 普通用户
     description = "zhangchongjie";
     extraGroups = [ "networkmanager" "wheel" "flatpak" ];
-#     添加这一行，将默认 shell 设置为 fish
-    shell = pkgs.fish;
+    shell = pkgs.fish; # fish shell启用
   };
-
+  # Fish Shell（系统级）
+  programs.fish.enable = true;
 
   # Install firefox.
   programs.firefox.enable = true;
@@ -167,14 +194,6 @@
      vscode
   ];
 
-  # 确保桌面环境正确集成
-  services.xserver.displayManager.setupCommands = ''
-    export GTK_IM_MODULE=fcitx
-    export QT_IM_MODULE=fcitx
-    export XMODIFIERS=@im=fcitx
-    export QT_QPA_PLATFORM=wayland
-  '';
-
   services.dbus.enable = true;
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -203,56 +222,68 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.11"; # Did you read the comment?
 
-   nix.settings = {
-    # 将您的用户名和 root 设为可信用户
-    trusted-users = [ "root" "zhangchongjie" ];
-    # 配置二进制缓存镜像，可以添加多个，优先级从高到低
-    substituters = [
-      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
-      "https://mirrors.ustc.edu.cn/nix-channels/store"
-      "https://mirrors.cernet.edu.cn/nix-channels/store"
-      "https://cache.nixos.org"
-    ];
-    trusted-public-keys = [
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-    ];
-    experimental-features = [ "nix-command" "flakes"];
+
+  # Nix 配置优化
+  nix = {
+    settings = {
+      # 将您的用户名和 root 设为可信用户
+      trusted-users = [ "root" "zhangchongjie" ];
+      
+      # 配置二进制缓存镜像，优先级从高到低
+      substituters = [
+        "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+        "https://mirrors.ustc.edu.cn/nix-channels/store"
+        "https://mirrors.cernet.edu.cn/nix-channels/store"
+        "https://cache.nixos.org"
+      ];
+      trusted-public-keys = [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      ];
+      experimental-features = [ "nix-command" "flakes" ];
+      
+      # 自动优化存储
+      auto-optimise-store = true;
+      
+      # 保留较少的 generations
+      keep-derivations = true;
+      keep-outputs = true;
+
+      # 并行构建
+      max-jobs = "auto";
+      cores = 0;
+
+      # 启用沙箱
+      sandbox = true;
+    };
     
-    # 自动垃圾回收
-    auto-optimise-store = true;
+    # 垃圾回收配置
+    gc = {
+      automatic = true;
+      dates = "daily";
+      options = "--delete-older-than 3d";
+    };
     
-    # 保留较少的 generations
-    keep-derivations = true;
-    keep-outputs = true;
-
-    # 优化：并行构建
-    max-jobs = "auto";
-
-    # 优化：使用所有 CPU 核心
-    cores = 0;
-
-    # 优化：启用沙箱（提高构建可靠性）
-    sandbox = true;
-
+    # 存储优化
+    optimise.automatic = true;
   };
-
-  # 启用 nix-gc 服务定期清理
-  nix.gc = {
-    automatic = true;
-    dates = "daily";  # 改为每天清理
-    options = "--delete-older-than 3d";  # 删除 3 天前的 generations，更激进
+  
+ # Flatpak 配置
+  services.flatpak = {
+    enable = true;
   };
-
-  # 优化：启用 Nix 存储优化
-  nix.optimise.automatic = true;
-
-  # 启用 Flatpak 支持
-  services.flatpak.enable = true;
-  # Flatpak字体设置
+  
+  # Flatpak 字体配置
   services.flatpak-fonts = {
     enable = true;
-    userName = "zhangchongjie";  # 明确指定用户名
+    userName = "zhangchongjie";
   };
+  
+  # Flatpak 目录结构
+  systemd.tmpfiles.rules = [
+    "d /var/lib/flatpak 0755 root flatpak -"
+    "d /var/lib/flatpak/exports 0755 root flatpak -"
+    "d /var/lib/flatpak/exports/share 0755 root flatpak -"
+  ];
 
   # 配置XDG Portal - 这是关键
   xdg.portal = {
@@ -267,13 +298,6 @@
     };
   };
 
-  # 确保字体暴露给 Flatpak /usr/share/fonts
-  systemd.tmpfiles.rules = [
-    # Flatpak 目录
-    "d /var/lib/flatpak 0755 root flatpak -"
-    "d /var/lib/flatpak/exports 0755 root flatpak -"
-    "d /var/lib/flatpak/exports/share 0755 root flatpak -"
-  ];
 
   # 启用 zRAM
   zramSwap = {
@@ -301,26 +325,38 @@
   };
 
 
-  # 防火墙配置
-  networking.firewall = {
+   # 网络配置
+  networking = {
+    hostName = "nixos";   # 主机名
+    networkmanager.enable = true; # 启用 NetworkManager
+    
+    # DNS 配置
+    nameservers = [ "114.114.114.114" "223.5.5.5" ];
+    
+    # 防火墙配置
+    firewall = {
+      enable = true;
+      allowPing = true;
+      checkReversePath = true;
+      
+      allowedTCPPorts = [ 9090 ];
+      allowedTCPPortRanges = [
+        { from = 1714; to = 1764; }  # KDE Connect
+      ];
+      allowedUDPPortRanges = [
+        { from = 1714; to = 1764; }  # KDE Connect
+      ];
+    };
+  };
+  
+  # systemd-resolved DNS 服务
+  services.resolved = {
     enable = true;
-    
-    # 允许 ICMP (ping)
-    allowPing = true;
-
-    # KDE Connect
-    allowedTCPPortRanges = [
-      { from = 1714; to = 1764; }
-    ];
-    allowedUDPPortRanges = [
-      { from = 1714; to = 1764; }
-    ];
-
-    # ⭐ 只开放 API 端口（用于控制面板）
-    allowedTCPPorts = [ 9090 ];
-    
-    # 拒绝其他所有入站连接
-    checkReversePath = true;
+    dnssec = "false";
+    extraConfig = ''
+      DNSStubListener=yes
+      DNS=114.114.114.114 223.5.5.5
+    '';
   };
 
   # 安全加固
@@ -333,42 +369,7 @@
   # SSD 优化 - 启用定期 TRIM
   services.fstrim.enable = true;
 
-
-  # 性能优化
-  boot.kernel.sysctl = {
-    # 网络优化
-    "net.ipv4.tcp_fastopen" = 3;
-    "net.ipv4.tcp_congestion_control" = "bbr";
-    "net.core.default_qdisc" = "cake";
-    "net.core.rmem_max" = 134217728;  # 增加网络接收缓冲区
-    "net.core.wmem_max" = 134217728;  # 增加网络发送缓冲区
-    
-    # 内存优化
-    "vm.swappiness" = 1;
-    "vm.vfs_cache_pressure" = 100;
-    "vm.dirty_ratio" = 10;
-    "vm.dirty_background_ratio" = 5;
-    
-    # 文件系统优化
-    "fs.inotify.max_user_watches" = 524288;  # 增加文件监控限制
-    "fs.file-max" = 2097152;  # 增加最大文件描述符数
-  };
-
-
   # AMD CPU 电源管理
   powerManagement.cpuFreqGovernor = "ondemand";  # 动态频率调节
-  
-  # 启用 NetworkManager DNS 保护
-  networking.networkmanager.dns = "systemd-resolved";
-  services.resolved = {
-    enable = true;
-    dnssec = "false";  # 如果需要 DNSSEC，可设为 true
-    extraConfig = ''
-      DNSStubListener=yes
-      DNS=114.114.114.114 223.5.5.5
-    '';
-  };
-
-
 }
 
