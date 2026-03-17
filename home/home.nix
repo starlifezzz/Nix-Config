@@ -84,6 +84,17 @@
       hm-switch = "home-manager switch";
       rebuild-flake = "rebuild-flake";
       rebuild-offline = "rebuild-offline";
+      
+      # 新增实用别名
+      c = "clear";
+      ".." = "cd ..";
+      "..." = "cd ../..";
+      "...." = "cd ../../..";
+      s = "sudo";
+      sk = "sudo killall -9";
+      update = "sudo nixos-rebuild switch --flake /etc/nixos#nixos";
+      gc = "sudo nix-collect-garbage -d";
+      optimise = "sudo nix-store --optimise";
     };
 
     interactiveShellInit = ''
@@ -109,8 +120,9 @@
 
       core = {
         editor = "vim";
-        autocrlf = "input";  # 防止 Windows 换行符问题
-        filemode = true;  # 跟踪文件权限
+        autocrlf = "input";
+        filemode = true;
+        quotepath = false;  # 显示中文文件名
       };
 
       pull = {
@@ -138,6 +150,10 @@
       
       fetch = {
         prune = true;  # 自动清理远程分支
+      };
+        # 性能优化
+      pack = {
+        threads = 0;  # 使用所有可用核心
       };
     };
   };

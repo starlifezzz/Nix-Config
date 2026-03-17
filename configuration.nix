@@ -225,15 +225,27 @@
     # 保留较少的 generations
     keep-derivations = true;
     keep-outputs = true;
+
+    # 优化：并行构建
+    max-jobs = "auto";
+
+    # 优化：使用所有 CPU 核心
+    cores = 0;
+
+    # 优化：启用沙箱（提高构建可靠性）
+    sandbox = true;
+
   };
 
   # 启用 nix-gc 服务定期清理
   nix.gc = {
     automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 7d";  # 删除 7 天前的 generations
+    dates = "daily";  # 改为每天清理
+    options = "--delete-older-than 3d";  # 删除 3 天前的 generations，更激进
   };
 
+  # 优化：启用 Nix 存储优化
+  nix.optimise.automatic = true;
 
   # 启用 Flatpak 支持
   services.flatpak.enable = true;
@@ -316,6 +328,9 @@
   security.sudo.wheelNeedsPassword = true;  # wheel 组需要密码
   security.doas.enable = false;  # 禁用 doas（如果不需要）
 
+  # 限制核心转储
+  systemd.coredump.enable = false;
+
   # SSD 优化 - 启用定期 TRIM
   services.fstrim.enable = true;
 
@@ -324,12 +339,37 @@
   boot.kernel.sysctl = {
     # 网络优化
     "net.ipv4.tcp_fastopen" = 3;
-    "net.ipv4.tcp_congestion_control" = "bbr";  # 使用 BBR 拥塞控制
+    "net.ipv4.tcp_congestion_control" = "bbr";
     "net.core.default_qdisc" = "cake";
+    "net.core.rmem_max" = 134217728;  # 增加网络接收缓冲区
+    "net.core.wmem_max" = 134217728;  # 增加网络发送缓冲区
     
     # 内存优化
-    "vm.swappiness" = 10;  # 减少 swap 使用
-    "vm.vfs_cache_pressure" = 50;
+    "vm.swappiness" = 1;
+    "vm.vfs_cache_pressure" = 100;
+    "vm.dirty_ratio" = 10;
+    "vm.dirty_background_ratio" = 5;
+    
+    # 文件系统优化
+    "fs.inotify.max_user_watches" = 524288;  # 增加文件监控限制
+    "fs.file-max" = 2097152;  # 增加最大文件描述符数
   };
+
+
+  # AMD CPU 电源管理
+  powerManagement.cpuFreqGovernor = "ondemand";  # 动态频率调节
+  
+  # 启用 NetworkManager DNS 保护
+  networking.networkmanager.dns = "systemd-resolved";
+  services.resolved = {
+    enable = true;
+    dnssec = "false";  # 如果需要 DNSSEC，可设为 true
+    extraConfig = ''
+      DNSStubListener=yes
+      DNS=114.114.114.114 223.5.5.5
+    '';
+  };
+
+
 }
 
