@@ -234,19 +234,6 @@
     };
   };
 
-  # 设置环境变量
-  environment.sessionVariables = {
-    XDG_DATA_DIRS = [
-      "/nix/var/nix/profiles/default/share"
-      "/run/current-system/sw/share"
-      "/var/lib/flatpak/exports/share"
-      "/home/zhangchongjie/.local/share/flatpak/exports/share"
-    ];
-#     # 字体相关环境变量
-#     FONTCONFIG_PATH = "/etc/fonts";
-#     FONTCONFIG_FILE = "/etc/fonts/fonts.conf";
-  };
-
   # 确保字体暴露给 Flatpak /usr/share/fonts
   systemd.tmpfiles.rules = [
     # Flatpak 目录
