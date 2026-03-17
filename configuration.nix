@@ -30,12 +30,17 @@
     "video=1920x1080@60"
     # 或者使用auto
     # "video=efifb:auto"
+    # Zen 内核优化参数（AMD CPU）
+    "processor.max_cstate=1"     # 减少 CPU C-state 延迟（提高响应性）
+    "idle=mwait"                 # AMD CPU 使用 mwait 指令（比 poll 更节能）
+    "amd_pstate=active" 
   ];
 
 
 
   # Use latest kernel.
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_zen;
+
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -203,8 +208,10 @@
     trusted-users = [ "root" "zhangchongjie" ];
     # 配置二进制缓存镜像，可以添加多个，优先级从高到低
     substituters = [
-      "https://mirrors.cernet.edu.cn/nix-channels/store"
+      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+      "https://mirror.pku.edu.cn/nix-channels/store"
       "https://mirrors.ustc.edu.cn/nix-channels/store"
+      "https://mirrors.cernet.edu.cn/nix-channels/store"
       "https://cache.nixos.org"
     ];
     trusted-public-keys = [
