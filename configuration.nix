@@ -175,8 +175,6 @@
      zellij
      neofetch
      git
-     lxgw-wenkai-screen
-     lxgw-wenkai
      home-manager
      kdePackages.kdeconnect-kde
      clash-verge-rev

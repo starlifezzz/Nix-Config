@@ -9,7 +9,6 @@
   home.homeDirectory = "/home/zhangchongjie";
   home.stateVersion = "25.11";
 
-
   # ═══════════════════════════════════════════════════════════
   # 用户软件包
   # ═══════════════════════════════════════════════════════════
@@ -18,6 +17,8 @@
     #  curl
     #  dig
     # font.nix所需字体
+    lxgw-wenkai-screen
+    lxgw-wenkai
     wqy_zenhei
     wqy_microhei
     source-han-sans
