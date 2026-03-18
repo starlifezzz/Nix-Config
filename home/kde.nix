@@ -564,7 +564,8 @@
       [Containments][26][Applets][29][Configuration][ConfigDialog]
       DialogHeight=630
       DialogWidth=810
-
+      
+      #定义任务栏的快捷方式
       [Containments][26][Applets][29][Configuration][General]
       launchers=applications:systemsettings.desktop,preferred://filemanager,preferred://browser,file:///var/lib/flatpak/exports/share/applications/com.qq.QQ.desktop,file:///var/lib/flatpak/exports/share/applications/com.tencent.WeChat.desktop,file:///nix/store/ad6l12ipzrm44bl51b0q42sw0i9nc33q-system-path/share/applications/clash-verge.desktop
 
@@ -716,7 +717,7 @@
 
     # 设置 GTK 主题环境变量
   home.sessionVariables = {
-    GTK_FONT_NAME = "LXGW WenKai Screen 11";
+    GTK_FONT_NAME = "LXGW WenKai Screen 10";
     # 在 Wayland 下清空这些变量，让 Wayland 协议直接处理
     GTK_IM_MODULE = "";
     QT_IM_MODULE = "";

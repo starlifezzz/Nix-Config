@@ -32,11 +32,11 @@
       accentColorFromWallpaper=true
       
       # 主要字体设置 - 使用 LXGW WenKai Screen
-      font=LXGW WenKai Screen,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,0
+      font=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,0
       menuFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,0
       smallestReadableFont=LXGW WenKai Screen,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,0
       toolBarFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,0
-      fixed=LXGW WenKai Screen Mono,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,0
+      fixed=LXGW WenKai Screen Mono,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,0
 
       [Icons]
       Theme=Papirus
@@ -60,7 +60,7 @@
   xdg.configFile."gtk-3.0/settings.ini" = {
     text = ''
       [Settings]
-      gtk-font-name=LXGW WenKai Screen 11
+      gtk-font-name=LXGW WenKai Screen 10
       gtk-icon-theme-name=Papirus
     '';
     force = true;
@@ -69,7 +69,7 @@
   xdg.configFile."gtk-4.0/settings.ini" = {
     text = ''
       [Settings]
-      gtk-font-name=LXGW WenKai Screen 11
+      gtk-font-name=LXGW WenKai Screen 10
       gtk-icon-theme-name=Papirus
     '';
     force = true;
@@ -77,7 +77,7 @@
 
   xdg.configFile."gtk-2.0/gtkrc" = {
     text = ''
-      gtk-font-name="LXGW WenKai Screen 11"
+      gtk-font-name="LXGW WenKai Screen 10"
       gtk-icon-theme-name="Papirus"
     '';
     force = true;
@@ -85,7 +85,7 @@
 
   # 设置 GTK 主题环境变量
   home.sessionVariables = {
-    GTK_FONT_NAME = "LXGW WenKai Screen 11";
+    GTK_FONT_NAME = "LXGW WenKai Screen 10";
   };
 
 }
