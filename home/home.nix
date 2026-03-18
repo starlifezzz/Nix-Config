@@ -26,7 +26,7 @@
       c = "clear";
       s = "sudo";
       sk = "sudo killall -9";
-      update = "sudo nixos-rebuild switch --flake /etc/nixos#nixos";
+      update = "sudo nixos-rebuild switch";
       gc = "sudo nix-collect-garbage -d";
       optimise = "sudo nix-store --optimise";
       
@@ -158,21 +158,4 @@
       };
     };
   };
-
-  # # ═══════════════════════════════════════════════════════════
-  # # 环境变量
-  # # ═══════════════════════════════════════════════════════════
-  # home.sessionVariables = {
-  #   XDG_DATA_DIRS = lib.makeSearchPath "" [
-  #     "/nix/var/nix/profiles/default/share"
-  #     "/run/current-system/sw/share"
-  #     "/var/lib/flatpak/exports/share"
-  #     "$HOME/.local/share/flatpak/exports/share"
-  #   ];
-  # };
-
-  # # ═══════════════════════════════════════════════════════════
-  # # 启用 Home Manager
-  # # ═══════════════════════════════════════════════════════════
-  # programs.home-manager.enable = true;
 }

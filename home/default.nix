@@ -17,17 +17,15 @@
     #  wget
     #  curl
     #  dig
-     alacritty
-     fish
-     vim
-     zellij
-     neofetch
-     git
-     lxgw-wenkai-screen
-     lxgw-wenkai
+    # font.nix所需字体
+    wqy_zenhei
+    wqy_microhei
+    source-han-sans
+    source-han-serif
+    jetbrains-mono
+    fira-code
   ];
 
-  
   # ═══════════════════════════════════════════════════════════
   # 环境变量
   # ═══════════════════════════════════════════════════════════
@@ -36,7 +34,6 @@
       "$HOME/.local/share"
       "/run/current-system/sw/share"
       "/nix/var/nix/profiles/default/share"
-      "/run/current-system/sw/share"
       "/var/lib/flatpak/exports/share"
       "$HOME/.local/share/flatpak/exports/share"
     ];

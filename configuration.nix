@@ -24,7 +24,6 @@
     };
     
     # 内核配置
-    # kernelPackages = pkgs.linuxPackages_zen; # 使用最新zen内核
     kernelPackages =  pkgs.linuxPackages_latest; # 使用最新稳定版内核，官方默认内核
     kernelParams = [
       "video=1920x1080@60"
@@ -170,6 +169,14 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+     alacritty
+     fish
+     vim
+     zellij
+     neofetch
+     git
+     lxgw-wenkai-screen
+     lxgw-wenkai
      home-manager
      kdePackages.kdeconnect-kde
      clash-verge-rev
