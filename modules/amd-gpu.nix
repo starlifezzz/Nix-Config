@@ -41,14 +41,12 @@
     enable32Bit = true;
     extraPackages = with pkgs; [
       mesa
-      mesa.drivers
       libvdpau-va-gl
-      vaapiVdpau
+      libva-vdpau-driver
       vulkan-loader
     ];
     extraPackages32 = with pkgs; [
       driversi686Linux.mesa
-      driversi686Linux.mesa.drivers
     ];
   };
 
@@ -64,8 +62,6 @@
     LIBVA_DRIVER_NAME = "r600";
   };
 
-  # 用户组配置
-  users.users.zhangchongjie.extraGroups = [ "video" "render" "input" ];
 
   # 系统服务优化
   systemd.services."gpu-power-management" = {

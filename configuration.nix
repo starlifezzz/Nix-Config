@@ -31,11 +31,6 @@
       "video=1920x1080@60"
     ];
 
-    # 额外模块参数
-    extraModulePackages = with config.boot.kernelPackages; [
-      radeon
-    ];
-    
     # 内核参数优化
     kernel.sysctl = {
       # 网络优化
@@ -159,7 +154,7 @@
   users.users.zhangchongjie = {
     isNormalUser = true; # 普通用户
     description = "zhangchongjie";
-    extraGroups = [ "networkmanager" "wheel" "flatpak" "video" "render"];
+    extraGroups = [ "networkmanager" "wheel" "flatpak" "video" "render" "input"];
     shell = pkgs.fish; # fish shell启用
   };
   # Fish Shell（系统级）
@@ -213,26 +208,6 @@
   ];
 
   hardware.sensor.iio.enable = true;
-  
-    # 添加 AMD 固件 - 这对 DPM 至关重要
-  hardware.firmware = with pkgs; [ 
-    linux-firmware
-  ];
-
-  # AMD 显卡硬件加速配置
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true;
-    extraPackages = with pkgs; [
-      mesa
-      mesa.drivers
-      rocmPackages.clr.icd
-    ];
-    extraPackages32 = with pkgs; [
-      driversi686Linux.mesa
-      driversi686Linux.mesa.drivers
-    ];
-  };
 
   services.dbus.enable = true;
   # Some programs need SUID wrappers, can be configured further or are
@@ -268,7 +243,6 @@
     settings = {
       # 将您的用户名和 root 设为可信用户
       trusted-users = [ "root" "zhangchongjie" ];
-      
       # 配置二进制缓存镜像，优先级从高到低
       substituters = [
         "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
@@ -280,10 +254,8 @@
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       ];
       experimental-features = [ "nix-command" "flakes" ];
-      
       # 自动优化存储
       auto-optimise-store = true;
-      
       # 保留较少的 generations
       keep-derivations = true;
       keep-outputs = true;
@@ -295,29 +267,24 @@
       # 启用沙箱
       sandbox = true;
     };
-    
     # 垃圾回收配置
     gc = {
       automatic = true;
       dates = "daily";
       options = "--delete-older-than 3d";
     };
-    
     # 存储优化
     optimise.automatic = true;
   };
-  
  # Flatpak 配置
   services.flatpak = {
     enable = true;
   };
-  
   # Flatpak 字体配置
   services.flatpak-fonts = {
     enable = true;
     userName = "zhangchongjie";
   };
-  
   # Flatpak 目录结构
   systemd.tmpfiles.rules = [
     "d /var/lib/flatpak 0755 root flatpak -"
@@ -369,16 +336,13 @@
   networking = {
     hostName = "nixos";   # 主机名
     networkmanager.enable = true; # 启用 NetworkManager
-    
     # DNS 配置
     nameservers = [ "114.114.114.114" "223.5.5.5" ];
-    
     # 防火墙配置
     firewall = {
       enable = true;
       allowPing = true;
       checkReversePath = true;
-      
       allowedTCPPorts = [ 9090 ];
       allowedTCPPortRanges = [
         { from = 1714; to = 1764; }  # KDE Connect
@@ -388,7 +352,6 @@
       ];
     };
   };
-  
   # systemd-resolved DNS 服务
   services.resolved = {
     enable = true;
@@ -411,7 +374,5 @@
 
   # AMD CPU 电源管理
   powerManagement.cpuFreqGovernor = "ondemand";  # 动态频率调节
-
- 
 
 }
