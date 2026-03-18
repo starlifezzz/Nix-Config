@@ -188,37 +188,37 @@
      git
      home-manager
      vscode
-     mesa              # 包含 glxinfo
+    #  mesa              # 包含 glxinfo
      
-     vulkan-tools      # 包含 vulkaninfo
-     libva-utils       # 包含 vainfo
-     radeontop         # AMD GPU 监控
-     lm_sensors        # 硬件传感器
-     htop              # 系统监控
-     btop              # 高级系统监控
-     pciutils          # 包含 lspci
-     inxi              # 完整硬件信息工具
-     mesa-demos        # OpenGL 测试工具包
-     sysstat           # 系统统计工具
-     iotop             # IO 监控
-     powertop          # 电源功耗分析
-     coreutils         # 基础工具
-     libvdpau-va-gl    # VDPAU 加速
-     libva-vdpau-driver # VA-API VDPAU 后端
-     vdpauinfo         # VDPAU 信息工具
-     ffmpeg-full       # 完整的 FFmpeg（支持硬件解码）
-     coreutils         # 基础工具
-     libvdpau-va-gl    # VDPAU 加速
-     libva-vdpau-driver # VA-API VDPAU 后端
-     vdpauinfo         # VDPAU 信息工具
-     ffmpeg-full       # 完整的 FFmpeg（支持硬件解码）
-     # 游戏性能优化
-     gamemode          # Feral GameMode 性能优化
-     gamescope         # Steam Deck 式的缩放器和 compositor
-     mangohud         # 游戏内性能监控 overlay
-     vkbasalt          # Vulkan 后处理效果
-     dxvk               # DirectX 到 Vulkan 的转换层（Wine 游戏）
-     winetricks        # Wine 配置工具
+    #  vulkan-tools      # 包含 vulkaninfo
+    #  libva-utils       # 包含 vainfo
+    #  radeontop         # AMD GPU 监控
+    #  lm_sensors        # 硬件传感器
+    #  htop              # 系统监控
+    #  btop              # 高级系统监控
+    #  pciutils          # 包含 lspci
+    #  inxi              # 完整硬件信息工具
+    #  mesa-demos        # OpenGL 测试工具包
+    #  sysstat           # 系统统计工具
+    #  iotop             # IO 监控
+    #  powertop          # 电源功耗分析
+    #  coreutils         # 基础工具
+    #  libvdpau-va-gl    # VDPAU 加速
+    #  libva-vdpau-driver # VA-API VDPAU 后端
+    #  vdpauinfo         # VDPAU 信息工具
+    #  ffmpeg-full       # 完整的 FFmpeg（支持硬件解码）
+    #  coreutils         # 基础工具
+    #  libvdpau-va-gl    # VDPAU 加速
+    #  libva-vdpau-driver # VA-API VDPAU 后端
+    #  vdpauinfo         # VDPAU 信息工具
+    #  ffmpeg-full       # 完整的 FFmpeg（支持硬件解码）
+    #  # 游戏性能优化
+    #  gamemode          # Feral GameMode 性能优化
+    #  gamescope         # Steam Deck 式的缩放器和 compositor
+    #  mangohud         # 游戏内性能监控 overlay
+    #  vkbasalt          # Vulkan 后处理效果
+    #  dxvk               # DirectX 到 Vulkan 的转换层（Wine 游戏）
+    #  winetricks        # Wine 配置工具
   ];
 
   hardware.sensor.iio.enable = true;
