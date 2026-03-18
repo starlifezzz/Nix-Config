@@ -9,34 +9,20 @@
   home.homeDirectory = "/home/zhangchongjie";
   home.stateVersion = "25.11";
 
-  imports = [
-    ./home.nix
-    ./kde.nix
-    ./font.nix
-  ];
-
 
   # ═══════════════════════════════════════════════════════════
   # 用户软件包
   # ═══════════════════════════════════════════════════════════
   home.packages = with pkgs; [
     # 浏览器
-    firefox
-
+    # firefox
     # 其他
-    flatpak
+    # flatpak
     # kdePackages.kate
     lutris-free
   ];
 
-
   # ═══════════════════════════════════════════════════════════
-  # 启用 Home Manager
-  # ═══════════════════════════════════════════════════════════
-  programs.home-manager.enable = true;
-
-
-    # ═══════════════════════════════════════════════════════════
   # 环境变量
   # ═══════════════════════════════════════════════════════════
   home.sessionVariables = {
@@ -47,4 +33,18 @@
       "$HOME/.local/share/flatpak/exports/share"
     ];
   };
+
+  # ═══════════════════════════════════════════════════════════
+  # 启用 Home Manager
+  # ═══════════════════════════════════════════════════════════
+  programs.home-manager.enable = true;
+
+  imports = [
+    ./home.nix
+    ./kde.nix
+    ./font.nix
+  ];
+
+ 
+
 }
