@@ -25,8 +25,8 @@
     };
     
     # 内核配置
-    kernelPackages = pkgs.linuxPackages_zen; # 使用最新内核
-    # kernelPackages =  pkgs.linuxPackages_latest; # 使用最新内核
+    # kernelPackages = pkgs.linuxPackages_zen; # 使用最新zen内核
+    kernelPackages =  pkgs.linuxPackages_latest; # 使用最新稳定版内核，官方默认内核
     kernelParams = [
       "video=1920x1080@60"
     ];
@@ -204,7 +204,22 @@
      iotop             # IO 监控
      powertop          # 电源功耗分析
      coreutils         # 基础工具
-
+     libvdpau-va-gl    # VDPAU 加速
+     libva-vdpau-driver # VA-API VDPAU 后端
+     vdpauinfo         # VDPAU 信息工具
+     ffmpeg-full       # 完整的 FFmpeg（支持硬件解码）
+     coreutils         # 基础工具
+     libvdpau-va-gl    # VDPAU 加速
+     libva-vdpau-driver # VA-API VDPAU 后端
+     vdpauinfo         # VDPAU 信息工具
+     ffmpeg-full       # 完整的 FFmpeg（支持硬件解码）
+     # 游戏性能优化
+     gamemode          # Feral GameMode 性能优化
+     gamescope         # Steam Deck 式的缩放器和 compositor
+     mangohud         # 游戏内性能监控 overlay
+     vkbasalt          # Vulkan 后处理效果
+     dxvk               # DirectX 到 Vulkan 的转换层（Wine 游戏）
+     winetricks        # Wine 配置工具
   ];
 
   hardware.sensor.iio.enable = true;
