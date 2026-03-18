@@ -14,19 +14,27 @@
   # 用户软件包
   # ═══════════════════════════════════════════════════════════
   home.packages = with pkgs; [
-    # 浏览器
-    # firefox
-    # 其他
-    # flatpak
-    # kdePackages.kate
-    lutris-free
+    #  wget
+    #  curl
+    #  dig
+     alacritty
+     fish
+     vim
+     zellij
+     neofetch
+     git
+     lxgw-wenkai-screen
+     lxgw-wenkai
   ];
 
+  
   # ═══════════════════════════════════════════════════════════
   # 环境变量
   # ═══════════════════════════════════════════════════════════
   home.sessionVariables = {
     XDG_DATA_DIRS = lib.makeSearchPath "" [
+      "$HOME/.local/share"
+      "/run/current-system/sw/share"
       "/nix/var/nix/profiles/default/share"
       "/run/current-system/sw/share"
       "/var/lib/flatpak/exports/share"
@@ -44,7 +52,5 @@
     ./kde.nix
     ./font.nix
   ];
-
- 
 
 }

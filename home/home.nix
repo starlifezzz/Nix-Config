@@ -87,6 +87,15 @@
       cd3up = ''
         cd ../../..
       '';
+
+      # 新增：带代理启动 ProtonUp-Qt
+      protonup-proxy = ''
+        set -gx HTTP_PROXY http://127.0.0.1:$CLASH_PORT
+        set -gx HTTPS_PROXY http://127.0.0.1:$CLASH_PORT
+        set -gx ALL_PROXY socks5://127.0.0.1:(math $CLASH_PORT + 1)
+        echo "🌐 使用代理启动 ProtonUp-Qt..."
+        protonup-qt $argv
+      '';
     };
 
     interactiveShellInit = ''
