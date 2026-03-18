@@ -10,6 +10,7 @@
       ./hardware-configuration.nix
       ./modules/flatpak-fonts.nix  # flatpak字体配置
       ./modules/fonts.nix  #系统字体配置
+      ./modules/amd-gpu.nix  # AMD GPU 配置（新增）
     ];
 
   # 启动配置
@@ -28,15 +29,11 @@
     # kernelPackages =  pkgs.linuxPackages_latest; # 使用最新内核
     kernelParams = [
       "video=1920x1080@60"
-      # "processor.max_cstate=1"
-      # "idle=mwait"
-      # "amd_pstate=active"
-      # "radeon.si_support=1"      # 启用 radeon 对 SI 卡支持
-      # "amdgpu.si_support=0"      # 禁用 amdgpu 对 SI 卡支持
-      # "radeon.cik_support=1"     # 启用 radeon 对 CIK 卡支持（R9 370 是 CIK）
-      # "amdgpu.cik_support=0"     # 禁用 amdgpu 对 CIK 卡支持
-      # "radeon.modeset=1"         # 启用内核模式设置
-      # "radeon.dpm=1"             # 启用动态电源管理
+    ];
+
+    # 额外模块参数
+    extraModulePackages = with config.boot.kernelPackages; [
+      radeon
     ];
     
     # 内核参数优化
@@ -198,6 +195,7 @@
      home-manager
      vscode
      mesa              # 包含 glxinfo
+     
      vulkan-tools      # 包含 vulkaninfo
      libva-utils       # 包含 vainfo
      radeontop         # AMD GPU 监控
@@ -205,10 +203,21 @@
      htop              # 系统监控
      btop              # 高级系统监控
      pciutils          # 包含 lspci
+     inxi              # 完整硬件信息工具
+     mesa-demos        # OpenGL 测试工具包
+     sysstat           # 系统统计工具
+     iotop             # IO 监控
+     powertop          # 电源功耗分析
+     coreutils         # 基础工具
 
   ];
 
   hardware.sensor.iio.enable = true;
+  
+    # 添加 AMD 固件 - 这对 DPM 至关重要
+  hardware.firmware = with pkgs; [ 
+    linux-firmware
+  ];
 
   # AMD 显卡硬件加速配置
   hardware.graphics = {
@@ -216,12 +225,15 @@
     enable32Bit = true;
     extraPackages = with pkgs; [
       mesa
+      mesa.drivers
       rocmPackages.clr.icd
     ];
     extraPackages32 = with pkgs; [
       driversi686Linux.mesa
+      driversi686Linux.mesa.drivers
     ];
   };
+
   services.dbus.enable = true;
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -400,7 +412,6 @@
   # AMD CPU 电源管理
   powerManagement.cpuFreqGovernor = "ondemand";  # 动态频率调节
 
-  # 传感器模块自动加载
-  boot.kernelModules = [ "k10temp" "i2c_dev" "i2c_piix4" ];
+ 
 
 }
