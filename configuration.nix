@@ -383,7 +383,7 @@
   services.fstrim.enable = true;
 
   # AMD CPU 电源管理
-  powerManagement.cpuFreqGovernor = "ondemand";  # 动态频率调节
+  powerManagement.cpuFreqGovernor = "performance";  # 动态频率调节
 
 
 
