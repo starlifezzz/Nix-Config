@@ -26,7 +26,7 @@
     # 内核配置
     kernelPackages =  pkgs.linuxPackages_latest; # 使用最新稳定版内核，官方默认内核
     kernelParams = [
-      "video=1920x1080@60"
+      "video=2560x1440@75"
     ];
 
     # 内核参数优化
@@ -114,7 +114,7 @@
   # services.xserver.enable = true;
 
   # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm.enable = true;
+  # services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
 
   # Configure keymap in X11
@@ -152,8 +152,7 @@
   users.users.zhangchongjie = {
     isNormalUser = true; # 普通用户
     description = "zhangchongjie";
-    extraGroups = [ "networkmanager" "wheel" "flatpak" "video" "render" "input"];
-    shell = pkgs.fish; # fish shell启用
+    extraGroups = [ "networkmanager" "wheel" "flatpak" "video" "render" "input" "netraw"];
   };
   # Fish Shell（系统级）
   programs.fish.enable = true;
@@ -177,9 +176,9 @@
      git
      home-manager
      kdePackages.kdeconnect-kde
-     clash-verge-rev
+     flclash
      timeshift
-     qt6Packages.fcitx5-configtool
+    #  qt6Packages.fcitx5-configtool
      bleachbit
      vscode
      lutris-free
@@ -188,12 +187,6 @@
      libva-vdpau-driver # VA-API VDPAU 后端
      vdpauinfo         # VDPAU 信息工具
      ffmpeg-full       # 完整的 FFmpeg（支持硬件解码）
-     # 桌面集成工具（新增）
-     desktop-file-utils
-     appstream-glib
-     kdePackages.kconfig
-     kdePackages.kwindowsystem
-     gtk2
   ];
 
   hardware.sensor.iio.enable = true;
@@ -274,12 +267,14 @@
     enable = true;
     userName = "zhangchongjie";
   };
-  # Flatpak 目录结构
-  systemd.tmpfiles.rules = [
-    "d /var/lib/flatpak 0755 root flatpak -"
-    "d /var/lib/flatpak/exports 0755 root flatpak -"
-    "d /var/lib/flatpak/exports/share 0755 root flatpak -"
-  ];
+
+
+  # # Flatpak 目录结构
+  # systemd.tmpfiles.rules = [
+  #   "d /var/lib/flatpak 0755 root flatpak -"
+  #   "d /var/lib/flatpak/exports 0755 root flatpak -"
+  #   "d /var/lib/flatpak/exports/share 0755 root flatpak -"
+  # ];
 
   # 配置XDG Portal - 这是关键
   xdg.portal = {
@@ -325,14 +320,14 @@
   networking = {
     hostName = "nixos";   # 主机名
     networkmanager.enable = true; # 启用 NetworkManager
-    # DNS 配置
-    nameservers = [ "114.114.114.114" "223.5.5.5" ];
+    proxy.default = "http://127.0.0.1:7897";
+    proxy.noProxy = "127.0.0.1,localhost,*.local";
     # 防火墙配置
     firewall = {
       enable = true;
       allowPing = true;
       checkReversePath = true;
-      allowedTCPPorts = [ 9090 ];
+      allowedTCPPorts = [ 9090 7897 ];  # 保留 Dashboard 和 API
       allowedTCPPortRanges = [
         { from = 1714; to = 1764; }  # KDE Connect
       ];
@@ -341,13 +336,14 @@
       ];
     };
   };
+
   # systemd-resolved DNS 服务
   services.resolved = {
     enable = true;
     dnssec = "false";
     extraConfig = ''
       DNSStubListener=yes
-      DNS=114.114.114.114 223.5.5.5
+      DNS=119.29.29.29 223.5.5.5
     '';
   };
 
@@ -358,6 +354,22 @@
   # 限制核心转储
   systemd.coredump.enable = false;
 
+
+  # FlashClash TUN 模式支持
+  boot.kernelModules = [ "tun" ];
+
+  # 允许 flclash 访问 TUN 设备并创建网络命名空间
+  systemd.services.flclash-tun = {
+    description = "Setup TUN permissions for flclash";
+    before = [ "network.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.coreutils}/bin/chmod 666 /dev/net/tun";
+      RemainAfterExit = true;
+    };
+    wantedBy = [ "multi-user.target" ];
+  };
+
   # SSD 优化 - 启用定期 TRIM
   services.fstrim.enable = true;
 
@@ -365,14 +377,15 @@
   powerManagement.cpuFreqGovernor = "ondemand";  # 动态频率调节
 
 
-  # SDDM 登录界面配置
+    # SDDM 登录界面配置
   services.displayManager.sddm = {
+    enable = true;
     theme = "breeze";
     
-    # 设置与 KDE 桌面相同的壁纸
+    # 直接在 sddm.conf 中设置背景
     settings = {
       General = {
-        background = "${pkgs.kdePackages.breeze}/share/wallpapers/Breeze/contents/images/1920x1080.jpg";
+        Background = "${pkgs.kdePackages.plasma-workspace-wallpapers}/share/wallpapers/Mountain/contents/images/5120x2880.jpg";
       };
     };
   };
