@@ -9,8 +9,6 @@
     enable = true;
 
     shellInit = ''
-      # 代理端口
-      set -gx CLASH_PORT 7897
     '';
 
     shellAliases = {
