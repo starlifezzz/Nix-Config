@@ -238,6 +238,8 @@ neofetch
 网络配置: 根据需要修改代理设置
 用户密码: 首次启动后记得设置用户密码
 Flatpak 仓库: 首次使用后添加 Flatpak 远程仓库
+
+---
 🛠️ 故障排查
 常见问题
 1. 无法启动
@@ -250,7 +252,6 @@ sudo nix-collect-garbage --delete-older-than 7d
 
 ---
 
-###
 📚 参考资料
 NixOS 官方文档
 Nix 配置选项
