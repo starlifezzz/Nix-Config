@@ -247,13 +247,17 @@ nixos-rebuild boot --flake .
 sudo systemctl restart NetworkManager
 # 清理旧世代
 sudo nix-collect-garbage --delete-older-than 7d
+
+---
+
+###
 📚 参考资料
 NixOS 官方文档
 Nix 配置选项
 Nixpkgs 软件包搜索
 Home Manager
 
-
+---
 <div align="center">
 Made with ❤️ using NixOS
 
