@@ -82,13 +82,13 @@
   };
 
 
-  # 桌面环境配置
-  services.xserver = {
-    enable = true;
-    # 键盘布局
-    xkb.layout = "cn";
-    xkb.variant = "";
-  };
+  # # 桌面环境配置
+  # services.xserver = {
+  #   enable = true;
+  #   # 键盘布局
+  #   xkb.layout = "cn";
+  #   xkb.variant = "";
+  # };
   
   # Fcitx5 输入法
   i18n.inputMethod = {
@@ -109,15 +109,6 @@
   # Enable the KDE Plasma Desktop Environment.
   # services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
-
-
-  # SDDM 显示管理器配置
-  services.displayManager.defaultSession = "plasma";
-  # Configure keymap in X11
-  # services.xserver.xkb = {
-  #   layout = "cn";
-  #   variant = "";
-  # };
 
   # Enable CUPS to print documents.
   #打印服务
@@ -149,6 +140,9 @@
     isNormalUser = true; # 普通用户
     description = "zhangchongjie";
     extraGroups = [ "networkmanager" "wheel" "flatpak" "video" "render" "input" "netraw"];
+    # 设置默认 shell 为 fish
+    shell = pkgs.fish;
+
   };
   # Fish Shell（系统级）
   programs.fish.enable = true;
@@ -187,7 +181,7 @@
 
   hardware.sensor.iio.enable = true;
 
-  services.dbus.enable = true;
+  # services.dbus.enable = true;
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -309,8 +303,8 @@
   networking = {
     hostName = "nixos";   # 主机名
     networkmanager.enable = true; # 启用 NetworkManager
-    proxy.default = "http://127.0.0.1:7897";
-    proxy.noProxy = "127.0.0.1,localhost,*.local";
+    # Deleted:proxy.default = "http://127.0.0.1:7897";
+    # Deleted:proxy.noProxy = "127.0.0.1,localhost,*.local";
     # 防火墙配置
     firewall = {
       enable = true;
@@ -325,9 +319,13 @@
       ];
     };
   };
-
-  # 启用 libinput 触摸板支持（Wayland 使用）
-  services.libinput.enable = true;
+  
+  # 系统范围的环境变量 - 包含代理设置
+  environment.variables = {
+    HTTP_PROXY = "http://127.0.0.1:7897";
+    HTTPS_PROXY = "http://127.0.0.1:7897";
+    NO_PROXY = "127.0.0.1,localhost,*.local";
+  };
 
   # systemd-resolved DNS 服务
   services.resolved = {
@@ -345,7 +343,6 @@
 
   # 限制核心转储
   systemd.coredump.enable = false;
-
 
   # FlashClash TUN 模式支持
   boot.kernelModules = [ "tun" ];
@@ -368,7 +365,8 @@
   # AMD CPU 电源管理
   powerManagement.cpuFreqGovernor = "ondemand";  # 动态频率调节
 
-  # SDDM 登录界面配置
+  # SDDM 显示管理器配置
+  services.displayManager.defaultSession = "plasma";
   services.displayManager.sddm = {
     enable = true;
     theme = "breeze";
