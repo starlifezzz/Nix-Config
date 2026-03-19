@@ -340,6 +340,15 @@
       ];
     };
   };
+
+
+  #  # 系统范围的环境变量 - 包含代理设置
+  # environment.variables = {
+  #   HTTP_PROXY = "http://127.0.0.1:7897";
+  #   HTTPS_PROXY = "http://127.0.0.1:7897";
+  #   NO_PROXY = "127.0.0.1,localhost,*.local";
+  # };
+
   
   # systemd-resolved DNS 服务
   services.resolved = {
