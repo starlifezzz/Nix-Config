@@ -85,16 +85,9 @@
   # 桌面环境配置
   services.xserver = {
     enable = true;
-    
     # 键盘布局
     xkb.layout = "cn";
     xkb.variant = "";
-    
-    # 输入法环境变量
-    displayManager.setupCommands = ''
-      export GTK_IM_MODULE=fcitx
-      export QT_IM_MODULE=fcitx
-    '';
   };
   
   # Fcitx5 输入法
@@ -117,6 +110,9 @@
   # services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
 
+
+  # SDDM 显示管理器配置
+  services.displayManager.defaultSession = "plasma";
   # Configure keymap in X11
   # services.xserver.xkb = {
   #   layout = "cn";
@@ -269,13 +265,6 @@
   };
 
 
-  # # Flatpak 目录结构
-  # systemd.tmpfiles.rules = [
-  #   "d /var/lib/flatpak 0755 root flatpak -"
-  #   "d /var/lib/flatpak/exports 0755 root flatpak -"
-  #   "d /var/lib/flatpak/exports/share 0755 root flatpak -"
-  # ];
-
   # 配置XDG Portal - 这是关键
   xdg.portal = {
     enable = true;
@@ -316,7 +305,7 @@
   };
 
 
-   # 网络配置
+# 网络配置
   networking = {
     hostName = "nixos";   # 主机名
     networkmanager.enable = true; # 启用 NetworkManager
@@ -336,6 +325,9 @@
       ];
     };
   };
+
+  # 启用 libinput 触摸板支持（Wayland 使用）
+  services.libinput.enable = true;
 
   # systemd-resolved DNS 服务
   services.resolved = {
@@ -376,8 +368,7 @@
   # AMD CPU 电源管理
   powerManagement.cpuFreqGovernor = "ondemand";  # 动态频率调节
 
-
-    # SDDM 登录界面配置
+  # SDDM 登录界面配置
   services.displayManager.sddm = {
     enable = true;
     theme = "breeze";
