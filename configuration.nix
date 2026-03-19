@@ -364,4 +364,17 @@
   # AMD CPU 电源管理
   powerManagement.cpuFreqGovernor = "ondemand";  # 动态频率调节
 
+
+  # SDDM 登录界面配置
+  services.displayManager.sddm = {
+    theme = "breeze";
+    
+    # 设置与 KDE 桌面相同的壁纸
+    settings = {
+      General = {
+        background = "${pkgs.kdePackages.breeze}/share/wallpapers/Breeze/contents/images/1920x1080.jpg";
+      };
+    };
+  };
+
 }
