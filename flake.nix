@@ -35,6 +35,12 @@
             allowReboot = false;
           };
         }
+        
+        # 添加 nix registry 配置
+        {
+          nix.registry.nixpkgs.to = nixpkgs;
+          nix.registry.hm.to = home-manager;
+        }
       ];
     };
   };

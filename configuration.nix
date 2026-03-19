@@ -8,7 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./modules/flatpak-fonts.nix  # flatpak字体配置
+      # ./modules/flatpak-fonts.nix  # flatpak字体配置
       ./modules/amd-gpu.nix  # AMD GPU 配置
     ];
 
@@ -41,7 +41,7 @@
       # 网络优化
       "net.ipv4.tcp_fastopen" = 3;
       "net.ipv4.tcp_congestion_control" = "bbr";
-      "net.core.default_qdisc" = "cake";
+      "net.core.default_qdisc" = "fq";  # 改为 fq 以配合 bbr 获得更好性能
       "net.core.rmem_max" = 134217728;
       "net.core.wmem_max" = 134217728;
       "net.ipv4.tcp_mtu_probing" = 1;
@@ -267,16 +267,17 @@
     };
     # 存储优化
     optimise.automatic = true;
+
   };
  # Flatpak 配置
   services.flatpak = {
     enable = true;
   };
-  # Flatpak 字体配置
-  services.flatpak-fonts = {
-    enable = true;
-    userName = "zhangchongjie";
-  };
+  # # Flatpak 字体配置
+  # services.flatpak-fonts = {
+  #   enable = true;
+  #   userName = "zhangchongjie";
+  # };
 
 
   # 配置XDG Portal - 这是关键
@@ -385,7 +386,9 @@
   # AMD CPU 电源管理
   powerManagement.cpuFreqGovernor = "performance";  # 动态频率调节
 
-
+  # BTRFS 定期碎片整理
+  services.btrfs.autoScrub.enable = true;
+  services.btrfs.autoScrub.interval = "weekly";
 
   # SDDM 显示管理器配置
   services.displayManager.defaultSession = "plasma";
