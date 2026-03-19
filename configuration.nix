@@ -64,6 +64,9 @@
       "vm.dirty_expire_centisecs" = 6000;
       # AMDGPU + BTRFS 优化
       "vm.page-cluster" = "0";  # 禁用交换预读（SSD 优化）
+
+      "net.ipv4.ip_forward" = 1;
+      "net.ipv6.conf.all.forwarding" = 1;
     };
   };
 
@@ -331,7 +334,8 @@
       enable = true;
       allowPing = true;
       checkReversePath = true;
-      allowedTCPPorts = [ 9090 7897 ];  # 保留 Dashboard 和 API
+      allowedTCPPorts = [ 9090 7897 7890 7891 7892];  # 保留 Dashboard 和 API
+      allowedUDPPorts = [ 7890 ];
       allowedTCPPortRanges = [
         { from = 1714; to = 1764; }  # KDE Connect
       ];
@@ -366,6 +370,14 @@
 
   # 限制核心转储
   systemd.coredump.enable = false;
+
+  
+  # 系统范围的环境变量 - 包含代理设置
+  environment.variables = {
+    HTTP_PROXY = "http://127.0.0.1:7897";
+    HTTPS_PROXY = "http://127.0.0.1:7897";
+    NO_PROXY = "127.0.0.1,localhost,*.local";
+  };
 
   # FlashClash TUN 模式支持
   boot.kernelModules = [ "tun" ];
