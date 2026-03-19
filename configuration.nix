@@ -9,7 +9,7 @@
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./modules/flatpak-fonts.nix  # flatpak字体配置
-      # ./modules/amd-gpu.nix  # AMD GPU 配置（新增）
+      ./modules/amd-gpu.nix  # AMD GPU 配置
     ];
 
   # 启动配置
@@ -27,6 +27,13 @@
     kernelPackages =  pkgs.linuxPackages_latest; # 使用最新稳定版内核，官方默认内核
     kernelParams = [
       "video=2560x1440@75"
+      # "amd_pstate=active"  # 启用 AMD P-State 驱动
+      "processor.max_cstate=5"  # 限制 C-State 深度
+      "amd_iommu=soft"          # 如果使用独显
+      "init_on_alloc=1"
+      "page_alloc.shuffle=1"
+      # 如果遇到 SMT 相关问题，取消下面这行的注释
+      # "nosmt"  # 禁用 SMT（仅限问题排查）
     ];
 
     # 内核参数优化
@@ -37,16 +44,26 @@
       "net.core.default_qdisc" = "cake";
       "net.core.rmem_max" = 134217728;
       "net.core.wmem_max" = 134217728;
+      "net.ipv4.tcp_mtu_probing" = 1;
+      "net.ipv4.tcp_slow_start_after_idle" = 0;
       
       # 内存优化
       "vm.swappiness" = 1;
       "vm.vfs_cache_pressure" = 100;
       "vm.dirty_ratio" = 10;
       "vm.dirty_background_ratio" = 5;
+      # AMD Ryzen 优化：禁用页面表隔离（提升性能，略微降低安全性）
+      "kernel.page-table-isolation" = 0;  # 可选，根据需要启用
+      
       
       # 文件系统优化
       "fs.inotify.max_user_watches" = 524288;
       "fs.file-max" = 2097152;
+      # BTRFS 优化
+      "vm.dirty_writeback_centisecs" = 300;
+      "vm.dirty_expire_centisecs" = 6000;
+      # AMDGPU + BTRFS 优化
+      "vm.page-cluster" = "0";  # 禁用交换预读（SSD 优化）
     };
   };
 
@@ -168,7 +185,6 @@
      kdePackages.kdeconnect-kde
      flclash
      timeshift
-    #  qt6Packages.fcitx5-configtool
      bleachbit
      vscode
      lutris-free
@@ -177,6 +193,10 @@
      libva-vdpau-driver # VA-API VDPAU 后端
      vdpauinfo         # VDPAU 信息工具
      ffmpeg-full       # 完整的 FFmpeg（支持硬件解码）
+    # GPU 工具
+     vulkan-tools      # vulkaninfo
+     radeontop         # AMD GPU 监控
+     coreutils         # 提供 lspci 等工具
   ];
 
   hardware.sensor.iio.enable = true;
@@ -364,6 +384,8 @@
 
   # AMD CPU 电源管理
   powerManagement.cpuFreqGovernor = "ondemand";  # 动态频率调节
+
+
 
   # SDDM 显示管理器配置
   services.displayManager.defaultSession = "plasma";

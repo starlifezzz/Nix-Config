@@ -567,7 +567,7 @@
       
       #定义任务栏的快捷方式
       [Containments][26][Applets][29][Configuration][General]
-      launchers=applications:systemsettings.desktop,preferred://filemanager,preferred://browser,file:///var/lib/flatpak/exports/share/applications/com.qq.QQ.desktop,file:///var/lib/flatpak/exports/share/applications/com.tencent.WeChat.desktop,file:///nix/store/ad6l12ipzrm44bl51b0q42sw0i9nc33q-system-path/share/applications/clash-verge.desktop
+      launchers=applications:systemsettings.desktop,preferred://filemanager,preferred://browser,file:///var/lib/flatpak/exports/share/applications/com.qq.QQ.desktop,file:///var/lib/flatpak/exports/share/applications/com.tencent.WeChat.desktop,file:////nix/store/k1q7ysfx90qmjkcfls0kgr04yfw53j7k-flclash-0.8.91/share/applications//flclash.desktop
 
       [Containments][26][Applets][30]
       immutability=1
