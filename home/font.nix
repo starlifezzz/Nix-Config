@@ -1,6 +1,3 @@
-/**
-  字体配置 - 通过 Home Manager 管理
-*/
 { config, pkgs, lib, ... }:
 
 {
@@ -32,6 +29,48 @@
     text = ''
       gtk-font-name="LXGW WenKai Screen 10"
       gtk-icon-theme-name="Papirus"
+    '';
+    force = true;
+  };
+
+  # Fontconfig 配置 - 设置等宽字体为 LXGW WenKai Mono
+  xdg.configFile."fontconfig/fonts.conf" = {
+    text = ''
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+      <fontconfig>
+        <!-- 设置默认等宽字体为 LXGW WenKai Mono -->
+        <match target="pattern">
+          <test name="family" compare="contains">
+            <string>monospace</string>
+          </test>
+          <edit name="family" mode="prepend" binding="strong">
+            <string>LXGW WenKai Mono</string>
+            <string>LXGW WenKai Screen</string>
+          </edit>
+        </match>
+
+        <!-- 设置终端字体优先级 -->
+        <match target="pattern">
+          <test name="family" compare="contains">
+            <string>Terminal</string>
+          </test>
+          <edit name="family" mode="prepend" binding="strong">
+            <string>LXGW WenKai Mono</string>
+            <string>LXGW WenKai Screen</string>
+          </edit>
+        </match>
+
+        <!-- 禁用位图字体 -->
+        <match target="font">
+          <test name="scalable" compare="not_eq">
+            <bool>true</bool>
+          </test>
+          <edit name="scalable" mode="assign">
+            <bool>true</bool>
+          </edit>
+        </match>
+      </fontconfig>
     '';
     force = true;
   };
