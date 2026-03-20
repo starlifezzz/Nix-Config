@@ -16,3 +16,5 @@ result-*
 
 # 敏感信息（可选）
 # secrets/
+flake.lock
+hardware-configuration.nix
