@@ -1,10 +1,6 @@
 { config, pkgs, lib, ... }:
 
 {
-
-  # ═══════════════════════════════════════════════════════════
-  # Alacritty 终端配置
-  # ═══════════════════════════════════════════════════════════
   programs.alacritty = {
     enable = true;
 
@@ -21,8 +17,8 @@
 
       terminal = {
         shell = {
-          program = "/run/current-system/sw/bin/zellij";
-          args = [ "attach" "--index=0" "--create" ];
+          program = "${pkgs.zellij}/bin/zellij";
+          args = [ "attach" "--create" ];
         };
       };
 
@@ -82,22 +78,18 @@
 
         normal = {
           family = "LXGW WenKai Mono";
-          style = "Regular";
         };
 
         bold = {
           family = "LXGW WenKai Mono";
-          style = "Regular";
         };
 
         italic = {
           family = "LXGW WenKai Mono";
-          style = "Regular";
         };
 
         bold_italic = {
           family = "LXGW WenKai Mono";
-          style = "Regular";
         };
 
         offset = {
@@ -112,9 +104,7 @@
       };
 
       cursor = {
-        style = {
-          shape = "Beam";
-        };
+        style.shape = "Beam";
       };
 
       scrolling = {
@@ -148,22 +138,20 @@
         duration = 10;
       };
 
-      keyboard = {
-        bindings = [
-          { key = "R"; mods = "Command"; chars = "\f"; mode = "~Vi|~Search"; }
-          { key = "R"; mods = "Command"; action = "ClearHistory"; mode = "~Vi|~Search"; }
-          { key = "W"; mods = "Command"; action = "Hide"; }
-          { key = "W"; mods = "Command|Shift"; action = "Quit"; }
-          { key = "N"; mods = "Command"; action = "SpawnNewInstance"; }
-          { key = "T"; mods = "Command"; action = "CreateNewWindow"; }
-          { key = "Left"; mods = "Alt"; chars = "\u001Bb"; }
-          { key = "Right"; mods = "Alt"; chars = "\u001Bf"; }
-          { key = "Left"; mods = "Command"; chars = "\u0001"; }
-          { key = "Right"; mods = "Command"; chars = "\u0005"; }
-          { key = "Back"; mods = "Command"; chars = "\u0015"; }
-          { key = "Back"; mods = "Alt"; chars = "\u001B\u007F"; }
-        ];
-      };
+      keyboard.bindings = [
+        { key = "R"; mods = "Super"; chars = "\f"; mode = "~Vi|~Search"; }
+        { key = "R"; mods = "Super"; action = "ClearHistory"; mode = "~Vi|~Search"; }
+        { key = "W"; mods = "Super"; action = "Hide"; }
+        { key = "W"; mods = "Super|Shift"; action = "Quit"; }
+        { key = "N"; mods = "Super"; action = "SpawnNewInstance"; }
+        { key = "T"; mods = "Super"; action = "CreateNewWindow"; }
+        { key = "Left"; mods = "Alt"; chars = "\u001Bb"; }
+        { key = "Right"; mods = "Alt"; chars = "\u001Bf"; }
+        { key = "Left"; mods = "Super"; chars = "\u0001"; }
+        { key = "Right"; mods = "Super"; chars = "\u0005"; }
+        { key = "Back"; mods = "Super"; chars = "\u0015"; }
+        { key = "Back"; mods = "Alt"; chars = "\u001B\u007F"; }
+      ];
     };
   };
 }

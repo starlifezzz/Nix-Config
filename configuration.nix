@@ -171,7 +171,6 @@
      alacritty
      fish
      vim
-     zellij
      neofetch
      git
      home-manager

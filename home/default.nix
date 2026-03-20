@@ -17,6 +17,7 @@
     #  curl
     #  dig
     # font.nix所需字体
+    zellij
     lxgw-wenkai-screen
     lxgw-wenkai
     wqy_zenhei
