@@ -15,8 +15,7 @@
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
-        ./hardware-configuration.nix
-
+        
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
@@ -33,8 +32,6 @@
       modules = [
         ./configuration.nix
         ./modules/amd-gpu.nix
-        ./hardware-configuration.nix
-
         
         {
           networking.hostName = "nixos-1600x-r9370";
@@ -66,7 +63,6 @@
       modules = [
         ./configuration.nix
         ./modules/amd-gpu.nix
-        ./hardware-configuration.nix
         
         {
           networking.hostName = "nixos-2600-rx5500xt";

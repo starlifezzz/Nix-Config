@@ -7,7 +7,7 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
+      ./hardware-configuration-2600.nix
       # ./modules/flatpak-fonts.nix  # flatpak字体配置
       ./modules/amd-gpu.nix  # AMD GPU 配置
       ./modules/hardware/default.nix
