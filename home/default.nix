@@ -49,7 +49,8 @@
     ./home.nix
     ./kde.nix
     ./font.nix
-   Alacritty  ./Alacritty
+    ./Alacritty.nix
+    ./zellij.nix
   ];
 
 }

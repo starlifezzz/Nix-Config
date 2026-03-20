@@ -9,7 +9,9 @@
     enable = true;
 
     settings = {
-      live_config_reload = true;
+      general = {
+        live_config_reload = true;
+      };
 
       env = {
         TERM = "xterm-256color";
@@ -17,9 +19,11 @@
         ZELLIJ_AUTO_EXIT = "true";
       };
 
-      shell = {
-        program = "/run/current-system/sw/bin/zellij";
-        args = [ "attach" "--index=0" "--create" ];
+      terminal = {
+        shell = {
+          program = "/run/current-system/sw/bin/zellij";
+          args = [ "attach" "--index=0" "--create" ];
+        };
       };
 
       colors = {
@@ -146,8 +150,8 @@
 
       keyboard = {
         bindings = [
-          { key = "R"; mods = "Command"; chars = "\f"; modes = [ "~Vi" "~Search" ]; }
-          { key = "R"; mods = "Command"; action = "ClearHistory"; modes = [ "~Vi" "~Search" ]; }
+          { key = "R"; mods = "Command"; chars = "\f"; mode = "~Vi|~Search"; }
+          { key = "R"; mods = "Command"; action = "ClearHistory"; mode = "~Vi|~Search"; }
           { key = "W"; mods = "Command"; action = "Hide"; }
           { key = "W"; mods = "Command|Shift"; action = "Quit"; }
           { key = "N"; mods = "Command"; action = "SpawnNewInstance"; }
