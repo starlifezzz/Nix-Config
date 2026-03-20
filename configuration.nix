@@ -239,7 +239,6 @@
       ];
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "nix-community.cachix.org-1:2G9iXR7hZtbHwvOxgnPp3n8uK6l4VqL"
       ];
 
       experimental-features = [ "nix-command" "flakes" ];
@@ -340,12 +339,12 @@
   };
 
 
-  #  # 系统范围的环境变量 - 包含代理设置
-  # environment.variables = {
-  #   HTTP_PROXY = "http://127.0.0.1:7897";
-  #   HTTPS_PROXY = "http://127.0.0.1:7897";
-  #   NO_PROXY = "127.0.0.1,localhost,*.local";
-  # };
+   # 系统范围的环境变量 - 包含代理设置
+  environment.variables = {
+    HTTP_PROXY = "http://127.0.0.1:7897";
+    HTTPS_PROXY = "http://127.0.0.1:7897";
+    NO_PROXY = "127.0.0.1,localhost,*.local";
+  };
 
   
   # systemd-resolved DNS 服务

@@ -82,7 +82,7 @@
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.users.zhangchongjie = import ./home/home.nix;
+          home-manager.users.zhangchongjie = import ./home;
           
           home-manager.extraSpecialArgs = { inherit self; };
         }
