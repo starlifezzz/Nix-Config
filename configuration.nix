@@ -28,11 +28,12 @@
     kernelPackages =  pkgs.linuxPackages_latest; # 使用最新稳定版内核，官方默认内核
     kernelParams = [
       "video=2560x1440@75"
-      # "amd_pstate=active"  # 启用 AMD P-State 驱动
-      "processor.max_cstate=5"  # 限制 C-State 深度
-      "amd_iommu=soft"          # 如果使用独显
       "init_on_alloc=1"
       "page_alloc.shuffle=1"
+      # USB 稳定性优化 - 关键修复
+      "usbcore.autosuspend=-1"           # 禁用 USB 自动挂起
+      "usbcore.usbfs_memory_mb=1024"     # 增加 USBFS 内存限制
+      "xhci.pci_port_switch=1"           # XHCI 端口切换优化
       # 如果遇到 SMT 相关问题，取消下面这行的注释
       # "nosmt"  # 禁用 SMT（仅限问题排查）
     ];
@@ -55,7 +56,8 @@
       "vm.dirty_background_ratio" = 5;
       # AMD Ryzen 优化：禁用页面表隔离（提升性能，略微降低安全性）
       "kernel.page-table-isolation" = 0;  # 可选，根据需要启用
-      
+      "kernel.sched_autogroup_enabled" = 1;  # 启用任务组调度
+      "kernel.sched_migration_cost_ns" = 50000;  # 调度优化
       
       # 文件系统优化
       "fs.inotify.max_user_watches" = 524288;
@@ -173,7 +175,7 @@
      zellij
      fish
      vim
-    #  neofetch
+     neofetch
      git
      home-manager
      kdePackages.kdeconnect-kde
