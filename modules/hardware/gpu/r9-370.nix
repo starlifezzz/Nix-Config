@@ -1,31 +1,26 @@
 { config, lib, pkgs, ... }:
 
 {
-  config = lib.mkMerge [
-    {
-      hardware.gpu.model = lib.mkDefault "r9-370";
+  config = lib.mkIf (config.hardware.gpu.manualModel == "r9-370") {
+    hardware.gpu.model = "r9-370";
+    
+    services.xserver.videoDrivers = [ "modesetting" ];
+    
+    boot.kernelParams = [
+      "amdgpu.runpm=0"
+      "pcie_aspm=off"
+    ];
+    
+    hardware.graphics = {
+      enable = true;
+      enable32Bit = true;
       
-      services.xserver.videoDrivers = lib.mkDefault [ "modesetting" ];
-      
-      boot.kernelParams = [
-        "amdgpu.runpm=0"
-        "pcie_aspm=off"
+      extraPackages = with pkgs; [
+        libva
+        libvdpau
       ];
-      
-      hardware.opengl = {
-        enable = lib.mkDefault true;
-        driSupport = lib.mkDefault true;
-        driSupport32Bit = lib.mkDefault true;
-        
-        extraPackages = with pkgs; [
-          libva
-          libvdpau
-        ];
-      };
-      
-      environment.systemPackages = with pkgs; [
-        radeontop
-      ];
-    }
-  ];
+    };
+    
+    environment.systemPackages = with pkgs; [ radeontop ];
+  };
 }

@@ -173,7 +173,7 @@
      zellij
      fish
      vim
-     neofetch
+    #  neofetch
      git
      home-manager
      kdePackages.kdeconnect-kde
@@ -347,6 +347,15 @@
   };
 
   
+  # # systemd-resolved DNS 服务
+  # services.resolved = {
+  #   enable = true;
+  #   dnssec = "false";
+  # };
+  
+  # # 直接修改 resolv.conf
+  # networking.nameservers = [ "119.29.29.29" "223.5.5.5" ];
+
   # systemd-resolved DNS 服务
   services.resolved = {
     enable = true;
@@ -356,6 +365,9 @@
       DNS=119.29.29.29 223.5.5.5
     '';
   };
+
+  
+
 
   # 安全加固
   security.sudo.wheelNeedsPassword = true;  # wheel 组需要密码

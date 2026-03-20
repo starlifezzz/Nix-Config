@@ -1,19 +1,16 @@
 { config, lib, pkgs, ... }:
 
 {
-  config = lib.mkMerge [
-    {
-      hardware.cpu.model = lib.mkDefault "ryzen-2600";
-      
-      boot.kernelParams = [
-        "amd_pstate=active"
-        "processor.max_cstate=5"
-        "sched_energy_aware=0"
-      ];
-      
-      powerManagement.powertop.enable = lib.mkDefault true;
-      
-      nix.settings.max-jobs = lib.mkDefault 12;
-    }
-  ];
+  config = lib.mkIf (config.hardware.cpu.manualModel == "ryzen-2600") {
+    hardware.cpu.model = "ryzen-2600";
+    
+    boot.kernelParams = [
+      "amd_pstate=active"
+      "processor.max_cstate=5"
+    ];
+    
+    powerManagement.powertop.enable = true;
+    
+    # Deleted: nix.settings.max-jobs = 6;
+  };
 }

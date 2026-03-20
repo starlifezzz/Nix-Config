@@ -9,6 +9,9 @@
   home.homeDirectory = "/home/zhangchongjie";
   home.stateVersion = "25.11";
 
+  # 禁用 Nixpkgs 版本检查（因为我们在用 unstable）
+  home.enableNixpkgsReleaseCheck = false;
+
   # ═══════════════════════════════════════════════════════════
   # 用户软件包
   # ═══════════════════════════════════════════════════════════
