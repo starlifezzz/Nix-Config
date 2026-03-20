@@ -186,6 +186,7 @@
      git
      home-manager
      kdePackages.kdeconnect-kde
+     clash-verge-rev
      flclash
      timeshift
      bleachbit
