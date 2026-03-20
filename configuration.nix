@@ -10,6 +10,7 @@
       ./hardware-configuration.nix
       # ./modules/flatpak-fonts.nix  # flatpak字体配置
       ./modules/amd-gpu.nix  # AMD GPU 配置
+      ./modules/hardware/default.nix
     ];
 
   # 启动配置
