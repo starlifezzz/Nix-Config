@@ -13,7 +13,8 @@
         "amdgpu.ppfeaturemask=0xffffffff"
       ];
       
-      hardware.opengl = {
+      
+    hardware.opengl = {
         enable = lib.mkDefault true;
         driSupport = lib.mkDefault true;
         driSupport32Bit = lib.mkDefault true;
@@ -24,9 +25,7 @@
           vulkan-loader
           vulkan-tools
         ];
-      };
-      
-      hardware.vulkan.enable = lib.mkDefault true;
+    };
       
       environment.systemPackages = with pkgs; [
         radeontop

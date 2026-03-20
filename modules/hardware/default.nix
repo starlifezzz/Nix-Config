@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ./cpu-detect.nix
+    ./cpu/cpu-detect.nix
     ./cpu/ryzen-1600x.nix
     ./cpu/ryzen-2600.nix
     ./gpu/gpu-detect.nix

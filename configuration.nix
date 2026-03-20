@@ -239,9 +239,9 @@
       ];
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "nix-community.cachix.org-1:2G9iXR7hZtbHwvOxgnPp3n8uK6l4VqL/"
-
+        "nix-community.cachix.org-1:2G9iXR7hZtbHwvOxgnPp3n8uK6l4VqL"
       ];
+
       experimental-features = [ "nix-command" "flakes" ];
       # 自动优化存储
       auto-optimise-store = true;
