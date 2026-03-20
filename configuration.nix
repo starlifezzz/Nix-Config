@@ -238,6 +238,8 @@
       ];
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "nix-community.cachix.org-1:2G9iXR7hZtbHwvOxgnPp3n8uK6l4VqL/"
+
       ];
       experimental-features = [ "nix-command" "flakes" ];
       # 自动优化存储
@@ -361,6 +363,14 @@
 
   # 限制核心转储
   systemd.coredump.enable = false;
+
+  # 授予用户对 /etc/nixos 的配置权限
+  system.activationScripts.ownership = ''
+    # 设置 /etc/nixos 目录所有权
+    chown -R zhangchongjie:users /etc/nixos
+    chmod -R u+w /etc/nixos
+  '';
+
 
   # SSD 优化 - 启用定期 TRIM
   services.fstrim.enable = true;
