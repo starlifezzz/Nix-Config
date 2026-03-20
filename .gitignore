@@ -17,4 +17,6 @@ result-*
 # 不能提交的文件
 # secrets/
 flake.lock
-hardware-configuration.nix
+hardware-configuration*.nix
+!hardware-configuration-2600.nix
+
