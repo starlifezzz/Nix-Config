@@ -14,7 +14,7 @@ result-*
 *.tmp
 *.log
 
-# 敏感信息（可选）
+# 不能提交的文件
 # secrets/
 flake.lock
 hardware-configuration.nix
