@@ -64,9 +64,6 @@
       "vm.dirty_expire_centisecs" = 6000;
       # AMDGPU + BTRFS 优化
       "vm.page-cluster" = "0";  # 禁用交换预读（SSD 优化）
-
-      "net.ipv4.ip_forward" = 1;
-      "net.ipv6.conf.all.forwarding" = 1;
     };
   };
 
@@ -101,14 +98,6 @@
     LC_TIME = "zh_CN.UTF-8";
   };
 
-
-  # # 桌面环境配置
-  # services.xserver = {
-  #   enable = true;
-  #   # 键盘布局
-  #   xkb.layout = "cn";
-  #   xkb.variant = "";
-  # };
   
   # Fcitx5 输入法
   i18n.inputMethod = {
@@ -124,7 +113,7 @@
 
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
-  # services.xserver.enable = true;
+  services.xserver.enable = false;
 
   # Enable the KDE Plasma Desktop Environment.
   # services.displayManager.sddm.enable = true;
@@ -155,11 +144,12 @@
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
 
+
   # 用户配置
   users.users.zhangchongjie = {
     isNormalUser = true; # 普通用户
     description = "zhangchongjie";
-    extraGroups = [ "networkmanager" "wheel" "flatpak" "video" "render" "input" "netraw"];
+    extraGroups = [ "networkmanager" "wheel" "flatpak" "video" "render" "input" ];
     # 设置默认 shell 为 fish
     shell = pkgs.fish;
 
@@ -372,29 +362,6 @@
   # 限制核心转储
   systemd.coredump.enable = false;
 
-  
-  # 系统范围的环境变量 - 包含代理设置
-  environment.variables = {
-    HTTP_PROXY = "http://127.0.0.1:7897";
-    HTTPS_PROXY = "http://127.0.0.1:7897";
-    NO_PROXY = "127.0.0.1,localhost,*.local";
-  };
-
-  # FlashClash TUN 模式支持
-  boot.kernelModules = [ "tun" ];
-
-  # 允许 flclash 访问 TUN 设备并创建网络命名空间
-  systemd.services.flclash-tun = {
-    description = "Setup TUN permissions for flclash";
-    before = [ "network.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.coreutils}/bin/chmod 666 /dev/net/tun";
-      RemainAfterExit = true;
-    };
-    wantedBy = [ "multi-user.target" ];
-  };
-
   # SSD 优化 - 启用定期 TRIM
   services.fstrim.enable = true;
 
@@ -409,6 +376,7 @@
   services.displayManager.defaultSession = "plasma";
   services.displayManager.sddm = {
     enable = true;
+    wayland.enable = true;
     theme = "breeze";
     
     # 直接在 sddm.conf 中设置背景

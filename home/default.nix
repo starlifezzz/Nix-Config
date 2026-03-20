@@ -49,6 +49,7 @@
     ./home.nix
     ./kde.nix
     ./font.nix
+   Alacritty  ./Alacritty
   ];
 
 }
