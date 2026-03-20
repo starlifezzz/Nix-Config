@@ -1,31 +1,44 @@
 {
-  description = "NixOS configuration";
-   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    
+  description = "NixOS configuration with modular hardware support";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # 添加额外的 flake 输入（可选）
-    # nur = {
-    #   url = "github:nix-community/NUR";
-    # };
   };
 
- outputs = { nixpkgs, home-manager, ... }: {
+  outputs = { self, nixpkgs, home-manager, ... }: {
     
-    # 主机 1: Ryzen 1600X + R9 370
-    nixosConfigurations.host-1600x-r9370 = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        ./configuration.nix
+        ./hardware-configuration.nix
+
+        home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.zhangchongjie = import ./home/home.nix;
+          
+          home-manager.extraSpecialArgs = { inherit self; };
+        }
+      ];
+    };
+    
+    nixosConfigurations.nixos-1600x-r9370 = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
         ./modules/amd-gpu.nix
+        ./hardware-configuration.nix
+
         
         {
           networking.hostName = "nixos-1600x-r9370";
           
-          # 指定硬件配置
           hardware.cpu = {
             enable = true;
             manualModel = "ryzen-1600x";
@@ -35,20 +48,25 @@
             enable = true;
             manualModel = "r9-370";
           };
+        }
+        
+        home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.zhangchongjie = import ./home/home.nix;
           
-          # 或者使用自动检测
-          # hardware.cpu.autoDetect = true;
-          # hardware.gpu.autoDetect = true;
+          home-manager.extraSpecialArgs = { inherit self; };
         }
       ];
     };
     
-    # 主机 2: Ryzen 2600 + RX 5500XT
-    nixosConfigurations.host-2600-rx5500xt = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.nixos-2600-rx5500xt = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
         ./modules/amd-gpu.nix
+        ./hardware-configuration.nix
         
         {
           networking.hostName = "nixos-2600-rx5500xt";
@@ -63,28 +81,14 @@
             manualModel = "rx-5500xt";
           };
         }
-      ];
-    };
-    
-    # 默认配置（自动检测）
-    nixosConfigurations.default = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        ./configuration.nix
-        ./modules/amd-gpu.nix
         
+        home-manager.nixosModules.home-manager
         {
-          networking.hostName = "nixos";
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.zhangchongjie = import ./home/home.nix;
           
-          hardware.cpu = {
-            enable = true;
-            autoDetect = true;
-          };
-          
-          hardware.gpu = {
-            enable = true;
-            autoDetect = true;
-          };
+          home-manager.extraSpecialArgs = { inherit self; };
         }
       ];
     };

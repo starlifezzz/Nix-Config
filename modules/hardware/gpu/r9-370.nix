@@ -1,43 +1,28 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports = [
-    ./gpu-detect.nix
-  ];
-  
   config = lib.mkMerge [
     {
-      hardware.gpu.model = "r9-370";
+      hardware.gpu.model = lib.mkDefault "r9-370";
       
-      # R9 370 (GCN 3.0) 驱动配置
-      services.xserver.videoDrivers = [ "modesetting" ];
+      services.xserver.videoDrivers = lib.mkDefault [ "modesetting" ];
       
       boot.kernelParams = [
         "amdgpu.runpm=0"
         "pcie_aspm=off"
       ];
       
-      # GCN 3.0 硬件加速
       hardware.opengl = {
-        enable = true;
-        driSupport = true;
-        driSupport32Bit = true;
+        enable = lib.mkDefault true;
+        driSupport = lib.mkDefault true;
+        driSupport32Bit = lib.mkDefault true;
         
         extraPackages = with pkgs; [
-          rocmPackages.clr
           libva
           libvdpau
         ];
       };
       
-      # VDPAU 支持（R9 370 更适合 VDPAU）
-      nixpkgs.config.packageOverrides = pkgs: {
-        vaapiDriver = pkgs.vaapiDriver.override {
-          drivers = [ "r600" ];
-        };
-      };
-      
-      # 监控工具
       environment.systemPackages = with pkgs; [
         radeontop
       ];
