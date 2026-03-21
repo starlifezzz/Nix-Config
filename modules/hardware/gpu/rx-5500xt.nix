@@ -38,7 +38,7 @@
     boot.kernelParams = [
       # GPU 电源管理
       "amdgpu.runpm=1"  # 运行时电源管理
-      # "pcie_aspm=performance"  # PCIe 性能模式
+      "pcie_aspm=performance"  # PCIe 性能模式
       
       # AMDGPU 特性启用
       "amdgpu.ppfeaturemask=0xffffffff"  # 启用所有电源管理特性

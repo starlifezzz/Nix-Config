@@ -25,7 +25,7 @@
       "init_on_alloc=1"  # 安全优化
       
       # Ryzen 专属优化
-      # "pcie_aspm=performance"  # PCIe ASPM 性能模式
+      "pcie_aspm=performance"  # PCIe ASPM 性能模式
       
       # 内存和缓存优化
       "transparent_hugepage=madvise"  # 透明大页优化

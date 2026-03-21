@@ -8,7 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration-2600.nix
-      # ./modules/flatpak-fonts.nix  # flatpak字体配置
+      ./modules/flatpak-fonts.nix  # flatpak字体配置
       ./modules/amd-gpu.nix  # AMD GPU 配置
       ./modules/hardware/default.nix
     ];
@@ -175,7 +175,7 @@
      zellij
      fish
      vim
-     neofetch
+     fastfetch
      git
      home-manager
      kdePackages.kdeconnect-kde
@@ -271,11 +271,12 @@
   services.flatpak = {
     enable = true;
   };
-  # # Flatpak 字体配置
-  # services.flatpak-fonts = {
-  #   enable = true;
-  #   userName = "zhangchongjie";
-  # };
+
+  # Flatpak 字体配置
+  services.flatpak-fonts = {
+    enable = true;
+    userName = "zhangchongjie";
+  };
 
 
   # 配置XDG Portal - 这是关键
@@ -348,16 +349,6 @@
     NO_PROXY = "127.0.0.1,localhost,*.local";
   };
 
-  
-  # # systemd-resolved DNS 服务
-  # services.resolved = {
-  #   enable = true;
-  #   dnssec = "false";
-  # };
-  
-  # # 直接修改 resolv.conf
-  # networking.nameservers = [ "119.29.29.29" "223.5.5.5" ];
-
   # systemd-resolved DNS 服务
   services.resolved = {
     enable = true;
@@ -367,9 +358,6 @@
       DNS=119.29.29.29 223.5.5.5
     '';
   };
-
-  
-
 
   # 安全加固
   security.sudo.wheelNeedsPassword = true;  # wheel 组需要密码

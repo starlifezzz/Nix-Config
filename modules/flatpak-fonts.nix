@@ -4,7 +4,6 @@ with lib;
 
 let
   cfg = config.services.flatpak-fonts;
-  # 从系统用户配置获取用户名，或允许手动指定
   targetUser = if cfg.userName != "" then cfg.userName else "zhangchongjie";
 in
 {
@@ -19,10 +18,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    # 1. 不再重复定义字体包，由 fonts.nix 统一管理
-    # fonts.packages 已在 fonts.nix 中定义
-
-    # 2. 保留同步脚本供手动执行
     environment.systemPackages = [
       (pkgs.writeShellScriptBin "sync-flatpak-fonts" ''
         #!/usr/bin/env bash
@@ -36,27 +31,25 @@ in
           exit 1
         fi
 
-        echo "🔤 为用户 ${targetUser} 设置 Flatpak 字体..."
+        echo "🔤 为用户 ${targetUser} 设置 Flatpak字体..."
         mkdir -p "$USER_FONT_DIR"
 
-        # 使用临时文件统计，避免子 shell 问题
         TEMP_COUNT=$(mktemp)
         echo "0 0" > "$TEMP_COUNT"
 
-        copy_font() {
+        link_font() {
           local font_path="$1"
           local font_name="$(basename "$font_path")"
           local dest_path="$USER_FONT_DIR/$font_name"
 
-          if [ -f "$USER_FONT_DIR/$font_name" ]; then
-            echo "    ⏭️  跳过：$font_name"
+          if [ -L "$dest_path" ] || [ -f "$dest_path" ]; then
+            echo "    ⏭️  已存在：$font_name"
             return 0
           fi
 
           if [ -f "$font_path" ] && [ -s "$font_path" ]; then
-            if cp -f "$font_path" "$dest_path" 2>/dev/null; then
-              echo "    ✓ 复制：$font_name"
-              # 更新计数
+            if ln -sf "$font_path" "$dest_path" 2>/dev/null; then
+              echo "    ✓ 链接：$font_name"
               read new exist < "$TEMP_COUNT"
               echo "$((new + 1)) $exist" > "$TEMP_COUNT"
               return 0
@@ -65,39 +58,40 @@ in
           return 0
         }
 
-        # 从系统字体目录查找
-        SYSTEM_FONT_DIRS="/nix/var/nix/profiles/system/sw/share/fonts"
+        FONT_SOURCES="/run/current-system/sw/share/fonts /nix/var/nix/profiles/system/sw/share/fonts"
 
-        for SOURCE_DIR in $SYSTEM_FONT_DIRS; do
+        for SOURCE_DIR in $FONT_SOURCES; do
           if [ -d "$SOURCE_DIR" ]; then
             echo "  从 $SOURCE_DIR 搜索字体..."
-            # ✅ 使用进程替换避免子 shell
             while read -r FONT; do
-              copy_font "$FONT"
+              link_font "$FONT"
             done < <(find "$SOURCE_DIR" -type f \( -name "*.ttf" -o -name "*.ttc" -o -name "*.otf" \) 2>/dev/null)
           fi
         done
 
-        # 读取最终计数
         read NEW_COUNT EXIST_COUNT < "$TEMP_COUNT"
         rm -f "$TEMP_COUNT"
 
         if [ "$NEW_COUNT" -gt 0 ]; then
           echo "  更新字体缓存..."
           sudo -u ${targetUser} fc-cache -f "$USER_FONT_DIR" 2>/dev/null || true
-          echo "✅ 复制了 $NEW_COUNT 个新字体"
+          echo "✅ 创建了 $NEW_COUNT 个新字体链接"
         else
-          echo "✅ 所有字体已存在，无需复制"
+          echo "✅ 所有字体已存在，无需操作"
         fi
 
         echo "字体目录：$USER_FONT_DIR"
+        
+        echo "🔓 设置 Flatpak 权限..."
+        sudo -u ${targetUser} flatpak override --user --filesystem=~/.local/share/fonts:ro 2>&1 || echo "警告：flatpak override 失败"
+        sudo -u ${targetUser} flatpak override --user --filesystem=xdg-data/fonts:create 2>&1 || echo "警告：flatpak override 失败"
+        echo "✅ Flatpak 权限设置完成"
       '')
     ];
 
-    # 3. 启用系统激活脚本，每次 rebuild 自动同步
     system.activationScripts.setupFlatpakFonts = {
       text = ''
-        echo "🔄 设置 Flatpak 字体..."
+        echo "🔄 设置 Flatpak字体..."
 
         USER_HOME="/home/${targetUser}"
         USER_FONT_DIR="$USER_HOME/.local/share/fonts"
@@ -105,27 +99,31 @@ in
         if [ -d "$USER_HOME" ]; then
           mkdir -p "$USER_FONT_DIR"
 
-          # 从系统字体目录复制
-          for SOURCE_DIR in /nix/var/nix/profiles/system/sw/share/fonts; do
+          FONT_SOURCES="/run/current-system/sw/share/fonts /nix/var/nix/profiles/system/sw/share/fonts"
+
+          for SOURCE_DIR in $FONT_SOURCES; do
             if [ -d "$SOURCE_DIR" ]; then
               find "$SOURCE_DIR" -type f \( -name "*.ttf" -o -name "*.ttc" -o -name "*.otf" \) 2>/dev/null | \
                 while read FONT; do
                   FONT_NAME=$(basename "$FONT")
-                  if [ ! -f "$USER_FONT_DIR/$FONT_NAME" ]; then
-                    cp -f "$FONT" "$USER_FONT_DIR/$FONT_NAME" 2>/dev/null || true
+                  DEST_PATH="$USER_FONT_DIR/$FONT_NAME"
+                  if [ ! -L "$DEST_PATH" ] && [ ! -f "$DEST_PATH" ]; then
+                    ln -sf "$FONT" "$DEST_PATH" 2>/dev/null || true
                   fi
                 done
             fi
           done
 
-          # 设置权限
           chown -R ${targetUser}:users "$USER_FONT_DIR" 2>/dev/null || true
-          chmod 755 "$USER_FONT_DIR"
+          chmod -R 755 "$USER_FONT_DIR"
 
-          # 更新字体缓存
           sudo -u ${targetUser} fc-cache -f "$USER_FONT_DIR" 2>/dev/null || true
 
-          echo "✅ Flatpak 字体设置完成"
+          echo "⚠️  尝试设置 Flatpak 权限..."
+          sudo -u ${targetUser} flatpak override --user --filesystem=~/.local/share/fonts:ro 2>&1 || true
+          sudo -u ${targetUser} flatpak override --user --filesystem=xdg-data/fonts:create 2>&1 || true
+          
+          echo "✅ Flatpak字体设置完成"
         else
           echo "  警告：用户 ${targetUser} 的主目录不存在，跳过"
         fi
