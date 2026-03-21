@@ -366,8 +366,6 @@
     };
     fontsPkgs = config.fonts.packages ++ (with pkgs; [
         # Add your cursor themes and icon packages here
-         lxgw-wenkai-screen
-         lxgw-wenkai
         # etc.
       ]);
     x11Fonts = pkgs.runCommand "X11-fonts"
@@ -408,12 +406,6 @@
 
   fonts.packages = with pkgs; [
     noto-fonts
-    lxgw-wenkai-screen
-    lxgw-wenkai
-    source-han-sans
-    source-han-serif
-    jetbrains-mono
-    fira-code
   ];
 
   

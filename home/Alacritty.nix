@@ -94,12 +94,12 @@
 
         offset = {
           x = 0;
-          y = 1;
+          y = 0;
         };
 
         glyph_offset = {
           x = 0;
-          y = 1;
+          y = 0;
         };
       };
 
