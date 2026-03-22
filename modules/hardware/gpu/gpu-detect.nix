@@ -3,7 +3,7 @@
 {
   options.hardware.gpu = {
     manualModel = lib.mkOption {
-      type = lib.types.nullOr (lib.types.enum [ "r9-370" "rx-5500" ]);
+      type = lib.types.nullOr (lib.types.enum [ "r9-370" "rx-5500" "rx-5500xt" "rx-5700" "rx-5700-xt" "unknown-gpu" ]);
       default = null;
     };
     
