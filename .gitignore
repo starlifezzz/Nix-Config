@@ -18,4 +18,5 @@ result-*
 # secrets/
 flake.lock
 hardware-configuration*.nix
+!hardware-configuration-2600.nix
 

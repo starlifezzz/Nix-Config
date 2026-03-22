@@ -13,7 +13,8 @@
       # ./hardware-configuration.nix
     ] 
       #  ++ lib.optional (builtins.pathExists ./hardware-auto.nix) ./hardware-auto.nix
-      ++ lib.optional (builtins.pathExists ./hardware-configuration-2600.nix) ./hardware-configuration-2600.nix;
+      ++ lib.optional (builtins.pathExists ./hardware-configuration-2600.nix) ./hardware-configuration-2600.nix   #每次新系统都要把原hardware-configuration.nix重命名
+      ;
 
   # 启动配置
   boot = {

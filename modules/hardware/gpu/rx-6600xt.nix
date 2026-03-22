@@ -24,7 +24,7 @@
         rocmPackages.clr.icd
         libva-vdpau-driver
         libvdpau-va-gl
-        mesa.drivers
+        mesa
       ];
     };
     

@@ -37,7 +37,7 @@
         # 视频编解码加速
         libva-vdpau-driver
         libvdpau-va-gl
-        mesa.drivers
+        mesa
       ];
     };
     

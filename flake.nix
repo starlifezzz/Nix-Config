@@ -12,6 +12,9 @@
 
   outputs = { self, nixpkgs, home-manager, nixos-hardware, ... }:
     let
+      # 预定义模块路径（避免在函数内重复计算）
+      detectionModule = ./modules/hardware/detection.nix;
+      
       # 定义所有支持的硬件组合
       hardwareConfigs = {
         # 默认配置（当前设备）
@@ -38,10 +41,10 @@
             nixos-hardware.nixosModules.common-cpu-amd
             nixos-hardware.nixosModules.common-pc-ssd
             
-            # 基础硬件检测模块（提供选项定义）
-            ./modules/hardware/detection.nix
+            # 基础硬件检测模块
+            detectionModule
             
-            # 动态导入硬件特定配置并设置 manualModel
+            # 动态导入硬件特定配置
             ({ config, lib, pkgs, ... }: {
               imports = 
                 lib.optional (builtins.pathExists ./modules/hardware/cpu/${hw.cpu}.nix)
@@ -51,7 +54,6 @@
               
               networking.hostName = lib.mkDefault hw.hostName;
               
-              # 关键：设置 hardware.manualModel
               hardware.cpu.manualModel = hw.cpu;
               hardware.gpu.manualModel = hw.gpu;
             })
