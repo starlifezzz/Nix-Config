@@ -14,71 +14,86 @@
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       
-      specialArgs = {
-        inherit self;
-      };
+      specialArgs = { inherit self; };
       
       modules = [
         ./configuration.nix
+        ./modules/amd-gpu.nix
+        ./modules/hardware/default.nix
         
         # ═══════════════════════════════════════════════════════════
-        # 自动硬件检测与模块加载
+        # 硬件检测与模块加载
         # ═══════════════════════════════════════════════════════════
         ({ config, lib, pkgs, ... }: 
           let
-            # 运行检测脚本获取硬件信息
-            detectHardwareScript = pkgs.writeShellScriptBin "detect-hardware" ''
-              ${./scripts/detect-hardware.sh} json
+            # 在激活时检测硬件并生成配置文件
+            detectAndGenerate = ''
+              echo ">>> ═══════════════════════════════════════════════════════════"
+              echo ">>> Running hardware detection..."
+              
+              # CPU 检测
+              if grep -q "AMD Ryzen 5 1600X" /proc/cpuinfo 2>/dev/null; then
+                CPU_MODEL="ryzen-1600x"
+                echo ">>> ✓ Detected: AMD Ryzen 5 1600X"
+              elif grep -q "AMD Ryzen 5 2600" /proc/cpuinfo 2>/dev/null; then
+                CPU_MODEL="ryzen-2600"
+                echo ">>> ✓ Detected: AMD Ryzen 5 2600"
+              elif grep -q "AMD Ryzen 5 3600" /proc/cpuinfo 2>/dev/null; then
+                CPU_MODEL="ryzen-3600"
+                echo ">>> ✓ Detected: AMD Ryzen 5 3600"
+              else
+                CPU_MODEL="unknown-cpu"
+                echo ">>> ⚠ Unknown CPU detected"
+              fi
+              
+              # GPU 检测 - 只保留 RX 5500 (7340)
+              if lspci -nn 2>/dev/null | grep -E '\[1002:7340\]' >/dev/null 2>&1; then
+                GPU_MODEL="rx-5500"
+                echo ">>> ✓ Detected: AMD Radeon RX 5500 [1002:7340]"
+              elif lspci -nn 2>/dev/null | grep -E '\[1002:66af\]' >/dev/null 2>&1; then
+                GPU_MODEL="r9-370"
+                echo ">>> ✓ Detected: AMD Radeon R9 370 [1002:66af]"
+              else
+                GPU_MODEL="unknown-gpu"
+                echo ">>> ⚠ Unknown GPU detected"
+              fi
+              
+              echo ">>> Detected: CPU=$CPU_MODEL, GPU=$GPU_MODEL"
+              
+              # 生成硬件配置文件（如果不存在）
+              if [ ! -f /etc/nixos/hardware-auto.nix ]; then
+                cat > /etc/nixos/hardware-auto.nix << EOF
+# Auto-generated hardware configuration
+# Generated at: $(date)
+# DO NOT EDIT MANUALLY
+
+{ config, lib, pkgs, ... }:
+
+{
+  hardware.cpu.manualModel = lib.mkDefault "$CPU_MODEL";
+  hardware.gpu.manualModel = lib.mkDefault "$GPU_MODEL";
+  
+  networking.hostName = lib.mkDefault ("nixos-" + "$CPU_MODEL" + "-" + "$GPU_MODEL");
+}
+EOF
+                echo ">>> Generated /etc/nixos/hardware-auto.nix"
+              else
+                echo ">>> /etc/nixos/hardware-auto.nix already exists, skipping generation"
+              fi
+              
+              echo ">>> ═══════════════════════════════════════════════════════════"
             '';
             
-            # 执行检测并解析结果
-            hardwareInfo = builtins.fromJSON (
-              builtins.readFile (
-                pkgs.runCommand "hardware-detection" {} ''
-                  ${detectHardwareScript}/bin/detect-hardware > $out
-                ''
-              )
-            );
-            
-            cpuModel = hardwareInfo.cpu or "unknown";
-            gpuModel = hardwareInfo.gpu or "unknown";
-            
-            # 动态生成模块导入列表
-            cpuModulePath = ./modules/hardware/cpu/${cpuModel}.nix;
-            gpuModulePath = ./modules/hardware/gpu/${gpuModel}.nix;
-            
-            # 检查模块文件是否存在
-            hasCpuModule = builtins.pathExists cpuModulePath;
-            hasGpuModule = builtins.pathExists gpuModulePath;
-            
-            # 构建模块列表
-            hardwareModules = []
-              ++ lib.optionals hasCpuModule [ cpuModulePath ]
-              ++ lib.optionals hasGpuModule [ gpuModulePath ];
-            
           in {
-            # 在系统激活时显示检测信息
-            system.activationScripts.preActivation.text = lib.mkBefore ''
-              echo ">>> ═══════════════════════════════════════════════════════════"
-              echo ">>> Hardware Detection Results:"
-              echo ">>>   CPU Model: $cpuModel ${if hasCpuModule then "(module found)" else "(no specific module)"}"
-              echo ">>>   GPU Model: $gpuModel ${if hasGpuModule then "(module found)" else "(no specific module)"}"
-              echo ">>> Hostname: ${config.networking.hostName}"
-              echo ">>> ═══════════════════════════════════════════════════════════"
-              
-              # 保存检测结果到配置文件
-              cat > /etc/nixos/.hardware-detected.json << EOF
-            ${builtins.toJSON hardwareInfo}
-            EOF
-                        '';
-                        
-                        # 动态导入硬件模块
-                        imports = hardwareModules;
-                        
-                        # 设置主机名（基于检测到的硬件）
-                        networking.hostName = lib.mkDefault "nixos-${cpuModel}-${gpuModel}";
-                      }
-            )
+            # 在首次激活时检测硬件并生成配置文件
+            system.activationScripts.preActivation.text = lib.mkBefore detectAndGenerate;
+            
+            # 导入自动生成的硬件配置（如果存在）
+            imports = lib.optionals (builtins.pathExists ./hardware-auto.nix) [
+              ./hardware-auto.nix
+            ];
+          }
+        )
         
         # Home Manager 配置
         home-manager.nixosModules.home-manager

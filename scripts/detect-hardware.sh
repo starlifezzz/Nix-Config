@@ -1,208 +1,182 @@
 #!/usr/bin/env bash
-# /etc/nixos/scripts/manage-hardware.sh
+# /etc/nixos/scripts/detect-hardware.sh
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DETECT_SCRIPT="$SCRIPT_DIR/detect-hardware.sh"
+echo "=== NixOS Hardware Detection ===" >&2
 
-# ═══════════════════════════════════════════════════════════
-# 颜色定义
-# ═══════════════════════════════════════════════════════════
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# ═══════════════════════════════════════════════════════════
-# 函数定义
-# ═══════════════════════════════════════════════════════════
-print_header() {
-    echo -e "${BLUE}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║${NC} $1"
-    echo -e "${BLUE}╚══════════════════════════════════════════════════════════╝${NC}"
+# CPU 检测
+detect_cpu() {
+    if grep -q "AMD Ryzen 5 1600X" /proc/cpuinfo 2>/dev/null; then
+        echo "ryzen-1600x"
+        echo "✓ Detected: AMD Ryzen 5 1600X" >&2
+    elif grep -q "AMD Ryzen 5 2600" /proc/cpuinfo 2>/dev/null; then
+        echo "ryzen-2600"
+        echo "✓ Detected: AMD Ryzen 5 2600" >&2
+    elif grep -q "AMD Ryzen 5 3600" /proc/cpuinfo 2>/dev/null; then
+        echo "ryzen-3600"
+        echo "✓ Detected: AMD Ryzen 5 3600" >&2
+    else
+        echo "unknown-cpu"
+        echo "⚠ Unknown CPU detected" >&2
+    fi
 }
 
-print_success() {
-    echo -e "${GREEN}✓${NC} $1"
-}
+#!/bin/bash
+# GPU 硬件识别码检测脚本
 
-print_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}✗${NC} $1"
-}
-
-show_hardware_info() {
-    print_header "Hardware Detection"
-    
-    if [ ! -x "$DETECT_SCRIPT" ]; then
-        print_error "Detection script not found or not executable"
+detect_gpu() {
+    # 检查 lspci 是否可用
+    if ! command -v lspci &>/dev/null; then
+        echo "unknown-gpu"
+        echo "⚠ lspci not available" >&2
         return 1
     fi
-    
-    "$DETECT_SCRIPT" json | jq .
-}
 
-check_modules() {
-    print_header "Checking Module Availability"
-    
-    local cpu_model=$("$DETECT_SCRIPT" cpu)
-    local gpu_model=$("$DETECT_SCRIPT" gpu)
-    
-    print_success "Detected CPU: $cpu_model"
-    print_success "Detected GPU: $gpu_model"
-    
-    echo ""
-    echo "CPU Module:"
-    if [ -f "/etc/nixos/modules/hardware/cpu/${cpu_model}.nix" ]; then
-        print_success "  ✓ Module exists: /etc/nixos/modules/hardware/cpu/${cpu_model}.nix"
-    else
-        print_warning "  ✗ Module not found: /etc/nixos/modules/hardware/cpu/${cpu_model}.nix"
-    fi
-    
-    echo ""
-    echo "GPU Module:"
-    if [ -f "/etc/nixos/modules/hardware/gpu/${gpu_model}.nix" ]; then
-        print_success "  ✓ Module exists: /etc/nixos/modules/hardware/gpu/${gpu_model}.nix"
-    else
-        print_warning "  ✗ Module not found: /etc/nixos/modules/hardware/gpu/${gpu_model}.nix"
-    fi
-}
+    # 获取 AMD GPU 的硬件识别码 (Vendor ID:Device ID)
+    # 1002 = AMD Vendor ID
+    local gpu_id
+    gpu_id=$(lspci -nn 2>/dev/null | awk '/\[1002:[0-9a-fA-F]+\]/ && /VGA|Display/ {
+        match($0, /\[1002:([0-9a-fA-F]+)\]/, arr)
+        if (arr[1] != "") {
+            print arr[1]
+            exit
+        }
+    }')
 
-rebuild_system() {
-    print_header "Rebuilding System with Auto-Detected Hardware"
-    
-    echo "Running hardware detection..."
-    show_hardware_info
-    
-    echo ""
-    echo "Building system configuration..."
-    sudo nixos-rebuild switch --flake /etc/nixos#nixos --show-trace
-    
-    if [ $? -eq 0 ]; then
-        print_success "System rebuilt successfully!"
-    else
-        print_error "System rebuild failed!"
+    # 如果上面的方法不行，用 grep 提取
+    if [[ -z "$gpu_id" ]]; then
+        gpu_id=$(lspci -nn 2>/dev/null | grep -oP '\[1002:\K[0-9a-fA-F]+' | head -1)
+    fi
+
+    if [[ -z "$gpu_id" ]]; then
+        echo "unknown-gpu"
+        echo "⚠ No AMD GPU detected" >&2
         return 1
     fi
-}
 
-test_build() {
-    print_header "Testing Build (Dry Run)"
-    
-    echo "This will check if the configuration builds without applying it."
-    echo ""
-    
-    sudo nixos-rebuild build --flake /etc/nixos#nixos --show-trace
-    
-    if [ $? -eq 0 ]; then
-        print_success "Build test passed!"
-    else
-        print_error "Build test failed!"
-        return 1
-    fi
-}
+    # 转换为小写便于比较
+    gpu_id=$(echo "$gpu_id" | tr '[:upper:]' '[:lower:]')
 
-show_status() {
-    print_header "Current Status"
-    
-    echo "Hostname: $(hostname)"
-    echo ""
-    
-    if [ -f /etc/nixos/.hardware-detected.json ]; then
-        echo "Last detected hardware:"
-        cat /etc/nixos/.hardware-detected.json | jq .
-    else
-        echo "No previous detection found."
-    fi
-    
-    echo ""
-    echo "Available CPU modules:"
-    ls -1 /etc/nixos/modules/hardware/cpu/*.nix 2>/dev/null | sed 's|.*/||' || echo "  (none)"
-    
-    echo ""
-    echo "Available GPU modules:"
-    ls -1 /etc/nixos/modules/hardware/gpu/*.nix 2>/dev/null | sed 's|.*/||' || echo "  (none)"
-}
-
-clean_cache() {
-    print_header "Cleaning Cache"
-    
-    sudo rm -f /etc/nixos/.hardware-detected.json
-    sudo nix-collect-garbage -d
-    
-    print_success "Cache cleaned!"
-}
-
-show_help() {
-    cat <<HELP
-${BLUE}NixOS Hardware Management Tool${NC}
-
-${GREEN}Usage:${NC} $0 <command>
-
-${GREEN}Commands:${NC}
-  detect      Show detected hardware information
-  check       Check if corresponding modules exist
-  rebuild     Rebuild system with auto-detected hardware
-  test        Test build without applying changes
-  status      Show current status and available modules
-  clean       Clean cache and detected hardware info
-  help        Show this help message
-
-${GREEN}Examples:${NC}
-  $0 detect   # Show what hardware is detected
-  $0 check    # Verify modules exist for detected hardware
-  $0 rebuild  # Apply configuration and rebuild system
-  $0 test     # Test if build succeeds without applying
-
-${GREEN}Workflow:${NC}
-  1. Run '$0 detect' to see detected hardware
-  2. Run '$0 check' to verify modules exist
-  3. Run '$0 test' to test build
-  4. Run '$0 rebuild' to apply changes
-
-HELP
-}
-
-# ═══════════════════════════════════════════════════════════
-# 主程序
-# ═══════════════════════════════════════════════════════════
-main() {
-    local cmd="${1:-help}"
-    
-    case "$cmd" in
-        detect|info)
-            show_hardware_info
+    # 根据 Device ID 映射到具体型号
+    case "$gpu_id" in
+        # RDNA 4 (RX 9000 系列)
+        "7600"|"7601"|"7602"|"7603"|"7604")
+            echo "rx-9070-xt"
+            echo "✓ Detected: AMD Radeon RX 9070 XT [1002:$gpu_id]" >&2
             ;;
-        check|verify)
-            check_modules
+        "7605"|"7606"|"7607")
+            echo "rx-9070"
+            echo "✓ Detected: AMD Radeon RX 9070 [1002:$gpu_id]" >&2
             ;;
-        rebuild|apply)
-            rebuild_system
+        "7608"|"7609")
+            echo "rx-9060-xt"
+            echo "✓ Detected: AMD Radeon RX 9060 XT [1002:$gpu_id]" >&2
             ;;
-        test|dry-run)
-            test_build
+
+        # RDNA 3 (RX 7000 系列)
+        "7300"|"7301"|"7302"|"7303"|"7304")
+            echo "rx-7900-xtx"
+            echo "✓ Detected: AMD Radeon RX 7900 XTX [1002:$gpu_id]" >&2
             ;;
-        status)
-            show_status
+        "7305"|"7306"|"7307")
+            echo "rx-7900-xt"
+            echo "✓ Detected: AMD Radeon RX 7900 XT [1002:$gpu_id]" >&2
             ;;
-        clean)
-            clean_cache
+        "7308"|"7309"|"730a"|"730b")
+            echo "rx-7800-xt"
+            echo "✓ Detected: AMD Radeon RX 7800 XT [1002:$gpu_id]" >&2
             ;;
-        help|--help|-h)
-            show_help
+        "730c"|"730d"|"730e")
+            echo "rx-7700-xt"
+            echo "✓ Detected: AMD Radeon RX 7700 XT [1002:$gpu_id]" >&2
             ;;
+        "730f"|"7310"|"7311")
+            echo "rx-7600"
+            echo "✓ Detected: AMD Radeon RX 7600 [1002:$gpu_id]" >&2
+            ;;
+
+       # RDNA 2 (RX 6000 系列)
+        "731f")
+            echo "rx-5500xt"
+            echo "✓ Detected: AMD Radeon RX 5500 XT [1002:$gpu_id]" >&2
+            ;;
+        "732d"|"732e"|"732f")
+            echo "rx-6600xt"
+            echo "✓ Detected: AMD Radeon RX 6600 XT [1002:$gpu_id]" >&2
+            ;;
+        "7330"|"7331")
+            echo "rx-6600"
+            echo "✓ Detected: AMD Radeon RX 6600 [1002:$gpu_id]" >&2
+            ;;
+            
+        # RDNA 1 (RX 5000 系列) - Navi 14
+        "7340"|"7341")
+            echo "rx-5500"
+            echo "✓ Detected: AMD Radeon RX 5500 [1002:$gpu_id]" >&2
+            ;;
+        "7342"|"7343")
+            echo "rx-5700"
+            echo "✓ Detected: AMD Radeon RX 5700 [1002:$gpu_id]" >&2
+            ;;
+        "7344"|"7345")
+            echo "rx-5600"
+            echo "✓ Detected: AMD Radeon RX 5600 [1002:$gpu_id]" >&2
+            ;;
+        "7346"|"7347")
+            echo "rx-5600-xt"
+            echo "✓ Detected: AMD Radeon RX 5600 XT [1002:$gpu_id]" >&2
+            ;;
+        "7348"|"7349")
+            echo "rx-5700-xt"
+            echo "✓ Detected: AMD Radeon RX 5700 XT [1002:$gpu_id]" >&2
+            ;;
+        
+        # Polaris (RX 400/500 系列)
+        "66af"|"66b0"|"66b1")
+            echo "r9-370"
+            echo "✓ Detected: AMD Radeon R9 370 [1002:$gpu_id]" >&2
+            ;;
+        "67df"|"67ef")
+            echo "rx-470"
+            echo "✓ Detected: AMD Radeon RX 470 [1002:$gpu_id]" >&2
+            ;;
+        "67e0"|"67e1")
+            echo "rx-480"
+            echo "✓ Detected: AMD Radeon RX 480 [1002:$gpu_id]" >&2
+            ;;
+        "67ff"|"67ef")
+            echo "rx-570"
+            echo "✓ Detected: AMD Radeon RX 570 [1002:$gpu_id]" >&2
+            ;;
+        "67df"|"67ef")
+            echo "rx-580"
+            echo "✓ Detected: AMD Radeon RX 580 [1002:$gpu_id]" >&2
+            ;;
+           # 未识别
         *)
-            print_error "Unknown command: $cmd"
-            echo ""
-            show_help
-            exit 1
+            echo "unknown-gpu"
+            echo "⚠ Unknown AMD GPU Device ID: 1002:$gpu_id" >&2
             ;;
     esac
 }
 
-main "$@"
+
+# 主程序
+CPU_MODEL=$(detect_cpu)
+GPU_MODEL=$(detect_gpu)
+
+echo "" >&2
+echo "═══════════════════════════════════════════════════════" >&2
+echo "Detection Results:" >&2
+echo "  CPU: $CPU_MODEL" >&2
+echo "  GPU: $GPU_MODEL" >&2
+echo "═══════════════════════════════════════════════════════" >&2
+
+# 输出为 Nix 可读的格式
+cat <<EOF
+{
+  cpuModel = "$CPU_MODEL";
+  gpuModel = "$GPU_MODEL";
+}
+EOF
