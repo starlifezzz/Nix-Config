@@ -8,9 +8,11 @@
   imports =
     [
       # 基础硬件检测模块（提供 hardware.cpu.manualModel 等选项）
-      ./modules/hardware/detection.nix
+      # ./modules/hardware/detection.nix
+      # # 硬件配置文件（包含文件系统和 BTRFS 配置）
+      ./hardware-configuration.nix
     ] ++ lib.optional (builtins.pathExists ./hardware-auto.nix) ./hardware-auto.nix
-      ++ lib.optional (builtins.pathExists ./hardware-configuration.nix) ./hardware-configuration.nix;
+      ++ lib.optional (builtins.pathExists ./hardware-configuration-2600.nix) ./hardware-configuration-2600.nix;
 
   # 启动配置
   boot = {

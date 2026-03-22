@@ -17,7 +17,6 @@ in
       
       model = lib.mkOption {
         type = lib.types.str;
-        default = "unknown";
         description = "当前系统的 CPU 型号";
       };
     };
@@ -31,22 +30,21 @@ in
       
       model = lib.mkOption {
         type = lib.types.str;
-        default = "unknown";
         description = "当前系统的 GPU 型号";
       };
     };
   };
   
   config = {
-    # 如果手动指定了型号则使用，否则保持默认值
+    # 如果手动指定了型号则使用，否则设置为未知
     hardware.cpu.model = 
       if config.hardware.cpu.manualModel != null 
       then config.hardware.cpu.manualModel 
-      else config.hardware.cpu.model;
+      else "unknown";
     
     hardware.gpu.model = 
       if config.hardware.gpu.manualModel != null 
       then config.hardware.gpu.manualModel 
-      else config.hardware.gpu.model;
+      else "unknown";
   };
 }

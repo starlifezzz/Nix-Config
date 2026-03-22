@@ -38,8 +38,7 @@
             nixos-hardware.nixosModules.common-cpu-amd
             nixos-hardware.nixosModules.common-pc-ssd
             
-            ./modules/hardware/detection.nix
-            
+            # 动态导入硬件特定配置
             ({ config, lib, pkgs, ... }: {
               imports = 
                 lib.optional (builtins.pathExists ./modules/hardware/cpu/${hw.cpu}.nix)
@@ -48,9 +47,6 @@
                   ./modules/hardware/gpu/${hw.gpu}.nix;
               
               networking.hostName = lib.mkDefault hw.hostName;
-              
-              hardware.cpu.manualModel = hw.cpu;
-              hardware.gpu.manualModel = hw.gpu;
             })
             
             home-manager.nixosModules.home-manager
