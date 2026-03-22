@@ -1,5 +1,5 @@
 {
-  description = "NixOS configuration with modular hardware support";
+  description = "NixOS configuration with automatic hardware-specific module loading";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
@@ -13,64 +13,74 @@
     
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
+      
+      specialArgs = {
+        inherit self;
+      };
+      
       modules = [
         ./configuration.nix
         
-        # 自动根据当前系统的主机名选择硬件
-        ({ config, lib, pkgs, ... }: {
-          networking.hostName = lib.mkDefault "nixos";
-          
-          # 如果主机名是 "nixos"，使用 ryzen-2600 + rx-5500xt
-          hardware.cpu.manualModel = lib.mkDefault "ryzen-2600";
-          hardware.gpu.manualModel = lib.mkDefault "rx-5500xt";
-        })
+        # ═══════════════════════════════════════════════════════════
+        # 自动硬件检测与模块加载
+        # ═══════════════════════════════════════════════════════════
+        ({ config, lib, pkgs, ... }: 
+          let
+            # 运行检测脚本获取硬件信息
+            detectHardwareScript = pkgs.writeShellScriptBin "detect-hardware" ''
+              ${./scripts/detect-hardware.sh} json
+            '';
+            
+            # 执行检测并解析结果
+            hardwareInfo = builtins.fromJSON (
+              builtins.readFile (
+                pkgs.runCommand "hardware-detection" {} ''
+                  ${detectHardwareScript}/bin/detect-hardware > $out
+                ''
+              )
+            );
+            
+            cpuModel = hardwareInfo.cpu or "unknown";
+            gpuModel = hardwareInfo.gpu or "unknown";
+            
+            # 动态生成模块导入列表
+            cpuModulePath = ./modules/hardware/cpu/${cpuModel}.nix;
+            gpuModulePath = ./modules/hardware/gpu/${gpuModel}.nix;
+            
+            # 检查模块文件是否存在
+            hasCpuModule = builtins.pathExists cpuModulePath;
+            hasGpuModule = builtins.pathExists gpuModulePath;
+            
+            # 构建模块列表
+            hardwareModules = []
+              ++ lib.optionals hasCpuModule [ cpuModulePath ]
+              ++ lib.optionals hasGpuModule [ gpuModulePath ];
+            
+          in {
+            # 在系统激活时显示检测信息
+            system.activationScripts.preActivation.text = lib.mkBefore ''
+              echo ">>> ═══════════════════════════════════════════════════════════"
+              echo ">>> Hardware Detection Results:"
+              echo ">>>   CPU Model: $cpuModel ${if hasCpuModule then "(module found)" else "(no specific module)"}"
+              echo ">>>   GPU Model: $gpuModel ${if hasGpuModule then "(module found)" else "(no specific module)"}"
+              echo ">>> Hostname: ${config.networking.hostName}"
+              echo ">>> ═══════════════════════════════════════════════════════════"
+              
+              # 保存检测结果到配置文件
+              cat > /etc/nixos/.hardware-detected.json << EOF
+            ${builtins.toJSON hardwareInfo}
+            EOF
+                        '';
+                        
+                        # 动态导入硬件模块
+                        imports = hardwareModules;
+                        
+                        # 设置主机名（基于检测到的硬件）
+                        networking.hostName = lib.mkDefault "nixos-${cpuModel}-${gpuModel}";
+                      }
+            )
         
-        home-manager.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.zhangchongjie = import ./home;
-          
-          home-manager.extraSpecialArgs = { inherit self; };
-        }
-      ];
-    };
-    
-    nixosConfigurations.nixos-1600x-r9370 = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        ./configuration.nix
-        ./modules/amd-gpu.nix
-        
-        {
-          networking.hostName = "nixos-1600x-r9370";
-          hardware.cpu.manualModel = "ryzen-1600x";
-          hardware.gpu.manualModel = "r9-370";
-        }
-        
-        home-manager.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.zhangchongjie = import ./home;
-          
-          home-manager.extraSpecialArgs = { inherit self; };
-        }
-      ];
-    };
-    
-    nixosConfigurations.nixos-2600-rx5500xt = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        ./configuration.nix
-        ./modules/amd-gpu.nix
-        
-        {
-          networking.hostName = "nixos-2600-rx5500xt";
-          hardware.cpu.manualModel = "ryzen-2600";
-          hardware.gpu.manualModel = "rx-5500xt";
-        }
-        
+        # Home Manager 配置
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;

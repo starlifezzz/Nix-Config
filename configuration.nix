@@ -8,7 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration-2600.nix
-      ./modules/amd-gpu.nix  # AMD GPU 配置
+      # ./modules/amd-gpu.nix  # AMD GPU 配置
       ./modules/hardware/default.nix
     ];
 
@@ -355,8 +355,6 @@
 
   # 字体配置
   # fonts.fontconfig.enable = true;
-
-
  system.fsPackages = [ pkgs.bindfs ];
   fileSystems = let
     mkRoSymBind = path: {
@@ -407,8 +405,6 @@
   fonts.packages = with pkgs; [
     noto-fonts
   ];
-
-  
 
   # 安全加固
   security.sudo.wheelNeedsPassword = true;  # wheel 组需要密码

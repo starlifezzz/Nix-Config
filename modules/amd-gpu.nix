@@ -8,7 +8,9 @@
   
   config = {
     boot.kernelParams = [
-      "iommu=soft""iommu=soft"  # 使用 passthrough 模式，性能更好
+      "iommu=pt"  # 使用 passthrough 模式，性能更好
+      "amd.iommu=on"
+
     ];
     
     hardware.firmware = with pkgs; [
