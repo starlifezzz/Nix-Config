@@ -21,11 +21,9 @@
         ./configuration.nix
         ./modules/amd-gpu.nix
         ./modules/hardware/default.nix
-        ./modules/hardware-detection.nix
         
         nixos-hardware.nixosModules.common-cpu-amd
         nixos-hardware.nixosModules.common-pc-ssd
-        
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;

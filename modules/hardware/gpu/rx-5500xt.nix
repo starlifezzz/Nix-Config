@@ -1,8 +1,8 @@
 { config, lib, pkgs, ... }:
 
 {
-  config = lib.mkIf (config.hardware.gpu.manualModel == "rx-5500") {
-    hardware.gpu.model = "rx-5500";
+  config = lib.mkIf (config.hardware.gpu.manualModel == "rx-5500xt") {
+    hardware.gpu.model = "rx-5500xt";
     
     services.xserver.videoDrivers = [ "amdgpu" ];
     

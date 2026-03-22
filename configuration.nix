@@ -2,15 +2,16 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration-2600.nix
-      # ./modules/amd-gpu.nix  # AMD GPU 配置
+      ./modules/amd-gpu.nix  # AMD GPU 配置
       ./modules/hardware/default.nix
-    ]++ lib.optional (builtins.pathExists ./hardware-auto.nix) ./hardware-auto.nix;
+    ] ++ lib.optional (builtins.pathExists ./hardware-auto.nix) ./hardware-auto.nix;
+
 
   # 启动配置
   boot = {
