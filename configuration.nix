@@ -6,12 +6,11 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration-2600.nix
-      ./modules/amd-gpu.nix  # AMD GPU 配置
-      ./modules/hardware/default.nix
-    ] ++ lib.optional (builtins.pathExists ./hardware-auto.nix) ./hardware-auto.nix;
-
+    [
+      # 基础硬件检测模块（提供 hardware.cpu.manualModel 等选项）
+      ./modules/hardware/detection.nix
+    ] ++ lib.optional (builtins.pathExists ./hardware-auto.nix) ./hardware-auto.nix
+      ++ lib.optional (builtins.pathExists ./hardware-configuration.nix) ./hardware-configuration.nix;
 
   # 启动配置
   boot = {

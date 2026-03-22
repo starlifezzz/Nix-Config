@@ -1,5 +1,5 @@
 {
-  description = "NixOS configuration with automatic hardware-specific module loading";
+  description = "NixOS configuration with flexible hardware selection";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
@@ -12,62 +12,58 @@
 
   outputs = { self, nixpkgs, home-manager, nixos-hardware, ... }:
     let
-      supportedCPUs = [ "ryzen-1600x" "ryzen-2600" "ryzen-3600" ];
-      supportedGPUs = [ "r9-370" "rx-5500" "rx-5500xt" "rx-5700" "rx-5700-xt" "rx-6600-xt" ];
+      # 定义所有支持的硬件组合
+      hardwareConfigs = {
+        # 默认配置（当前设备）
+        "nixos" = { cpu = "ryzen-2600"; gpu = "rx-5500"; hostName = "nixos-2600-rx5500"; };
+        
+        # 其他硬件配置
+        "nixos-1600x-r9370" = { cpu = "ryzen-1600x"; gpu = "r9-370"; hostName = "nixos-1600x-r9370"; };
+        "nixos-2600-rx6600xt" = { cpu = "ryzen-2600"; gpu = "rx-6600-xt"; hostName = "nixos-2600-rx6600xt"; };
+        "nixos-3600-rx6600xt" = { cpu = "ryzen-3600"; gpu = "rx-6600-xt"; hostName = "nixos-3600-rx6600xt"; };
+      };
       
+      makeConfig = name: hw: 
+        nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          
+          specialArgs = {
+            inherit (hw) cpu gpu;
+            inherit self;
+          };
+          
+          modules = [
+            ./configuration.nix
+            
+            nixos-hardware.nixosModules.common-cpu-amd
+            nixos-hardware.nixosModules.common-pc-ssd
+            
+            ./modules/hardware/detection.nix
+            
+            ({ config, lib, pkgs, ... }: {
+              imports = 
+                lib.optional (builtins.pathExists ./modules/hardware/cpu/${hw.cpu}.nix)
+                  ./modules/hardware/cpu/${hw.cpu}.nix
+                ++ lib.optional (builtins.pathExists ./modules/hardware/gpu/${hw.gpu}.nix)
+                  ./modules/hardware/gpu/${hw.gpu}.nix;
+              
+              networking.hostName = lib.mkDefault hw.hostName;
+              
+              hardware.cpu.manualModel = hw.cpu;
+              hardware.gpu.manualModel = hw.gpu;
+            })
+            
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.zhangchongjie = import ./home;
+              home-manager.extraSpecialArgs = { inherit self; };
+            }
+          ];
+        };
     in
     {
-      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        
-        specialArgs = { inherit self; };
-        
-        modules = [
-          ./configuration.nix
-          
-          # 从 nixos-hardware 导入通用优化
-          nixos-hardware.nixosModules.common-cpu-amd
-          nixos-hardware.nixosModules.common-pc-ssd
-          
-          # 硬件检测模块（动态加载对应配置）
-          ({ config, lib, pkgs, ... }: {
-            options.hardware = {
-              cpu.model = lib.mkOption {
-                type = lib.types.enum supportedCPUs;
-                default = "unknown";
-              };
-              gpu.model = lib.mkOption {
-                type = lib.types.enum supportedGPUs;
-                default = "unknown";
-              };
-            };
-            
-            config = {
-              # 动态导入 CPU 配置
-              imports = lib.optional (builtins.pathExists ./modules/hardware/cpu/${config.hardware.cpu.model}.nix)
-                ./modules/hardware/cpu/${config.hardware.cpu.model}.nix;
-              
-              # 动态导入 GPU 配置
-              imports = lib.optional (builtins.pathExists ./modules/hardware/gpu/${config.hardware.gpu.model}.nix)
-                ./modules/hardware/gpu/${config.hardware.gpu.model}.nix;
-              
-              # 如果存在自动生成的配置文件则导入
-              imports = lib.optional (builtins.pathExists ./hardware-auto.nix) ./hardware-auto.nix;
-            };
-          })
-          
-          # 基础硬件配置（所有设备共用）
-          ./modules/hardware/detection.nix
-          
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.zhangchongjie = import ./home;
-            
-            home-manager.extraSpecialArgs = { inherit self; };
-          }
-        ];
-      };
+      nixosConfigurations = builtins.mapAttrs makeConfig hardwareConfigs;
     };
 }
