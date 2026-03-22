@@ -35,7 +35,7 @@
         rocmPackages.clr.icd
         
         # 视频编解码加速
-        vaapiVdpau
+        libva-vdpau-driver
         libvdpau-va-gl
         mesa.drivers
       ];

@@ -22,7 +22,7 @@
         vulkan-loader
         vulkan-tools
         rocmPackages.clr.icd
-        vaapiVdpau
+        libva-vdpau-driver
         libvdpau-va-gl
         mesa.drivers
       ];

@@ -38,7 +38,10 @@
             nixos-hardware.nixosModules.common-cpu-amd
             nixos-hardware.nixosModules.common-pc-ssd
             
-            # 动态导入硬件特定配置
+            # 基础硬件检测模块（提供选项定义）
+            ./modules/hardware/detection.nix
+            
+            # 动态导入硬件特定配置并设置 manualModel
             ({ config, lib, pkgs, ... }: {
               imports = 
                 lib.optional (builtins.pathExists ./modules/hardware/cpu/${hw.cpu}.nix)
@@ -47,6 +50,10 @@
                   ./modules/hardware/gpu/${hw.gpu}.nix;
               
               networking.hostName = lib.mkDefault hw.hostName;
+              
+              # 关键：设置 hardware.manualModel
+              hardware.cpu.manualModel = hw.cpu;
+              hardware.gpu.manualModel = hw.gpu;
             })
             
             home-manager.nixosModules.home-manager
