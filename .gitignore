@@ -19,4 +19,5 @@ result-*
 flake.lock
 hardware-configuration*.nix
 !hardware-configuration-2600.nix
+hardware-auto.nix
 
