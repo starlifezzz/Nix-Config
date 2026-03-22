@@ -7,7 +7,6 @@
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # 添加官方 nixos-hardware 支持
     nixos-hardware.url = "github:NixOS/nixos-hardware";
   };
 
@@ -22,12 +21,11 @@
         ./configuration.nix
         ./modules/amd-gpu.nix
         ./modules/hardware/default.nix
+        ./modules/hardware-detection.nix
         
-        # AMD CPU 通用优化（使用官方 nixos-hardware）
         nixos-hardware.nixosModules.common-cpu-amd
         nixos-hardware.nixosModules.common-pc-ssd
         
-        # Home Manager 配置
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;

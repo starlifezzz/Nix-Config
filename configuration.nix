@@ -10,7 +10,7 @@
       ./hardware-configuration-2600.nix
       # ./modules/amd-gpu.nix  # AMD GPU 配置
       ./modules/hardware/default.nix
-    ];
+    ]++ lib.optional (builtins.pathExists ./hardware-auto.nix) ./hardware-auto.nix;
 
   # 启动配置
   boot = {
@@ -193,6 +193,7 @@
      vulkan-tools      # vulkaninfo
      radeontop         # AMD GPU 监控
      coreutils         # 提供 lspci 等工具
+     pciutils          # 提供 lspci 工具
   ];
 
   hardware.sensor.iio.enable = true;

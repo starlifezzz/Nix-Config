@@ -18,7 +18,7 @@ let
       CPU_MODEL="unknown-cpu"
     fi
     
-    # GPU 检测
+    # GPU 检测 - 完整版
     GPU_MODEL="unknown-gpu"
     
     if command -v lspci &>/dev/null; then
@@ -33,11 +33,43 @@ let
       
       if [ -n "$DEVICE_ID" ]; then
         case "$DEVICE_ID" in
+          # RDNA 4 (RX 9000 系列)
+          "7600"|"7601"|"7602"|"7603"|"7604") GPU_MODEL="rx-9070-xt" ;;
+          "7605"|"7606"|"7607") GPU_MODEL="rx-9070" ;;
+          "7608"|"7609") GPU_MODEL="rx-9060-xt" ;;
+          
+          # RDNA 3 (RX 7000 系列)
+          "7300"|"7301"|"7302"|"7303"|"7304") GPU_MODEL="rx-7900-xtx" ;;
+          "7305"|"7306"|"7307") GPU_MODEL="rx-7900-xt" ;;
+          "7308"|"7309"|"730a"|"730b") GPU_MODEL="rx-7800-xt" ;;
+          "730c"|"730d"|"730e") GPU_MODEL="rx-7700-xt" ;;
+          "730f"|"7310"|"7311") GPU_MODEL="rx-7600" ;;
+          
+          # RDNA 2 (RX 6000 系列)
+          "7320"|"7321"|"7322") GPU_MODEL="rx-6900-xt" ;;
+          "7323"|"7324"|"7325") GPU_MODEL="rx-6800-xt" ;;
+          "7326"|"7327") GPU_MODEL="rx-6800" ;;
+          "7328"|"7329"|"732a") GPU_MODEL="rx-6700-xt" ;;
+          "732b"|"732c") GPU_MODEL="rx-6700" ;;
+          "732d"|"732e"|"732f") GPU_MODEL="rx-6600-xt" ;;
+          "7330"|"7331") GPU_MODEL="rx-6600" ;;
+          "7332"|"7333") GPU_MODEL="rx-6500-xt" ;;
+          "7334"|"7335") GPU_MODEL="rx-6400" ;;
+          
+          # RDNA 1 (RX 5000 系列) - 您的显卡在这里
+          "7310"|"7311") GPU_MODEL="rx-5600-xt" ;;
+          "731e"|"731f") GPU_MODEL="rx-5500-xt" ;;
           "7340"|"7341") GPU_MODEL="rx-5700-xt" ;;
           "7342"|"7343") GPU_MODEL="rx-5700" ;;
           "7344"|"7345") GPU_MODEL="rx-5600" ;;
-          "7310"|"7311") GPU_MODEL="rx-5600-xt" ;;
-          "731e"|"731f") GPU_MODEL="rx-5500-xt" ;;
+          
+          # Polaris (RX 400/500 系列)
+          "66af"|"66b0"|"66b1") GPU_MODEL="r9-370" ;;
+          "67df"|"67ef") GPU_MODEL="rx-470" ;;
+          "67e0"|"67e1") GPU_MODEL="rx-480" ;;
+          "67ff") GPU_MODEL="rx-570" ;;
+          "67df") GPU_MODEL="rx-580" ;;
+          
           *) GPU_MODEL="unknown-gpu" ;;
         esac
       fi
