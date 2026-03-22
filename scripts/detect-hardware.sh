@@ -53,21 +53,22 @@ detect_gpu() {
     gpu_id=$(echo "$gpu_id" | tr '[:upper:]' '[:lower:]')
 
     case "$gpu_id" in
+        # RDNA 1 (RX 5000 系列) - 按 Device ID 正确映射
         "7310"|"7311")
-            echo "rx-5600-xt"
-            echo "✓ Detected: AMD Radeon RX 5600 XT [1002:$gpu_id]" >&2
+            echo "rx-5700-xt"
+            echo "✓ Detected: AMD Radeon RX 5700 XT [1002:$gpu_id]" >&2
             ;;
         "731e"|"731f")
             echo "rx-5500-xt"
             echo "✓ Detected: AMD Radeon RX 5500 XT [1002:$gpu_id]" >&2
             ;;
         "7340"|"7341")
-            echo "rx-5700-xt"
-            echo "✓ Detected: AMD Radeon RX 5700 XT [1002:$gpu_id]" >&2
+            echo "rx-5500"
+            echo "✓ Detected: AMD Radeon RX 5500 [1002:$gpu_id]" >&2
             ;;
         "7342"|"7343")
-            echo "rx-5700"
-            echo "✓ Detected: AMD Radeon RX 5700 [1002:$gpu_id]" >&2
+            echo "rx-5500-m"
+            echo "✓ Detected: AMD Radeon RX 5500M [1002:$gpu_id]" >&2
             ;;
         "7344"|"7345")
             echo "rx-5600"

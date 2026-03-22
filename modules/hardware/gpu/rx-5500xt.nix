@@ -1,52 +1,57 @@
 { config, lib, pkgs, ... }:
 
 {
-  config = lib.mkIf (config.hardware.gpu.manualModel == "rx-5500xt") {
-    hardware.gpu.model = "rx-5500xt";
+  config = lib.mkIf (config.hardware.gpu.manualModel == "rx-5500") {
+    hardware.gpu.model = "rx-5500";
     
+    # 启用 AMDGPU 驱动
     services.xserver.videoDrivers = [ "amdgpu" ];
     
+    # 内核参数优化 - Navi 14 (RX 5500)
     boot.kernelParams = [
       # GPU 电源管理
-      "amdgpu.runpm=1"  # 运行时电源管理
-      "pcie_aspm=performance"  # PCIe 性能模式
+      "amdgpu.runpm=0"  # 禁用运行时电源管理（提高稳定性）
+      "pcie_aspm=performance"  # PCIe ASPM 性能模式
       
-      # AMDGPU 特性启用
+      # AMDGPU 特性
       "amdgpu.ppfeaturemask=0xffffffff"  # 启用所有电源管理特性
       "amdgpu.dc=1"  # 启用 Display Core（必须）
-      "amdgpu.mes=1"  # 启用 MES（新内核需要）
       
-      # 性能优化
-      "amdgpu.sched_hw_submission=256"  # 增加硬件提交队列
-      "amdgpu.vm_update_mode=3"  # 优化虚拟内存更新
+      # Navi 14 特定优化
+      "amdgpu.sched_hw_submission=256"
     ];
     
-hardware.graphics = {
+    # 图形加速支持
+    hardware.graphics = {
       enable = true;
       enable32Bit = true;
       
       extraPackages = with pkgs; [
-        libva
-        libvdpau
+        # Vulkan 支持
         vulkan-loader
         vulkan-tools
         
-        # RDNA 专属优化包
-        mesa.opencl  # OpenCL 支持
-        libva-vdpau-driver  # VAAPI 转 VDPAU
-        libvdpau-va-gl  # VDPAU 转 VAAPI
+        # OpenCL 支持
+        rocmPackages.clr.icd
+        
+        # 视频编解码加速
+        vaapiVdpau
+        libvdpau-va-gl
+        mesa.drivers
       ];
     };
     
-    environment.systemPackages = with pkgs; [
-      radeontop  # GPU 监控
-      corectrl  # AMD GPU 超频和控制工具
-    ];
+    # 固件加载
+    hardware.firmware = [ pkgs.linux-firmware ];
+    hardware.enableRedistributableFirmware = true;
     
-    # 启用 FSR（FidelityFX Super Resolution）
-    hardware.amdgpu = {
-      initrd.enable = true;
-      opencl.enable = true;
-    };
+    # 在 initrd 阶段加载 AMDGPU
+    boot.initrd.kernelModules = [ "amdgpu" ];
+    
+    # 工具软件
+    environment.systemPackages = with pkgs; [
+      radeontop
+      vkmark
+    ];
   };
 }
