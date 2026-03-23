@@ -16,16 +16,6 @@
   # 用户软件包
   # ═══════════════════════════════════════════════════════════
   home.packages = with pkgs; [
-    #  wget
-    #  curl
-    #  dig
-    # font.nix所需字体
-    lxgw-wenkai-screen
-    lxgw-wenkai
-    wqy_zenhei
-    wqy_microhei
-    source-han-sans
-    source-han-serif
     jetbrains-mono
     fira-code
   ];
@@ -41,6 +31,24 @@
       "/var/lib/flatpak/exports/share"
       "$HOME/.local/share/flatpak/exports/share"
     ];
+
+    # ═══════════════════════════════════════════════════════════
+    # Wayland 专用配置
+    # ═══════════════════════════════════════════════════════════
+    # 启用 Firefox 的 Wayland 支持
+    MOZ_ENABLE_WAYLAND = "1";
+    # Qt 应用优先使用 Wayland，回退到 XCB
+    QT_QPA_PLATFORM = "wayland;xcb";
+    # GTK 应用优先使用 Wayland，回退到 X11
+    GDK_BACKEND = "wayland,x11";
+    # 明确会话类型为 Wayland
+    XDG_SESSION_TYPE = "wayland";
+    # Clutter 工具包使用 Wayland
+    CLUTTER_BACKEND = "wayland";
+    # SDL 应用使用 Wayland
+    SDL_VIDEODRIVER = "wayland";
+    # Electron 应用自动选择平台
+    ELECTRON_OZONE_PLATFORM_HINT = "auto";
   };
 
   # ═══════════════════════════════════════════════════════════
@@ -51,7 +59,7 @@
   imports = [
     ./home.nix
     ./kde.nix
-    ./font.nix
+    # ./font.nix
     ./Alacritty.nix
     ./zellij.nix
   ];

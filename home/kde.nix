@@ -20,6 +20,62 @@
   };
 
   # ═══════════════════════════════════════════════════════════
+  # KDE Power Devil 电源管理 - 禁用USB自动挂起干预
+  # ═══════════════════════════════════════════════════════════
+  # 防止 KDE 电源管理器覆盖内核的 USB autosuspend 设置
+  xdg.configFile."powermanagementprofile" = {
+    text = ''
+      [USBDevices]
+      Autosuspend=false
+      
+      [AC Adapter]
+      whenAcAdaptorConnected=
+      whenAcAdaptorDisconnected=
+      
+      [Battery]
+      whenLowBattery=
+      whenCriticallyLowBattery=
+      
+      [ButtonEvents]
+      powerButtonAction=Nothing
+      sleepButtonAction=Nothing
+      laptopLidClosedAction=Nothing
+      laptopLidClosedActionWhenExternalPowerConnected=Nothing
+      
+      [DimDisplay]
+      idleTimeout=0
+      lockScreenBeforeTurningOff=0
+      dimDisplayTimeout=0
+      
+      [Energy Saving]
+      DPMSstandbyTime=0
+      DPMSSuspendTime=0
+      DPMSPowerOffTime=0
+      turnOffDisplayTime=0
+      brightnessLevel=100
+      minBrightnessLevel=30
+      dimDisplayBrightness=50
+      displayBrightnessOnBattery=80
+      displayBrightnessOnBatteryIdleTimeout=60
+      keyboardBrightnessLevel=50
+      keyboardBrightnessOnBattery=50
+      reduceKeyboardBrightnessTimeout=10
+      turnOffKeyboardLightTimeout=30
+      cpufrequencyPolicyOnBattery=powersave
+      cpufrequencyPolicyOnACPowersave=performance
+      runScriptCommand=
+      audioVolumeMutedOnBattery=false
+      activateScreensaver=
+      suspendSession=
+      enableSwitchableGraphics=true
+      
+      [General]
+      inhibitSuspendsCount=0
+      profileName=Performance
+    '';
+  };
+
+  # ═══════════════════════════════════════════════════════════
   # kdeglobals - 全局设置（字体、颜色、主题）
   # ═══════════════════════════════════════════════════════════
   xdg.configFile."kdeglobals" = {

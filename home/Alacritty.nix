@@ -11,14 +11,12 @@
 
       env = {
         TERM = "xterm-256color";
-        ZELLIJ_AUTO_ATTACH = "true";
-        ZELLIJ_AUTO_EXIT = "true";
       };
 
       terminal = {
         shell = {
           program = "${pkgs.zellij}/bin/zellij";
-          args = [ "attach" "--create" ];
+          args = [ ];
         };
       };
 

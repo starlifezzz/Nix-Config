@@ -1,7 +1,6 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
+# and in the NixOS manual (accessible by running 'nixos-help').
 { config, lib, pkgs, ... }:
 
 {
@@ -12,9 +11,9 @@
       # # 硬件配置文件（包含文件系统和 BTRFS 配置）
       # ./hardware-configuration.nix
     ] 
-      #  ++ lib.optional (builtins.pathExists ./hardware-auto.nix) ./hardware-auto.nix
-      ++ lib.optional (builtins.pathExists ./hardware-configuration-2600.nix) ./hardware-configuration-2600.nix   #每次新系统都要把原hardware-configuration.nix重命名
-      ;
+      # # 硬件自动检测配置（已禁用）以后换电脑后都要先改这个！！！！！！！！！！！
+      # ++ lib.optional (builtins.pathExists ./hardware-auto.nix) ./hardware-auto.nix
+      ++ lib.optional (builtins.pathExists ./hardware-configuration-2600.nix) ./hardware-configuration-2600.nix;
 
   # 启动配置
   boot = {
@@ -27,71 +26,45 @@
       efi.canTouchEfiVariables = true;#允许修改efi变量
     };
     
-    # 内核配置
-    kernelPackages =  pkgs.linuxPackages_latest; # 使用最新稳定版内核，官方默认内核
+    # 内核配置 - 使用最新稳定版内核
+    kernelPackages = pkgs.linuxPackages;
     kernelParams = [
-      "video=2560x1440@75"
-      "init_on_alloc=1"
-      "page_alloc.shuffle=1"
-      # USB 稳定性优化 - 关键修复
-      "usbcore.autosuspend=-1"           # 禁用 USB 自动挂起
-      "usbcore.usbfs_memory_mb=1024"     # 增加 USBFS 内存限制
-      "xhci.pci_port_switch=1"           # XHCI 端口切换优化
-      # 如果遇到 SMT 相关问题，取消下面这行的注释
-      # "nosmt"  # 禁用 SMT（仅限问题排查）
-    ];
-
-    # 内核参数优化
-    kernel.sysctl = {
-      # 网络优化
-      "net.ipv4.tcp_fastopen" = 3;
-      "net.ipv4.tcp_congestion_control" = "bbr";
-      "net.core.default_qdisc" = "fq";  # 改为 fq 以配合 bbr 获得更好性能
-      "net.core.rmem_max" = 134217728;
-      "net.core.wmem_max" = 134217728;
-      "net.ipv4.tcp_mtu_probing" = 1;
-      "net.ipv4.tcp_slow_start_after_idle" = 0;
+      # ═══════════════════════════════════════════════════════════
+      # USB 设备稳定性优化 - NixOS 官方推荐设置
+      # ═══════════════════════════════════════════════════════════
+      "usbcore.autosuspend=-1"         # 禁用 USB 自动挂起
+      "usbcore.usbfs_memory_mb=1024"   # USBFS 内存
       
-      # 内存优化
-      "vm.swappiness" = 1;
-      "vm.vfs_cache_pressure" = 100;
-      "vm.dirty_ratio" = 10;
-      "vm.dirty_background_ratio" = 5;
-      # AMD Ryzen 优化：禁用页面表隔离（提升性能，略微降低安全性）
-      "kernel.page-table-isolation" = 0;  # 可选，根据需要启用
-      "kernel.sched_autogroup_enabled" = 1;  # 启用任务组调度
-      "kernel.sched_migration_cost_ns" = 50000;  # 调度优化
+      # ═══════════════════════════════════════════════════════════
+      # 显示器分辨率策略：自动检测 EDID 并适配最大分辨率
+      # ═══════════════════════════════════════════════════════════
+      # 已移除硬编码的 video=2560x1440@75 参数
+      # KDE Plasma Wayland + KScreen 会自动检测显示器 EDID 信息
+      # 并应用显示器支持的最大分辨率和刷新率
+      # 支持热插拔自动切换（如更换 4K 显示器自动适配 4K）
+    ];
+    
+    # 内核模块
+    kernelModules = [ ];
+    
+    # 内核参数优化 - 仅保留桌面环境必要的优化
+    kernel.sysctl = {
+      # 内存管理 - 使用 lib.mkDefault 允许硬件模块覆盖
+      "vm.swappiness" = lib.mkDefault 1;
+      "vm.vfs_cache_pressure" = lib.mkDefault 100;
       
       # 文件系统优化
       "fs.inotify.max_user_watches" = 524288;
       "fs.file-max" = 2097152;
-      # BTRFS 优化
-      "vm.dirty_writeback_centisecs" = 300;
-      "vm.dirty_expire_centisecs" = 6000;
+      
       # AMDGPU + BTRFS 优化
-      "vm.page-cluster" = "0";  # 禁用交换预读（SSD 优化）
+      "vm.page-cluster" = lib.mkDefault 0;  # SSD 优化：禁用交换预读
     };
   };
 
-
-  # Use latest kernel.
-  # boot.kernelPackages = pkgs.linuxPackages_zen;
-
-
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Enable networking
-
-  # Set your time zone.
+  # 时区和语言设置
   time.timeZone = "Asia/Shanghai";
-
-  # Select internationalisation properties.
   i18n.defaultLocale = "zh_CN.UTF-8";
-
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "zh_CN.UTF-8";
     LC_IDENTIFICATION = "zh_CN.UTF-8";
@@ -104,32 +77,25 @@
     LC_TIME = "zh_CN.UTF-8";
   };
 
-  
   # Fcitx5 输入法
   i18n.inputMethod = {
-    enable = true; # 启用输入法
+    enable = true;
     type = "fcitx5"; 
-    fcitx5.addons = with pkgs; [ # 添加输入法扩展包
+    fcitx5.addons = with pkgs; [
       fcitx5-rime
       qt6Packages.fcitx5-chinese-addons
       qt6Packages.fcitx5-configtool
     ];
   };
 
-
-  # Enable the X11 windowing system.
-  # You can disable this if you're only using the Wayland session.
-  services.xserver.enable = false;
-
-  # Enable the KDE Plasma Desktop Environment.
-  # services.displayManager.sddm.enable = true;
+  # KDE Plasma 6 桌面环境
+  services.xserver.enable = false;  # 原生 Wayland
   services.desktopManager.plasma6.enable = true;
 
-  # Enable CUPS to print documents.
-  #打印服务
+  # 打印服务（默认禁用）
   services.printing.enable = false;
 
-  # Enable sound with pipewire.
+  # 音频配置 - PipeWire
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -137,19 +103,8 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
     jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
   };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-
 
   # 用户配置
   users.users.zhangchongjie = {
@@ -158,48 +113,59 @@
     extraGroups = [ "networkmanager" "wheel" "flatpak" "video" "render" "input" ];
     # 设置默认 shell 为 fish
     shell = pkgs.fish;
-
   };
+
   # Fish Shell（系统级）
   programs.fish.enable = true;
 
-  # Install firefox.
+  # Firefox 浏览器
   programs.firefox.enable = true;
 
-  # Allow unfree packages
+  # 允许 unfree 和 broken 包
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowBroken = true;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  # 系统软件包
   environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-     alacritty
-     zellij
-     fish
-     vim
-     fastfetch
-     git
-     home-manager
-     kdePackages.kdeconnect-kde
-     clash-verge-rev
-     flclash
-     timeshift
-     bleachbit
-     vscode
-     lutris-free
-     protonup-qt
-     libvdpau-va-gl    # VDPAU 加速
-     libva-vdpau-driver # VA-API VDPAU 后端
-     vdpauinfo         # VDPAU 信息工具
-     ffmpeg-full       # 完整的 FFmpeg（支持硬件解码）
-    # GPU 工具
-     vulkan-tools      # vulkaninfo
-     radeontop         # AMD GPU 监控
-     coreutils         # 提供 lspci 等工具
-     pciutils          # 提供 lspci 工具
+    # 基础工具
+    vim
+    git
+    
+    # 终端和开发工具
+    alacritty
+    zellij
+    fastfetch
+    home-manager
+    
+    # KDE 应用
+    kdePackages.kdeconnect-kde
+    
+    # 网络工具
+    clash-verge-rev  # 只保留一个 Clash GUI
+    flclash          # 备选
+    
+    # 系统维护工具
+    timeshift
+    bleachbit
+    
+    # 开发工具
+    vscode
+    
+    # 游戏相关
+    lutris-free
+    protonup-qt
+    
+    # GPU 工具（AMD）
+    vulkan-tools      # vulkaninfo
+    radeontop         # AMD GPU 监控
+    pciutils          # lspci 工具
+    
+    # 多媒体支持
+    ffmpeg-full       # 完整的 FFmpeg
+    kdePackages.plasma-workspace-wallpapers
   ];
 
+  # 传感器支持
   hardware.sensor.iio.enable = true;
 
   # services.dbus.enable = true;
@@ -222,35 +188,25 @@
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "25.11"; # Did you read the comment?
-
-
   # Nix 配置优化
   nix = {
     settings = {
-      # 将您的用户名和 root 设为可信用户
       trusted-users = [ "root" "zhangchongjie" ];
-      # 配置二进制缓存镜像，优先级从高到低
+      
+      # 二进制缓存镜像（优先级从高到低）
       substituters = [
         "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
         "https://mirrors.ustc.edu.cn/nix-channels/store"
         "https://mirrors.cernet.edu.cn/nix-channels/store"
         "https://cache.nixos.org"
       ];
+      
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       ];
 
       experimental-features = [ "nix-command" "flakes" ];
-      # 自动优化存储
       auto-optimise-store = true;
-      # 保留较少的 generations
       keep-derivations = true;
       keep-outputs = true;
 
@@ -261,75 +217,58 @@
       # 启用沙箱
       sandbox = true;
     };
-    # 垃圾回收配置
+    
+    # 垃圾回收
     gc = {
       automatic = true;
       dates = "daily";
       options = "--delete-older-than 3d";
     };
+    
     # 存储优化
     optimise.automatic = true;
-
-  };
- # Flatpak 配置
-  services.flatpak = {
-    enable = true;
   };
 
+  # Flatpak 配置
+  services.flatpak.enable = true;
 
-  # 配置XDG Portal - 这是关键
+  # XDG Portal 配置 - KDE Plasma 环境
   xdg.portal = {
     enable = true;
-    extraPortals = with pkgs; [
-      xdg-desktop-portal-gtk
-      kdePackages.xdg-desktop-portal-kde
+    extraPortals = [
+      pkgs.kdePackages.xdg-desktop-portal-kde  # KDE portal（完整实现）
     ];
-    # 配置KDE为默认portal
-    config = {
-      common.default = ["kde"];
-    };
+    # 不设置 default，让系统自动选择后端
+    # config.common.default 留空以使用自动选择
   };
 
-
-  # 启用 zRAM
+  # zRAM 配置
   zramSwap = {
     enable = true;
-    # 可选：设置 zRAM 大小（默认是内存的 50%）
-    memoryPercent = 50;  # 使用 50% 的内存作为 zRAM
-
-    # 可选：设置压缩算法（默认是 lzo-rle）
-    # 可用算法：lzo, lzo-rle, lz4, lz4hc, zstd
+    memoryPercent = 50;
     algorithm = "zstd";
-
-    # 可选：设置优先级（比磁盘 swap 高）
     priority = 100;
   };
 
-    # 2. 启用 Avahi (mDNS) 服务 - 使用正确的选项名
+  # Avahi 服务（mDNS）
   services.avahi = {
     enable = true;
-    nssmdns4 = true;  # 注意：从 nssmdns 改为 nssmdns4
+    nssmdns4 = true;
     publish = {
       enable = true;
-      addresses = true;
-      workstation = true;
     };
   };
 
-
-# 网络配置
+  # 网络配置
   networking = {
-    hostName = "nixos";   # 主机名
-    networkmanager.enable = true; # 启用 NetworkManager
-    # Deleted:proxy.default = "http://127.0.0.1:7897";
-    # Deleted:proxy.noProxy = "127.0.0.1,localhost,*.local";
-    # 防火墙配置
+    hostName = "nixos";
+    networkmanager.enable = true;
+    
     firewall = {
       enable = true;
       allowPing = true;
       checkReversePath = true;
-      allowedTCPPorts = [ 9090 7897 7890 7891 7892];  # 保留 Dashboard 和 API
-      allowedUDPPorts = [ 7890 ];
+      allowedTCPPorts = [ 7897 ];  # Clash Dashboard
       allowedTCPPortRanges = [
         { from = 1714; to = 1764; }  # KDE Connect
       ];
@@ -357,10 +296,55 @@
     '';
   };
 
+  # 字体配置（系统级）
+  fonts.packages = with pkgs; [
+    # 中文支持
+    noto-fonts-cjk-sans
+    noto-fonts-cjk-serif
+    noto-fonts-color-emoji
+    lxgw-wenkai-screen
+    lxgw-wenkai
+    
+    # 英文和通用字体
+    noto-fonts
+    source-han-sans
+    source-han-serif
+    
+    # 等宽字体（编程用）
+    jetbrains-mono
+    fira-code
+    
+    # 文泉驿字体（备用）
+    wqy_zenhei
+    wqy_microhei
+  ];
+  
+  # 字体渲染优化
+  fonts.fontconfig = {
+    enable = true;
+    
+    defaultFonts = {
+      serif = ["Noto Serif CJK SC" "WenQuanYi Micro Hei" "LXGW WenKai Screen" "LXGW WenKai"];
+      sansSerif = ["Noto Sans CJK SC" "WenQuanYi Zen Hei" "LXGW WenKai Screen" "LXGW WenKai"];
+      monospace = ["Noto Sans Mono CJK SC" "WenQuanYi Micro Hei Mono" "LXGW WenKai Screen" "LXGW WenKai"];
+      emoji = ["Noto Color Emoji"];
+    };
+    
+    antialias = true;
+    hinting = {
+      enable = true;
+      autohint = true;
+      style = "slight";
+    };
+    
+    subpixel = {
+      rgba = "rgb";
+      lcdfilter = "default";
+    };
+  };
 
-  # 字体配置
-  # fonts.fontconfig.enable = true;
- system.fsPackages = [ pkgs.bindfs ];
+  #flatpak读取系统字体权限
+  system.fsPackages = [ pkgs.bindfs ];
   fileSystems = let
     mkRoSymBind = path: {
       device = path;
@@ -407,48 +391,34 @@
     "/usr/share/fonts" = mkRoSymBind (x11Fonts + "/share/fonts");
   };
 
-  fonts.packages = with pkgs; [
-    noto-fonts
-  ];
-
-  # 安全加固
-  security.sudo.wheelNeedsPassword = true;  # wheel 组需要密码
-  security.doas.enable = false;  # 禁用 doas（如果不需要）
-
-  # 限制核心转储
-  systemd.coredump.enable = false;
-
-  # 授予用户对 /etc/nixos 的配置权限
-  system.activationScripts.ownership = ''
-    # 设置 /etc/nixos 目录所有权
-    chown -R zhangchongjie:users /etc/nixos
-    chmod -R u+w /etc/nixos
-  '';
-
-
-  # SSD 优化 - 启用定期 TRIM
+  # SSD 优化 - 定期 TRIM
   services.fstrim.enable = true;
 
-  # AMD CPU 电源管理
-  powerManagement.cpuFreqGovernor = "performance";  # 动态频率调节
-
-  # BTRFS 定期碎片整理
-  services.btrfs.autoScrub.enable = true;
-  services.btrfs.autoScrub.interval = "weekly";
+  # CPU 频率调节器
+  powerManagement.cpuFreqGovernor = "performance";
 
   # SDDM 显示管理器配置
   services.displayManager.defaultSession = "plasma";
   services.displayManager.sddm = {
     enable = true;
     wayland.enable = true;
-    theme = "breeze";
     
-    # 直接在 sddm.conf 中设置背景
     settings = {
       General = {
-        Background = "${pkgs.kdePackages.plasma-workspace-wallpapers}/share/wallpapers/Mountain/contents/images/5120x2880.jpg";
+        Background = "${pkgs.kdePackages.plasma-workspace-wallpapers}/share/wallpapers/Mountain/contents/images/5120x2880.png";
+        EnableAvatars = false;
+        InputMethod = "qtvirtualkeyboard";
       };
     };
   };
 
+  # Wayland 环境变量
+  environment.variables = {
+    QT_QPA_PLATFORM = "wayland";
+    GDK_BACKEND = "wayland";
+  };
+
+
+  # 系统版本
+  system.stateVersion = "25.11";
 }
