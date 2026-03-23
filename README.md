@@ -84,6 +84,12 @@
 - Flatpak 运行时已启用
 - 自动字体配置
 
+### 💬 AI 编程助手
+- **通义灵码** - Alibaba Cloud 智能编程助手
+  - VSCode 集成
+  - Fish shell 支持
+  - 脚本执行优化
+
 ---
 
 ## ⚙️ 系统优化
@@ -203,18 +209,77 @@
 
 ## 📁 目录结构
 
+```
+/etc/nixos/
+├── configuration.nix          # 系统主配置
+├── hardware-configuration.nix # 硬件配置
+├── flake.nix                  # Flakes 配置
+├── flake.lock                 # 版本锁定文件
+├── home/                      # Home Manager 配置
+│   ├── default.nix           # Home Manager 入口
+│   ├── home.nix             # 用户环境配置（Fish, Git, VSCode等）
+│   ├── font.nix             # 字体配置
+│   ├── Alacritty.nix        # 终端配置
+│   └── zellij.nix           # Zellij 多路复用器配置
+├── modules/                   # 自定义 Nix 模块
+│   └── hardware/            # 硬件检测模块
+├── scripts/                   # 实用脚本
+│   ├── fix-flatpak-browser.sh    # Flatpak 浏览器跳转修复
+│   ├── fix-portal-final.sh       # Portal 服务修复
+│   ├── fix-tongyi-vscode.sh      # 通义灵码 VSCode 集成修复 ⭐ NEW
+│   ├── apply-tongyi-fix.sh       # 一键应用通义灵码配置 ⭐ NEW
+│   └── vscode-settings-template.json  # VSCode 配置模板 ⭐ NEW
+└── README.md                  # 项目说明文档
+```
+
 ---
 
 ## 🚀 快速开始
 
 ### 重建系统
-bash
+```
 sudo nixos-rebuild switch --flake .
 sudo nix-channel --update
 sudo nix-collect-garbage -d
-sudo nix-collect-garbage -d
 sudo nix-store --optimise
 neofetch
+```
+
+### 🔧 通义灵码集成（新增）
+
+#### 一键配置（推荐）
+
+```
+cd /etc/nixos/scripts
+chmod +x apply-tongyi-fix.sh
+./apply-tongyi-fix.sh
+```
+
+#### 手动修复
+
+```
+# 1. 运行诊断和修复脚本
+cd /etc/nixos/scripts
+chmod +x fix-tongyi-vscode.sh
+./fix-tongyi-vscode.sh
+
+# 2. 应用配置
+sudo nixos-rebuild switch --flake .#nixos
+
+# 3. 重启 VSCode
+# Ctrl+Shift+P -> 'Developer: Reload Window'
+```
+
+#### 验证配置
+
+```
+# 在 VSCode 终端中执行
+fish --version          # 检查 Fish shell
+echo $PATH              # 检查环境变量
+which code              # 检查 VSCode 命令
+```
+
+详细文档请查看：[`scripts/TONGYI-VSCODE-FIX.md`](scripts/TONGYI-VSCODE-FIX.md)
 
 🎨 特色功能
 ✨ 自动化维护

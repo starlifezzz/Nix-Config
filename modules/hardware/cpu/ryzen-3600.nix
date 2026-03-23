@@ -19,12 +19,18 @@
     };
     
     boot.kernel.sysctl = {
-      "kernel.sched_autogroup_enabled" = lib.mkDefault 1;
-      "kernel.sched_migration_cost_ns" = lib.mkDefault 50000;
-      "vm.swappiness" = lib.mkDefault 10;
-      "vm.vfs_cache_pressure" = lib.mkDefault 50;
-      "vm.dirty_ratio" = lib.mkDefault 20;
-      "vm.dirty_background_ratio" = lib.mkDefault 10;
+      # CPU 调度优化 - 使用 lib.mkForce 覆盖 configuration.nix 的默认设置
+      "kernel.sched_autogroup_enabled" = lib.mkForce 1;
+      "kernel.sched_migration_cost_ns" = lib.mkForce 50000;
+      
+      # 内存优化 - Ryzen 3000 系列优化的值
+      "vm.swappiness" = lib.mkForce 10;
+      "vm.vfs_cache_pressure" = lib.mkForce 50;
+      "vm.dirty_ratio" = lib.mkForce 20;
+      "vm.dirty_background_ratio" = lib.mkForce 10;
+      
+      # Zen 2 架构可以禁用 PTI
+      "kernel.page-table-isolation" = lib.mkForce 0;
     };
   };
 }

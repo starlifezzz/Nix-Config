@@ -41,18 +41,23 @@
     };
     
     boot.kernel.sysctl = {
-      # 调度优化
-      "kernel.sched_autogroup_enabled" = 1;
-      "kernel.sched_migration_cost_ns" = 50000;
+      # 调度优化 - 使用 lib.mkForce 覆盖 configuration.nix 的默认设置
+      "kernel.sched_autogroup_enabled" = lib.mkForce 1;
+      "kernel.sched_migration_cost_ns" = lib.mkForce 50000;
       
-      # 内存优化
-      "vm.swappiness" = 10;
-      "vm.vfs_cache_pressure" = 50;
-      "vm.dirty_ratio" = 20;
-      "vm.dirty_background_ratio" = 10;
+      # 内存优化 - 第一代 Ryzen 优化的值
+      "vm.swappiness" = lib.mkForce 10;
+      "vm.vfs_cache_pressure" = lib.mkForce 50;
+      "vm.dirty_ratio" = lib.mkForce 20;
+      "vm.dirty_background_ratio" = lib.mkForce 10;
       
       # 安全优化（第一代 Ryzen 需要 PTI）
-      "kernel.page-table-isolation" = 1;  # 启用 PTI
+      # 使用 lib.mkForce 覆盖 configuration.nix 中的默认设置
+      "kernel.page-table-isolation" = lib.mkForce 1;  # 第一代 Ryzen 存在漏洞，需要启用 PTI
     };
   };
 }
+
+
+
+

@@ -2,7 +2,15 @@
   description = "NixOS configuration with flexible hardware selection";
 
   inputs = {
+    # 使用 GitHub 原生格式（推荐，最稳定）
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    # 如果 GitHub 访问慢，可以使用以下备选方案：
+    # 方案 1: 使用中科大 Git 镜像（较稳定）
+    # nixpkgs.url = "git+https://mirrors.ustc.edu.cn/nix-channels/nixpkgs.git?ref=nixos-25.11";
+    
+    # 方案 2: 使用 gitmirror 镜像
+    # nixpkgs.url = "git+https://gitmirror.com/github.com/NixOS/nixpkgs?ref=nixos-25.11";
+    
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
