@@ -37,16 +37,21 @@
     templates = "$HOME/Templates";
   };
 
-  # 配置 MIME 类型关联
+  # ═══════════════════════════════════════════════════════════
+  # MIME 类型关联 - 简化配置，让 KDE 自动管理动态部分
+  # ═══════════════════════════════════════════════════════════
+  # 根据记忆中的规范：MIME 关联属于纯动态配置，不应该强制声明式管理
+  # 只保留必要的静态关联，避免使用 force = true
   xdg.mime.enable = true;
   xdg.mimeApps = {
     enable = true;
+    # 只声明基础 Web 浏览器的 MIME 关联
+    # 其他应用（如 Lutris、VSCode）的 MIME 关联由 KDE 动态管理
     defaultApplications = {
       "text/html" = [ "firefox.desktop" ];
       "x-scheme-handler/http" = [ "firefox.desktop" ];
       "x-scheme-handler/https" = [ "firefox.desktop" ];
       "x-scheme-handler/about" = [ "firefox.desktop" ];
-      "x-scheme-handler/unknown" = [ "firefox.desktop" ];
     };
   };
 
@@ -73,14 +78,6 @@
   # 环境变量
   # ═══════════════════════════════════════════════════════════
   home.sessionVariables = {
-    XDG_DATA_DIRS = lib.makeSearchPath "" [
-      "$HOME/.local/share"
-      "/run/current-system/sw/share"
-      "/nix/var/nix/profiles/default/share"
-      "/var/lib/flatpak/exports/share"
-      "$HOME/.local/share/flatpak/exports/share"
-    ];
-
     # ═══════════════════════════════════════════════════════════
     # Wayland 专用配置
     # ═══════════════════════════════════════════════════════════
@@ -98,7 +95,6 @@
     SDL_VIDEODRIVER = "wayland";
     # Electron 应用自动选择平台
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
-
   };
 
   imports = [
