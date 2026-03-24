@@ -70,6 +70,10 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
+              
+              # 文件冲突时自动备份到带时间戳的文件
+              home-manager.backupFileExtension = "hm-backup";
+              
               home-manager.users.zhangchongjie = import ./home;
               home-manager.extraSpecialArgs = { inherit self; };
             }

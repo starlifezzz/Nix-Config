@@ -143,24 +143,22 @@
     
     # 网络工具
     clash-verge-rev  # 只保留一个 Clash GUI
-    flclash          # 备选
+    # flclash          # 备选
     
     # 系统维护工具
     timeshift
     bleachbit
     
-    # 游戏相关
-    lutris-free
-    protonup-qt
+    # pkgs.protonup-qt
     
     # GPU 工具（AMD）
-    vulkan-tools      # vulkaninfo
-    radeontop         # AMD GPU 监控
+    # vulkan-tools      # vulkaninfo
+    # radeontop         # AMD GPU 监控
     pciutils          # lspci 工具
     
     # 多媒体支持
     ffmpeg-full       # 完整的 FFmpeg
-    kdePackages.plasma-workspace-wallpapers
+    # kdePackages.plasma-workspace-wallpapers
   ];
 
   # 传感器支持
@@ -277,11 +275,19 @@
   };
 
 
-   # 系统范围的环境变量 - 包含代理设置
+  #  # 系统范围的环境变量 - 包含代理设置
+  # environment.variables = {
+  #   HTTP_PROXY = "http://127.0.0.1:7897";
+  #   HTTPS_PROXY = "http://127.0.0.1:7897";
+  #   NO_PROXY = "127.0.0.1,localhost,*.local";
+  # };
+
+
+    # 全局环境变量（对所有程序生效，包括 Lutris）
   environment.variables = {
-    HTTP_PROXY = "http://127.0.0.1:7897";
-    HTTPS_PROXY = "http://127.0.0.1:7897";
-    NO_PROXY = "127.0.0.1,localhost,*.local";
+    HTTP_PROXY = "http://127.0.0.1:端口号";
+    HTTPS_PROXY = "http://127.0.0.1:端口号";
+    NO_PROXY = "localhost,127.0.0.1,.localdomain.com";
   };
 
   # systemd-resolved DNS 服务
@@ -322,9 +328,9 @@
     enable = true;
     
     defaultFonts = {
-      serif = ["Noto Serif CJK SC" "WenQuanYi Micro Hei" "LXGW WenKai Screen" "LXGW WenKai"];
-      sansSerif = ["Noto Sans CJK SC" "WenQuanYi Zen Hei" "LXGW WenKai Screen" "LXGW WenKai"];
-      monospace = ["Noto Sans Mono CJK SC" "WenQuanYi Micro Hei Mono" "LXGW WenKai Screen" "LXGW WenKai"];
+      serif = ["LXGW WenKai Screen" "LXGW WenKai" "Noto Serif CJK SC" "WenQuanYi Micro Hei" ];
+      sansSerif = ["LXGW WenKai Screen" "LXGW WenKai" "Noto Sans CJK SC" "WenQuanYi Zen Hei" ];
+      monospace = ["LXGW WenKai Screen" "LXGW WenKai" "Noto Sans Mono CJK SC" "WenQuanYi Micro Hei Mono"];
       emoji = ["Noto Color Emoji"];
     };
     
@@ -409,13 +415,6 @@
       };
     };
   };
-
-  # Wayland 环境变量
-  environment.variables = {
-    QT_QPA_PLATFORM = "wayland";
-    GDK_BACKEND = "wayland";
-  };
-
 
   # 系统版本
   system.stateVersion = "25.11";

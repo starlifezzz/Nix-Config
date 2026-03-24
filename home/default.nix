@@ -13,11 +13,60 @@
   home.enableNixpkgsReleaseCheck = false;
 
   # ═══════════════════════════════════════════════════════════
+  # 启用 Home Manager systemd 服务 - 关键配置！
+  # ═══════════════════════════════════════════════════════════
+  programs.home-manager.enable = true;
+
+  # ═══════════════════════════════════════════════════════════
+  # XDG 桌面集成
+  # ═══════════════════════════════════════════════════════════
+  # 启用 XDG 规范支持（管理 XDG 目录、MIME 类型等）
+  xdg.enable = true;
+
+  # 配置 XDG 用户目录（符合 freedesktop.org 标准）
+  xdg.userDirs = {
+    enable = true;
+    createDirectories = true;
+    desktop = "$HOME/Desktop";
+    documents = "$HOME/Documents";
+    download = "$HOME/Downloads";
+    music = "$HOME/Music";
+    pictures = "$HOME/Pictures";
+    videos = "$HOME/Videos";
+    publicShare = "$HOME/Public";
+    templates = "$HOME/Templates";
+  };
+
+  # 配置 MIME 类型关联
+  xdg.mime.enable = true;
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "text/html" = [ "firefox.desktop" ];
+      "x-scheme-handler/http" = [ "firefox.desktop" ];
+      "x-scheme-handler/https" = [ "firefox.desktop" ];
+      "x-scheme-handler/about" = [ "firefox.desktop" ];
+      "x-scheme-handler/unknown" = [ "firefox.desktop" ];
+    };
+  };
+
+  # ═══════════════════════════════════════════════════════════
+  # 桌面快捷方式 - 手动指定 .desktop 文件链接
+  # ═══════════════════════════════════════════════════════════
+  # Home Manager 不会自动扫描 home.packages 创建快捷方式
+  # 必须使用 xdg.dataFile 显式链接到 ~/.local/share/applications/
+  xdg.dataFile."applications/net.lutris.Lutris.desktop".source = 
+    "${pkgs.lutris}/share/applications/net.lutris.Lutris.desktop";
+
+  # ═══════════════════════════════════════════════════════════
   # 用户软件包
   # ═══════════════════════════════════════════════════════════
   home.packages = with pkgs; [
     jetbrains-mono
     fira-code
+
+      # 游戏相关
+    pkgs.lutris
   ];
 
   # ═══════════════════════════════════════════════════════════
@@ -49,12 +98,6 @@
     SDL_VIDEODRIVER = "wayland";
     # Electron 应用自动选择平台
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
-  };
-
-  # ═══════════════════════════════════════════════════════════
-  # 启用 Home Manager
-  # ═══════════════════════════════════════════════════════════
-  programs.home-manager.enable = true;
 
   imports = [
     ./home.nix
