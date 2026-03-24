@@ -130,12 +130,13 @@
     # 基础工具
     vim
     git
-    
+
     # 终端和开发工具
     alacritty
     zellij
     fastfetch
     home-manager
+    pkgs.vscode
     
     # KDE 应用
     kdePackages.kdeconnect-kde
@@ -147,9 +148,6 @@
     # 系统维护工具
     timeshift
     bleachbit
-    
-    # 开发工具
-    vscode
     
     # 游戏相关
     lutris-free

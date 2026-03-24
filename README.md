@@ -606,6 +606,91 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 
 ---
 
+## 🔧 常见问题与故障排除
+
+### Flatpak VSCode 找不到系统工具 (nix-instantiate)
+
+**问题**: 在 VSCode 中遇到错误提示 `nix-instantiate not found in $PATH. Linting is disabled.`
+
+**原因**: Flatpak 版 VSCode 运行在沙箱中，无法访问 NixOS 的系统路径 `/run/current-system/sw/bin`。
+
+**解决方案**:
+
+1. **自动修复（推荐）**:
+   ```bash
+   cd /etc/nixos/scripts
+   ./fix-vscode-nix-access.sh
+   ```
+
+2. **手动配置**:
+   - 创建配置文件 `~/.var/app/com.visualstudio.code/config/environment-override.conf`
+   - 添加内容:
+     ```conf
+     PATH=/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/usr/bin:/bin
+     ```
+   - 完全重启 VSCode
+
+3. **验证**: 在 VSCode 终端运行 `which nix-instantiate`
+
+详细说明请参考 [FLATPAK_VSCODE_NIX_FIX.md](./FLATPAK_VSCODE_NIX_FIX.md)
+
+### Flatpak VSCode 终端启动目录不存在
+
+**问题**: 
+```
+终端进程启动失败：启动目录 (cwd)"/run/flatpak/doc/... (deleted)"不存在。
+```
+
+**原因**: Flatpak 沙箱文档门户（portal）路径与实际路径不一致，导致 VSCode使用错误的启动目录。
+
+**解决方案**:
+
+1. **自动修复（推荐）**:
+   ```bash
+   cd /etc/nixos/scripts
+   ./fix-vscode-cwd.sh
+   ```
+
+2. **手动配置**:
+   - 打开 VSCode 设置 (`Ctrl+,`)
+   - 搜索 `terminal.integrated.cwd`
+   - 设置为你的主目录绝对路径（如 `/home/zhangchongjie`）
+   
+   或编辑 `~/.config/Code/User/settings.json`:
+   ```json
+   {
+     "terminal.integrated.cwd": "/home/zhangchongjie"
+   }
+   ```
+
+3. **重启 VSCode**
+
+**验证**: 在 VSCode 终端运行 `pwd`，应该输出你的主目录路径而不是 `/run/flatpak/doc/...`
+
+详细说明请参考 [SOLUTION_SUMMARY.md](./SOLUTION_SUMMARY.md)
+
+### 其他常见问题
+
+#### 网络代理问题
+如果遇到网络连接问题，检查 FlClash 是否正常运行：
+```bash
+systemctl --user status flclash
+```
+
+#### 输入法不工作
+确保 Fcitx5 已正确启动：
+```bash
+systemctl --user status fcitx5
+```
+
+#### 系统重建失败
+使用测试模式先验证配置：
+```bash
+sudo nixos-rebuild test --flake .
+```
+
+---
+
 <div align="center">
 
 **Made with ❤️ using NixOS Flakes**
