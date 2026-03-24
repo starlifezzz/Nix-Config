@@ -99,6 +99,8 @@
     # Electron 应用自动选择平台
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
 
+  };
+
   imports = [
     ./home.nix
     ./kde.nix
