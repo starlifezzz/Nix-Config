@@ -436,7 +436,7 @@ environment.shellAliases = {
     };
   in {
     "/usr/share/icons" = mkRoSymBind (aggregatedIcons + "/share/icons");
-    "/usr/share/fonts" = mkRoSymBind (x11Fonts + "/share/fonts");
+    # "/usr/share/fonts" = mkRoSymBind (x11Fonts + "/share/fonts");
   };
 
   # SSD 优化 - 定期 TRIM

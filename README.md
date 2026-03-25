@@ -548,3 +548,87 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 [![Built with Nix](https://img.shields.io/static/v1?label=Built%20with&message=Nix&color=5277C6&style=for-the-badge&logo=nixos)](https://nixos.org)
 
 </div>
+
+```
+# NixOS 配置说明
+
+本目录包含 NixOS 系统的完整配置。
+
+## 📁 文件结构
+
+```
+/etc/nixos/
+├── configuration.nix          # 主配置文件
+├── flake.nix                  # Flake 配置（可选）
+├── hardware-configuration.nix # 硬件配置（自动生成）
+├── scripts/                   # 自定义脚本
+│   ├── start-clash-tun.sh    # Clash TUN 启动脚本
+│   └── check-clash-tun.sh    # Clash TUN 检查脚本
+├── CLASH_TUN_GUIDE.md         # Clash TUN 详细指南
+└── README.md                  # 本文件
+```
+
+## 🚀 快速开始
+
+### 系统重建
+
+```bash
+sudo nixos-rebuild switch
+```
+
+### 应用更新后重建
+
+```bash
+sudo nixos-rebuild switch --upgrade
+```
+
+## 🔧 常用命令
+
+### Clash TUN 模式
+
+```bash
+# 启动 TUN 模式
+sudo clash-tun
+
+# 检查状态
+sudo check-clash-tun.sh
+
+# 停止
+sudo pkill -f verge-mihomo
+```
+
+### 系统维护
+
+```bash
+# 查看当前配置
+nixos-rebuild build
+
+# 回滚到上一代
+sudo nixos-rebuild switch --rollback
+
+# 清理旧世代
+sudo nix-collect-garbage -d
+```
+
+## 📚 文档链接
+
+- [Clash TUN 配置指南](./CLASH_TUN_GUIDE.md) - 详细的 TUN 模式配置和故障排查
+- [NixOS 官方文档](https://nixos.org/manual/nixos/stable/)
+- [NixOS Wiki](https://wiki.nixos.org/)
+
+## ⚙️ 系统信息
+
+- **主机名**: nixos
+- **用户**: zhangchongjie
+- **桌面环境**: COSMIC (Wayland)
+- **网络**: iptables 防火墙
+
+## 📝 注意事项
+
+1. **TUN 设备易失性** - 每次重启后需要重新运行 `sudo clash-tun`
+2. **用户组修改** - 添加到 `netadmin` 组后需要重新登录
+3. **防火墙服务** - 修改 firewall 配置后需重启服务或重建系统
+
+---
+
+**最后更新**: 2026-03-25
