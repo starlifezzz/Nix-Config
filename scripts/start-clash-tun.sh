@@ -70,9 +70,11 @@ sleep 8 # 等待路由表注入完成
 
 # 6. 验证状态
 log_info "验证运行状态..."
-if ps -p $CLASH_PID > /dev/null 2>&1 && ip link show Mihomo > /dev/null 2>&1; then
+if ps -p $CLASH_PID > /dev/null 2>&1 && (ip link show Meta > /dev/null 2>&1 || ip link show Mihomo > /dev/null 2>&1); then
     log_success "✅ Mihomo 运行正常"
-    log_success "✅ TUN 接口已创建"
+    
+    TUN_IFACE=$(ip link show | grep -oE 'Meta|Mihomo' | head -1)
+    log_success "✅ TUN 接口已创建：$TUN_IFACE"
     
     echo ""
     log_info "测试外网连通性..."
@@ -92,4 +94,4 @@ if ps -p $CLASH_PID > /dev/null 2>&1 && ip link show Mihomo > /dev/null 2>&1; th
 else
     log_error "启动失败，请查看日志：cat /tmp/verge-mihomo.log"
     exit 1
-fi
+fi  

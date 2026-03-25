@@ -13,24 +13,20 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
-
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/75B2-AA88";
-      fsType = "vfat";
-      options = [ "fmask=0077" "dmask=0077" ];
-    };
-
-  # 配置BTRFS的压缩功能
-    fileSystems."/" =
-    { device = "/dev/disk/by-uuid/6ac89ad8-a5e6-4ca3-8505-856c27a28183";
-      fsType = "btrfs";
-      options = [ "subvol=@" "compress=zstd" ];
+  fileSystems."/" =
+    { device = "/dev/disk/by-uuid/81cd3bc2-837e-4831-8947-54f90fe11ce5";
+      fsType = "xfs";
     };
 
   fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/31f858cd-ca17-4221-95b0-651f75f2cfc5";
-      fsType = "btrfs";
-      options = [ "compress=zstd" ];
+    { device = "/dev/disk/by-uuid/dd324c5c-0f9d-4e99-8fbd-80f0784259f1";
+      fsType = "xfs";
+    };
+
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/6A77-1B04";
+      fsType = "vfat";
+      options = [ "fmask=0077" "dmask=0077" ];
     };
 
   swapDevices = [ ];

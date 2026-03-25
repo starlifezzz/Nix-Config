@@ -51,13 +51,13 @@
       name = "flathub";
       # 中国大陆用户建议使用以下镜像源之一：
       # 1. 中科大镜像 (推荐)
-      location = "https://mirrors.ustc.edu.cn/flatpak-repo/flatpak.flatpakrepo";
+      # location = "https://mirrors.ustc.edu.cn/flatpak-repo/flatpak.flatpakrepo";
       # 2. 上海交通大学镜像
       # location = "https://mirror.sjtu.edu.cn/flatpak-repo/flatpak.flatpakrepo";
       # 3. 清华大学镜像
       # location = "https://mirrors.tuna.tsinghua.edu.cn/flatpak-repo/flatpak.flatpakrepo";
       # 4. 官方源（如果镜像不可用）
-      # location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+      location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
     }
     
     # 可选：Flathub Beta 测试版仓库
