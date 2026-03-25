@@ -1,6 +1,12 @@
 { config, pkgs, lib, ... }:
 
 {
+  # ═══════════════════════════════════════════════════════════
+  # Home Manager 基础配置
+  # ═══════════════════════════════════════════════════════════
+  home.username = "zhangchongjie";
+  home.homeDirectory = "/home/zhangchongjie";
+  home.stateVersion = "25.11";
 
   # ═══════════════════════════════════════════════════════════
   # Fish Shell 配置

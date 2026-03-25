@@ -15,10 +15,14 @@
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    
+    # Flatpak 应用管理
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.7.0";
+    
     nixos-hardware.url = "github:NixOS/nixos-hardware";
   };
 
-  outputs = { self, nixpkgs, home-manager, nixos-hardware, ... }:
+  outputs = { self, nixpkgs, home-manager, nixos-hardware, nix-flatpak, ... }:
     let
       # 预定义模块路径（避免在函数内重复计算）
       detectionModule = ./modules/hardware/detection.nix;
@@ -74,8 +78,10 @@
               # 文件冲突时自动备份到带时间戳的文件
               home-manager.backupFileExtension = "hm-backup";
               
+              # 使用 default.nix 统一管理所有用户配置
               home-manager.users.zhangchongjie = import ./home;
-              home-manager.extraSpecialArgs = { inherit self; };
+              
+              home-manager.extraSpecialArgs = { inherit self nix-flatpak; };
             }
           ];
         };

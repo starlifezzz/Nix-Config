@@ -1,4 +1,3 @@
-# /etc/nixos/home/flatpak.nix
 { config, pkgs, lib, nix-flatpak, ... }:
 
 {
@@ -16,17 +15,11 @@
   # 配置要安装的 Flatpak 应用
   services.flatpak.packages = [
     # ═══════════════════════════════════════════════════════
-    # 浏览器
-    # ═══════════════════════════════════════════════════════
-    # "org.mozilla.firefox"  # Firefox
-    # "com.brave.Browser"    # Brave Browser
-    
-    # ═══════════════════════════════════════════════════════
     # 通讯工具
     # ═══════════════════════════════════════════════════════
     "org.telegram.desktop"     # Telegram
-    "im.riot.Riot"            # Element/Matrix
-    "org.signal.Signal"       # Signal
+    # "im.riot.Riot"            # Element/Matrix
+    # "org.signal.Signal"       # Signal
     
     # ═══════════════════════════════════════════════════════
     # 媒体播放
@@ -37,22 +30,42 @@
     # ═══════════════════════════════════════════════════════
     # 办公生产力
     # ═══════════════════════════════════════════════════════
-    "org.libreoffice.LibreOffice"  # LibreOffice
-    "md.obsidian.Obsidian"         # Obsidian 笔记
+    # "org.libreoffice.LibreOffice"  # LibreOffice
+    # "md.obsidian.Obsidian"         # Obsidian 笔记
     
     # ═══════════════════════════════════════════════════════
     # 开发工具
     # ═══════════════════════════════════════════════════════
-    "com.visualstudio.code"   # VS Code
-    "com.github.GitKraken"    # GitKraken Git 客户端
+    # "com.github.GitKraken"    # GitKraken Git 客户端
+     "com.qq.QQ"          
+     "com.spotify.Client" 
+     "com.tencent.WeChat"
+     "io.ente.auth"
   ];
   
+  # ═══════════════════════════════════════════════════════════
   # 配置 Flatpak 远程仓库
+  # ═══════════════════════════════════════════════════════════
   services.flatpak.remotes = [
+    # 主仓库 - Flathub (使用国内镜像加速)
     {
       name = "flathub";
-      location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+      # 中国大陆用户建议使用以下镜像源之一：
+      # 1. 中科大镜像 (推荐)
+      location = "https://mirrors.ustc.edu.cn/flatpak-repo/flatpak.flatpakrepo";
+      # 2. 上海交通大学镜像
+      # location = "https://mirror.sjtu.edu.cn/flatpak-repo/flatpak.flatpakrepo";
+      # 3. 清华大学镜像
+      # location = "https://mirrors.tuna.tsinghua.edu.cn/flatpak-repo/flatpak.flatpakrepo";
+      # 4. 官方源（如果镜像不可用）
+      # location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
     }
+    
+    # 可选：Flathub Beta 测试版仓库
+    # {
+    #   name = "flathub-beta";
+    #   location = "https://dl.flathub.org/beta-repo/flathub-beta.flatpakrepo";
+    # }
   ];
   
   # ═══════════════════════════════════════════════════════════

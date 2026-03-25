@@ -102,6 +102,7 @@
     # ./font.nix
     ./Alacritty.nix
     ./zellij.nix
+    ./flatpak.nix  # Flatpak 应用管理配置
   ];
 
 }
