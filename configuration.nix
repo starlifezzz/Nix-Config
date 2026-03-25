@@ -110,17 +110,7 @@
   users.users.zhangchongjie = {
     isNormalUser = true; # 普通用户
     description = "zhangchongjie";
-    # 添加 net_admin 权限以允许 Clash 创建 TUN 设备
-    # 根据 NixOS 官方文档，TUN 模式需要 NET_ADMIN capability
-    extraGroups = [ 
-      "networkmanager" 
-      "wheel" 
-      "flatpak" 
-      "video" 
-      "render" 
-      "input"
-      "netadmin"  # 网络管理权限（TUN 模式必需）
-    ];
+    extraGroups = [ "networkmanager" "wheel" "flatpak" "video" "render" "input" ];
     # 设置默认 shell 为 fish
     shell = pkgs.fish;
   };
@@ -244,7 +234,8 @@
     extraPortals = [
       pkgs.kdePackages.xdg-desktop-portal-kde  # KDE portal（完整实现）
     ];
-    config.common.default = "*=kde";  # 强制所有应用使用 KDE portal，避免 GTK 应用使用错误的后端
+    # 不设置 default，让系统自动选择后端
+    # config.common.default 留空以使用自动选择
   };
 
   # zRAM 配置
@@ -264,34 +255,16 @@
     };
   };
 
-  # ═══════════════════════════════════════════════════════════
   # 网络配置
-  # ═══════════════════════════════════════════════════════════
   networking = {
     hostName = "nixos";
     networkmanager.enable = true;
     
-    # ═══════════════════════════════════════════════════════════
-    # 防火墙配置 - 支持 Clash TUN 模式
-    # ═══════════════════════════════════════════════════════════
     firewall = {
       enable = true;
       allowPing = true;
       checkReversePath = true;
-      
-      # 允许 Clash TUN 模式的虚拟网卡流量
-      # 根据 NixOS 官方 issue #477636，TUN 模式需要额外的防火墙规则
-      trustedInterfaces = [
-        "Meta"  # Clash Meta 内核的默认 TUN 接口名称
-        "clash0"  # 备选 TUN 接口名称
-      ];
-      
-      # 开放必要的端口
-      allowedTCPPorts = [ 
-        7897  # Clash Dashboard
-        7890  # Clash HTTP 代理端口
-        7891  # Clash SOCKS5 代理端口
-      ];
+      allowedTCPPorts = [ 7897 ];  # Clash Dashboard
       allowedTCPPortRanges = [
         { from = 1714; to = 1764; }  # KDE Connect
       ];
