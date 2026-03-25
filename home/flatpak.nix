@@ -18,6 +18,8 @@
     # 通讯工具
     # ═══════════════════════════════════════════════════════
     "org.telegram.desktop"     # Telegram
+    "com.qq.QQ"  
+    "com.tencent.WeChat"
     # "im.riot.Riot"            # Element/Matrix
     # "org.signal.Signal"       # Signal
     
@@ -25,7 +27,7 @@
     # 媒体播放
     # ═══════════════════════════════════════════════════════
     "org.videolan.VLC"        # VLC 播放器
-    "com.spotify.Client"      # Spotify 音乐
+    # "com.spotify.Client"      # Spotify 音乐
     
     # ═══════════════════════════════════════════════════════
     # 办公生产力
@@ -37,10 +39,7 @@
     # 开发工具
     # ═══════════════════════════════════════════════════════
     # "com.github.GitKraken"    # GitKraken Git 客户端
-     "com.qq.QQ"          
-     "com.spotify.Client" 
-     "com.tencent.WeChat"
-     "io.ente.auth"
+     "io.ente.auth"             # Ente 密码管理 
   ];
   
   # ═══════════════════════════════════════════════════════════
