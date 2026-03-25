@@ -110,7 +110,17 @@
   users.users.zhangchongjie = {
     isNormalUser = true; # 普通用户
     description = "zhangchongjie";
-    extraGroups = [ "networkmanager" "wheel" "flatpak" "video" "render" "input" ];
+    # 添加 netadmin 权限以允许 Clash 创建 TUN 设备
+    # 根据 NixOS 官方文档，TUN 模式需要 NET_ADMIN capability
+    extraGroups = [ 
+      "networkmanager" 
+      "wheel" 
+      "flatpak" 
+      "video" 
+      "render" 
+      "input"
+      "netadmin"  # ✅ 网络管理权限（TUN 模式必需）
+    ];
     # 设置默认 shell 为 fish
     shell = pkgs.fish;
   };
@@ -136,32 +146,50 @@
     zellij
     fastfetch
     home-manager
-    pkgs.vscode
+    vscode
     
     # KDE 应用
     kdePackages.kdeconnect-kde
     
-    # 网络工具
-    clash-verge-rev  # 只保留一个 Clash GUI
-    # flclash          # 备选
-    
+    # ═══════════════════════════════════════════════════════════
+    # Clash TUN模式支持 - NixOS 官方文档推荐
+    # ═══════════════════════════════════════════════════════════
+    clash-verge-rev  # ✅ Clash Meta 内核 GUI（支持 TUN模式）
+  
+    # ═══════════════════════════════════════════════════════════
+    # 实用工具与脚本
+    # ═══════════════════════════════════════════════════════════
     # 系统维护工具
     timeshift
     bleachbit
-    
-    # pkgs.protonup-qt
-    
+  
     # GPU 工具（AMD）
-    # vulkan-tools      # vulkaninfo
-    # radeontop         # AMD GPU 监控
     pciutils          # lspci 工具
-    
+  
     # 多媒体支持
     ffmpeg-full       # 完整的 FFmpeg
-    # kdePackages.plasma-workspace-wallpapers
-  ];
+  
+    # Fish Shell（提供 fish 解释器）
+    fish
+];
 
-  # 传感器支持
+# ═══════════════════════════════════════════════════════════
+# Clash TUN 模式支持 - 通过脚本管理（非 systemd 服务）
+# ═══════════════════════════════════════════════════════════
+# 注意：TUN 设备由 start-clash-tun.sh 脚本在运行时创建
+# 不需要 systemd 服务，避免与脚本产生竞争条件
+
+# ═══════════════════════════════════════════════════════════
+# 自定义脚本别名（方便直接运行）
+# ═══════════════════════════════════════════════════════════
+environment.shellAliases = {
+  # Clash TUN 配置脚本别名
+  setup-clash = "sudo /etc/nixos/scripts/start-clash-tun.sh";
+  check-clash = "/etc/nixos/scripts/check-clash-tun.sh";
+  clash-tun = "sudo /etc/nixos/scripts/start-clash-tun.sh";
+};
+
+# 传感器支持
   hardware.sensor.iio.enable = true;
 
   # services.dbus.enable = true;
@@ -234,8 +262,7 @@
     extraPortals = [
       pkgs.kdePackages.xdg-desktop-portal-kde  # KDE portal（完整实现）
     ];
-    # 不设置 default，让系统自动选择后端
-    # config.common.default 留空以使用自动选择
+    config.common.default = "*=kde";  # 强制所有应用使用 KDE portal，避免 GTK 应用使用错误的后端
   };
 
   # zRAM 配置
@@ -255,16 +282,37 @@
     };
   };
 
+  # ═══════════════════════════════════════════════════════════
   # 网络配置
+  # ═══════════════════════════════════════════════════════════
   networking = {
     hostName = "nixos";
     networkmanager.enable = true;
     
+    # ═══════════════════════════════════════════════════════════
+    # 防火墙配置 - 支持 Clash TUN 模式
+    # ═══════════════════════════════════════════════════════════
     firewall = {
       enable = true;
       allowPing = true;
       checkReversePath = true;
-      allowedTCPPorts = [ 7897 ];  # Clash Dashboard
+      
+      # 允许 Clash TUN 模式的虚拟网卡流量
+      # 根据 NixOS 官方 issue #477636，TUN 模式需要信任 TUN 接口
+      trustedInterfaces = [
+        "Mihomo"  # ✅ Clash Verge Rev 的 TUN 接口名称
+        "Meta"    # 备选：Clash Meta 内核的默认 TUN 接口
+        "clash0"  # 备选 TUN 接口
+        "utun*"   # 通用 TUN 接口通配符
+      ];
+      
+      # 开放必要的端口
+      allowedTCPPorts = [ 
+        7897  # Clash Dashboard
+        7890  # Clash HTTP 代理端口
+        7891  # Clash SOCKS5 代理端口
+        9090  # Clash External Controller (可选)
+      ];
       allowedTCPPortRanges = [
         { from = 1714; to = 1764; }  # KDE Connect
       ];
@@ -275,25 +323,17 @@
   };
 
 
-  #  # 系统范围的环境变量 - 包含代理设置
-  # environment.variables = {
-  #   HTTP_PROXY = "http://127.0.0.1:7897";
-  #   HTTPS_PROXY = "http://127.0.0.1:7897";
-  #   NO_PROXY = "127.0.0.1,localhost,*.local";
-  # };
+  # ═══════════════════════════════════════════════════════════
+  # 环境变量配置 - TUN 模式下无需全局代理设置
+  # ═══════════════════════════════════════════════════════════
+  # 已移除：TUN 模式会自动拦截并转发所有流量，无需设置 HTTP_PROXY/HTTPS_PROXY
 
-
-    # 全局环境变量（对所有程序生效，包括 Lutris）
-  environment.variables = {
-    HTTP_PROXY = "http://127.0.0.1:7897";
-    HTTPS_PROXY = "http://127.0.0.1:7897";
-    NO_PROXY = "localhost,127.0.0.1,::1,.localdomain.com";
-  };
-
-  # systemd-resolved DNS 服务
+  # systemd-resolved DNS 服务（与 NetworkManager 协同工作）
   services.resolved = {
     enable = true;
     dnssec = "false";
+    # 注意：NetworkManager 会动态更新 DNS，systemd-resolved 作为后端
+    # 仅在 NetworkManager 未提供 DNS 时使用以下静态配置
     extraConfig = ''
       DNSStubListener=yes
       DNS=119.29.29.29 223.5.5.5
@@ -347,7 +387,12 @@
     };
   };
 
-  #flatpak读取系统字体权限
+  # ═══════════════════════════════════════════════════════════
+  # Flatpak 字体访问支持（可选配置）
+  # ═══════════════════════════════════════════════════════════
+  # 注意：Flatpak 应用通常通过 Portal 自动访问系统字体
+  # 此配置为某些需要直接访问 /usr/share/fonts 的旧应用提供兼容
+  # 如果所有 Flatpak 应用字体正常，可以考虑移除此配置
   system.fsPackages = [ pkgs.bindfs ];
   fileSystems = let
     mkRoSymBind = path: {
@@ -356,8 +401,7 @@
       options = [ "ro" "resolve-symlinks" "x-gvfs-hide" ];
     };
     fontsPkgs = config.fonts.packages ++ (with pkgs; [
-        # Add your cursor themes and icon packages here
-        # etc.
+        # 图标和光标主题（如有需要可在此添加）
       ]);
     x11Fonts = pkgs.runCommand "X11-fonts"
       {
