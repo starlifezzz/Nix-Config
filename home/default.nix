@@ -69,8 +69,7 @@
   home.packages = with pkgs; [
     jetbrains-mono
     fira-code
-
-      # 游戏相关
+    # 游戏相关
     pkgs.lutris
   ];
 

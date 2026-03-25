@@ -142,6 +142,7 @@
     git
 
     # 终端和开发工具
+    fish
     alacritty
     zellij
     fastfetch
@@ -150,27 +151,17 @@
     
     # KDE 应用
     kdePackages.kdeconnect-kde
-    
-    # ═══════════════════════════════════════════════════════════
-    # Clash TUN模式支持 - NixOS 官方文档推荐
-    # ═══════════════════════════════════════════════════════════
-    clash-verge-rev  # ✅ Clash Meta 内核 GUI（支持 TUN模式）
-  
-    # ═══════════════════════════════════════════════════════════
-    # 实用工具与脚本
-    # ═══════════════════════════════════════════════════════════
+
+    # ✅ Clash Meta 内核 GUI（支持 TUN模式）
+    #一定要保证/home/zhangchongjie/.local/share/io.github.clash-verge-rev.clash-verge-rev/
+    #有clash-verge-check.yaml,没有的话打开clash verge的客户端导入订阅后会生成
+    clash-verge-rev  
     # 系统维护工具
     timeshift
     bleachbit
   
-    # GPU 工具（AMD）
-    pciutils          # lspci 工具
-  
     # 多媒体支持
     ffmpeg-full       # 完整的 FFmpeg
-  
-    # Fish Shell（提供 fish 解释器）
-    fish
 ];
 
 # ═══════════════════════════════════════════════════════════
