@@ -1,0 +1,15 @@
+{ pkgs ? import <nixpkgs> {} }:
+
+pkgs.mkShell {
+  buildInputs = with pkgs; [
+    nix
+    git
+    vim
+    home-manager
+  ];
+
+  shellHook = ''
+    echo "NixOS development environment loaded"
+    echo "Configuration file: configuration.nix"
+  '';
+}

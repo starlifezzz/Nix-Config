@@ -128,6 +128,12 @@
   # Fish Shell（系统级）
   programs.fish.enable = true;
 
+  # direnv 配置
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;  # 启用 nix-direnv 集成
+  };
+
   # Firefox 浏览器
   programs.firefox.enable = true;
 
@@ -148,6 +154,7 @@
     fastfetch
     home-manager
     vscode
+    pkgs.direnv
     
     # KDE 应用
     kdePackages.kdeconnect-kde
@@ -254,6 +261,18 @@ environment.shellAliases = {
 
   # Flatpak 配置
   services.flatpak.enable = true;
+
+
+  # 配置 Flatpak 镜像源 - 系统级
+  systemd.services.flatpak-repo = {
+    wantedBy = [ "multi-user.target" ];
+    path = [ pkgs.flatpak ];
+    script = ''
+      flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+      flatpak remote-modify flathub --url=https://mirror.sjtu.edu.cn/flathub
+    '';
+  };
+
 
   # XDG Portal 配置 - KDE Plasma 环境
   xdg.portal = {
