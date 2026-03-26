@@ -280,8 +280,19 @@ environment.shellAliases = {
     extraPortals = [
       pkgs.kdePackages.xdg-desktop-portal-kde  # KDE portal（完整实现）
     ];
-    config.common.default = "*=kde";  # 强制所有应用使用 KDE portal，避免 GTK 应用使用错误的后端
+    # 修改配置，确保兼容性
+    config = {
+      common = {
+        default = [ "kde" ];  # 更正配置格式
+      };
+      # 为兼容性添加额外配置
+      plasma = {
+        default = [ "kde" ];
+      };
+    };
   };
+    # 确保 D-Bus 服务启用，这对 Flatpak 应用很重要
+  services.dbus.enable = true;
 
   # zRAM 配置
   zramSwap = {

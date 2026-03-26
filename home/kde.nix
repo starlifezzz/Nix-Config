@@ -470,7 +470,6 @@
       Window to Desktop 9=none,,窗口移动到桌面 9
       Window to Next Desktop=none,,窗口移动到下一桌面
       Window to Next Screen=Meta+Shift+Right,Meta+Shift+Right,移动窗口到下一屏幕
-      Window to Previous Desktop=none,,窗口移动到上一桌面
       Window to Previous Screen=Meta+Shift+Left,Meta+Shift+Left,移动窗口到上一屏幕
       Window to Screen 0=none,,移动窗口到屏幕 0
       Window to Screen 1=none,,移动窗口到屏幕 1
@@ -559,10 +558,11 @@
   # 设置 GTK 主题环境变量
   home.sessionVariables = {
     GTK_FONT_NAME = "LXGW WenKai Screen 10";
-    # 在 Wayland 下清空这些变量，让 Wayland 协议直接处理
+    # 保持输入法模块设置
     GTK_IM_MODULE = "";
     QT_IM_MODULE = "";
     XMODIFIERS = "@im=fcitx";
+    SDL_IM_MODULE = "fcitx";
   };
   
   # 文件管理器中显示常用目录
@@ -580,4 +580,8 @@
     force = true;
   };
 
+  # 启用 dconf 以确保 KDE 配置正确应用
+  dconf = {
+    enable = true;
+  };
 }
