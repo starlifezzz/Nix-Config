@@ -57,7 +57,7 @@
       "fs.inotify.max_user_watches" = 524288;
       "fs.file-max" = 2097152;
       
-      # AMDGPU + BTRFS 优化
+      # AMDGPU优化
       "vm.page-cluster" = lib.mkDefault 0;  # SSD 优化：禁用交换预读
     };
   };
@@ -435,7 +435,7 @@ environment.shellAliases = {
     };
   in {
     "/usr/share/icons" = mkRoSymBind (aggregatedIcons + "/share/icons");
-    # "/usr/share/fonts" = mkRoSymBind (x11Fonts + "/share/fonts");
+    "/usr/share/fonts" = mkRoSymBind (x11Fonts + "/share/fonts");
   };
 
   # SSD 优化 - 定期 TRIM
@@ -458,6 +458,12 @@ environment.shellAliases = {
       };
     };
   };
+
+  # 设置 /etc/nix 目录权限，允许 users 组写入
+  systemd.tmpfiles.rules = [
+    "d /etc/nixos 0775 root users -"
+  ];
+
 
   # 系统版本
   system.stateVersion = "25.11";
