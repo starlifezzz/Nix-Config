@@ -1,5 +1,5 @@
 # /etc/nixos/home/default.nix
-{ config, pkgs, lib, nix-flatpak, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   # ═══════════════════════════════════════════════════════════
@@ -99,10 +99,8 @@
   imports = [
     ./home.nix
     ./kde.nix
-    # ./font.nix
     ./Alacritty.nix
     ./zellij.nix
-    # ./flatpak.nix  # Flatpak 应用管理配置
   ];
 
 }
