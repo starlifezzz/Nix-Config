@@ -39,7 +39,8 @@
     # 开发工具
     # ═══════════════════════════════════════════════════════
     # "com.github.GitKraken"    # GitKraken Git 客户端
-     "io.ente.auth"             # Ente 密码管理 
+    #"com.visualstudio.code"
+    "io.ente.auth"             # Ente 密码管理
   ];
   
   # ═══════════════════════════════════════════════════════════
@@ -51,9 +52,9 @@
       name = "flathub";
       # 中国大陆用户建议使用以下镜像源之一：
       # 1. 中科大镜像 (推荐)
-      # location = "https://mirrors.ustc.edu.cn/flatpak-repo/flatpak.flatpakrepo";
+       location = "https://mirrors.ustc.edu.cn/flatpak-repo/flatpak.flatpakrepo";
       # 2. 上海交通大学镜像
-      location = "https://mirror.sjtu.edu.cn/flatpak-repo/flatpak.flatpakrepo";
+      #location = "https://mirror.sjtu.edu.cn/flatpak-repo/flatpak.flatpakrepo";
       # 3. 清华大学镜像
       # location = "https://mirrors.tuna.tsinghua.edu.cn/flatpak-repo/flatpak.flatpakrepo";
       # 4. 官方源（如果镜像不可用）
@@ -91,16 +92,7 @@
     };
     
     # VS Code 特殊配置
-    "com.visualstudio.code".Context = {
-      filesystems = [
-        "xdg-config/git:ro"           # 访问 Git 配置
-        "/run/current-system/sw/bin:ro"  # 访问 NixOS 系统命令
-      ];
-      sockets = [
-        "gpg-agent"                   # GPG 密钥支持
-        "pcsc"                        # 智能卡支持（如 YubiKey）
-      ];
-    };
+
     
     # OnlyOffice 需要 X11（无 Wayland 支持）
     "org.onlyoffice.desktopeditors".Context.sockets = [
