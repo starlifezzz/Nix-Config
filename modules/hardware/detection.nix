@@ -3,7 +3,7 @@
 
 let
   supportedCPUs = [ "ryzen-1600x" "ryzen-2600" "ryzen-3600" "unknown-cpu" ];
-  supportedGPUs = [ "r9-370" "rx-5500" "rx-5500xt" "rx-5700" "rx-5700-xt" "rx-6600-xt" "unknown-gpu" ];
+  supportedGPUs = [ "r9-370" "rx-5500" "rx-5500xt" "rx-5700" "rx-5700-xt" "rx-6600-xt" "rx-6600xt" "unknown-gpu" ];
   
 in
 {

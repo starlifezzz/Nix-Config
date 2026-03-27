@@ -2,15 +2,8 @@
   description = "NixOS configuration with flexible hardware selection";
 
   inputs = {
-    # 使用 GitHub 原生格式（推荐，最稳定）
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    # 如果 GitHub 访问慢，可以使用以下备选方案：
-    # 方案 1: 使用中科大 Git 镜像（较稳定）
-    # nixpkgs.url = "git+https://mirrors.ustc.edu.cn/nix-channels/nixpkgs.git?ref=nixos-25.11";
-    
-    # 方案 2: 使用 gitmirror 镜像
-    # nixpkgs.url = "git+https://gitmirror.com/github.com/NixOS/nixpkgs?ref=nixos-25.11";
-    
+
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -20,67 +13,124 @@
 
   outputs = { self, nixpkgs, home-manager, nixos-hardware, ... }:
     let
-      # 预定义模块路径（避免在函数内重复计算）
-      detectionModule = ./modules/hardware/detection.nix;
+      system = "x86_64-linux";
+      lib = nixpkgs.lib;
+
+      # ✅ 动态扫描 CPU 和 GPU 模块文件
+      cpuFiles = builtins.readDir ./modules/hardware/cpu;
+      gpuFiles = builtins.readDir ./modules/hardware/gpu;
+
+      # 提取文件名（去掉 .nix 后缀）
+      cpus = lib.filter (x: x != "unknown-cpu")
+        (map (name: lib.removeSuffix ".nix" name)
+          (lib.attrNames cpuFiles));
+
+      gpus = lib.filter (x: x != "unknown-gpu")
+        (map (name: lib.removeSuffix ".nix" name)
+          (lib.attrNames gpuFiles));
+
+
+      # ✅ 从环境变量读取当前配置，支持动态覆盖
+      currentCPU = builtins.getEnv "NIXOS_CPU";
+      currentGPU = builtins.getEnv "NIXOS_GPU";
+      currentHostName = builtins.getEnv "NIXOS_HOSTNAME";
       
-      # 定义所有支持的硬件组合
-      hardwareConfigs = {
-        # 默认配置（当前设备）
-        "nixos" = { cpu = "ryzen-2600"; gpu = "rx-5500"; hostName = "nixos-2600-rx5500"; };
-        
-        # 其他硬件配置
-        "nixos-1600x-r9370" = { cpu = "ryzen-1600x"; gpu = "r9-370"; hostName = "nixos-1600x-r9370"; };
-        "nixos-2600-rx6600xt" = { cpu = "ryzen-2600"; gpu = "rx-6600-xt"; hostName = "nixos-2600-rx6600xt"; };
-        "nixos-3600-rx6600xt" = { cpu = "ryzen-3600"; gpu = "rx-6600-xt"; hostName = "nixos-3600-rx6600xt"; };
+      # ✅ 显示警告（如果有环境变量覆盖）
+      _ = 
+        if currentCPU != "" || currentGPU != "" || currentHostName != ""
+        then builtins.trace "⚠️ WARNING: Using environment variables! NIXOS_CPU='${currentCPU}', NIXOS_GPU='${currentGPU}', NIXOS_HOSTNAME='${currentHostName}'" null
+        else null;
+
+      # ✅ 使用环境变量或默认值
+      currentConfig = {
+        cpu = if currentCPU != "" then currentCPU else "ryzen-1600x";
+        gpu = if currentGPU != "" then currentGPU else "r9-370";
+        hostName = if currentHostName != "" then currentHostName else "nixos";
       };
-      
-      makeConfig = name: hw: 
+
+
+      # ✅ 生成所有可能的硬件组合
+      allHardwareConfigs = lib.listToAttrs (
+        lib.concatMap (cpu:
+          lib.concatMap (gpu:
+            [
+              {
+                name = "nixos-${cpu}-${gpu}";
+                value = {
+                  inherit cpu gpu;
+                  hostName = "nixos-${cpu}-${gpu}";
+                };
+              }
+            ]
+          ) gpus
+        ) cpus
+      );
+
+      makeConfig = name: hw:
         nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          
+          inherit system;
+
           specialArgs = {
             inherit (hw) cpu gpu;
             inherit self;
           };
-          
+
           modules = [
             ./configuration.nix
-            
+
             nixos-hardware.nixosModules.common-cpu-amd
             nixos-hardware.nixosModules.common-pc-ssd
-            
+
             # 基础硬件检测模块
-            detectionModule
-            
-            # 动态导入硬件特定配置
+            ./modules/hardware/detection.nix
+
+            # ✅ 动态导入对应的 CPU 和 GPU 模块
             ({ config, lib, pkgs, ... }: {
-              imports = 
-                lib.optional (builtins.pathExists ./modules/hardware/cpu/${hw.cpu}.nix)
-                  ./modules/hardware/cpu/${hw.cpu}.nix
-                ++ lib.optional (builtins.pathExists ./modules/hardware/gpu/${hw.gpu}.nix)
-                  ./modules/hardware/gpu/${hw.gpu}.nix;
-              
-              networking.hostName = lib.mkDefault hw.hostName;
-              
+              # 先设置 manualModel（在模块导入前）
               hardware.cpu.manualModel = hw.cpu;
               hardware.gpu.manualModel = hw.gpu;
+              networking.hostName = lib.mkDefault hw.hostName;
             })
-            
+
+            # 直接导入模块文件（路径一定存在）
+            ./modules/hardware/cpu/${hw.cpu}.nix
+            ./modules/hardware/gpu/${hw.gpu}.nix
+
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              
-              # 文件冲突时自动备份到带时间戳的文件
               home-manager.backupFileExtension = "hm-backup";
-              
               home-manager.users.zhangchongjie = import ./home;
               home-manager.extraSpecialArgs = { inherit self; };
             }
           ];
         };
+
+      # ✅ 预先生成所有配置，避免重复计算
+      nixosConfigs = lib.mapAttrs' (name: config:
+        lib.nameValuePair name (makeConfig name config)
+      ) allHardwareConfigs;
+
+      # ✅ 获取当前配置实例，带错误检查
+      currentConfigKey = "nixos-${currentConfig.cpu}-${currentConfig.gpu}";
+      currentNixosConfig = nixosConfigs.${currentConfigKey} or
+        (builtins.abort "Configuration '${currentConfigKey}' not found. Available configurations: ${builtins.concatStringsSep ", " (lib.attrNames nixosConfigs)}");
     in
     {
-      nixosConfigurations = builtins.mapAttrs makeConfig hardwareConfigs;
+      # ✅ 自动生成所有组合的配置
+      nixosConfigurations = nixosConfigs // {
+        # ✅ 添加 default 别名指向当前配置
+        default = currentNixosConfig;
+
+        # ✅ 添加简短别名 "nixos" 指向当前配置（方便命令使用）
+        nixos = currentNixosConfig;
+      };
+
+      # ✅ 添加默认配置包 - 必须提供 nixos-rebuild 需要的属性
+      packages.${system} = {
+        default = currentNixosConfig.config.system.build.toplevel;
+        nixos = currentNixosConfig.config.system.build.toplevel;
+      } // lib.mapAttrs (_: config: config.config.system.build.toplevel) nixosConfigs;
     };
 }

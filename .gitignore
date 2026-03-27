@@ -16,7 +16,4 @@ result-*
 
 # 不能提交的文件
 # secrets/
-hardware-configuration*.nix
-!hardware-configuration-2600.nix
-!hardware-configuration-1600x.nix
 

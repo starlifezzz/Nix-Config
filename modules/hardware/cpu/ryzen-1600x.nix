@@ -1,63 +1,33 @@
-# { config, lib, pkgs, ... }:
-
-# {
-#   config = lib.mkIf (config.hardware.cpu.manualModel == "ryzen-1600x") {
-#     hardware.cpu.model = "ryzen-1600x";
-    
-#     boot.kernelParams = [
-#       "amd_pstate=active"
-#       "processor.max_cstate=5"
-#     ];
-    
-#     powerManagement.powertop.enable = true;
-    
-#     # Deleted: nix.settings.max-jobs = 6;
-#   };
-# }
-
 { config, lib, pkgs, ... }:
 
 {
   config = lib.mkIf (config.hardware.cpu.manualModel == "ryzen-1600x") {
     hardware.cpu.model = "ryzen-1600x";
     
+    # ✅ CPU 频率调节模块 - Ryzen 1000 系列必需
+    boot.kernelModules = [ "acpi-cpufreq" ];
+    
     boot.kernelParams = [
-      # 第一代 Ryzen 优化
-      # "amd_pstate=active"  # 第一代 Ryzen 不支持，使用 acpi-cpufreq
       "processor.max_cstate=5"
       "init_on_alloc=1"
-      
-      # 第一代 Ryzen 特殊优化
-      "pcie_aspm=off"  # 第一代 Ryzen ASPM 不稳定，建议关闭
-      
-      # 内存优化（第一代 Ryzen 对内存时序敏感）
+      "pcie_aspm=off"
       "transparent_hugepage=madvise"
       "numa_balancing=1"
     ];
     
     powerManagement = {
       powertop.enable = true;
-      cpuFreqGovernor = lib.mkDefault "ondemand";  # 按需调频（更适合第一代）
+      cpuFreqGovernor = lib.mkForce "ondemand";
     };
     
     boot.kernel.sysctl = {
-      # 调度优化 - 使用 lib.mkForce 覆盖 configuration.nix 的默认设置
       "kernel.sched_autogroup_enabled" = lib.mkForce 1;
       "kernel.sched_migration_cost_ns" = lib.mkForce 50000;
-      
-      # 内存优化 - 第一代 Ryzen 优化的值
       "vm.swappiness" = lib.mkForce 10;
       "vm.vfs_cache_pressure" = lib.mkForce 50;
       "vm.dirty_ratio" = lib.mkForce 20;
       "vm.dirty_background_ratio" = lib.mkForce 10;
-      
-      # 安全优化（第一代 Ryzen 需要 PTI）
-      # 使用 lib.mkForce 覆盖 configuration.nix 中的默认设置
-      "kernel.page-table-isolation" = lib.mkForce 1;  # 第一代 Ryzen 存在漏洞，需要启用 PTI
+      "kernel.page-table-isolation" = lib.mkForce 1;
     };
   };
 }
-
-
-
-

@@ -9,11 +9,8 @@
       # 基础硬件检测模块（提供 hardware.cpu.manualModel 等选项）
       ./modules/hardware/detection.nix
       # # 硬件配置文件（包含文件系统和 BTRFS 配置）
-      # ./hardware-configuration.nix
-    ] 
-      # # 硬件自动检测配置（已禁用）以后换电脑后都要先改这个！！！！！！！！！！！
-      # ++ lib.optional (builtins.pathExists ./hardware-auto.nix) ./hardware-auto.nix
-      ++ lib.optional (builtins.pathExists ./hardware-configuration-2600.nix) ./hardware-configuration-2600.nix;
+      ./hardware-configuration.nix
+    ];
 
   # 启动配置
   boot = {
@@ -89,7 +86,7 @@
   };
 
   # KDE Plasma 6 桌面环境
-  services.xserver.enable = false;  # 原生 Wayland
+  services.xserver.enable = true;  # 原生 Wayland
   services.desktopManager.plasma6.enable = true;
 
   # 打印服务（默认禁用）
@@ -105,6 +102,9 @@
     pulse.enable = true;
     jack.enable = true;
   };
+  
+  # ✅ UPower 服务 - 修复 WirePlumber 电池百分比错误
+  services.upower.enable = true;
 
   # 用户配置
   users.users.zhangchongjie = {
@@ -167,7 +167,7 @@
     timeshift
   
     # 多媒体支持
-    ffmpeg-full       # 完整的 FFmpeg
+    #ffmpeg-full       # 完整的 FFmpeg
 ];
 
 # ═══════════════════════════════════════════════════════════
@@ -471,17 +471,15 @@ environment.shellAliases = {
   services.fstrim.enable = true;
 
   # CPU 频率调节器
-  powerManagement.cpuFreqGovernor = "performance";
+  powerManagement.cpuFreqGovernor = lib.mkForce "ondemand";
 
-  # SDDM 显示管理器配置
+ # SDDM 显示管理器配置
   services.displayManager.defaultSession = "plasma";
   services.displayManager.sddm = {
     enable = true;
     wayland.enable = true;
-    
     settings = {
       General = {
-        Background = "${pkgs.kdePackages.plasma-workspace-wallpapers}/share/wallpapers/Mountain/contents/images/5120x2880.png";
         EnableAvatars = false;
         InputMethod = "qtvirtualkeyboard";
       };
@@ -491,6 +489,8 @@ environment.shellAliases = {
   # 设置 /etc/nix 目录权限，允许 users 组写入
   systemd.tmpfiles.rules = [
     "d /etc/nixos 0775 root users -"
+    "d /run/polkit-1/rules.d 0755 root root -"
+    "d /usr/local/share/polkit-1/rules.d 0755 root root -"
   ];
 
 
