@@ -18,4 +18,5 @@ result-*
 # secrets/
 hardware-configuration*.nix
 !hardware-configuration-2600.nix
+!hardware-configuration-1600x.nix
 
