@@ -165,7 +165,6 @@
     clash-verge-rev  
     # 系统维护工具
     timeshift
-    bleachbit
   
     # 多媒体支持
     ffmpeg-full       # 完整的 FFmpeg

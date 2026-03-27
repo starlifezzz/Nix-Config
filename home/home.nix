@@ -34,6 +34,12 @@
       gc = "sudo nix-collect-garbage -d";
       optimise = "sudo nix-store --optimise";
       
+      # NixOS 专用
+      ns = "nix-shell";
+      nrs = "sudo nixos-rebuild switch";
+      nrt = "sudo nixos-rebuild test";
+      generations = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
+      
       # 目录导航使用 Fish 函数（避免特殊字符问题）
     };
 
