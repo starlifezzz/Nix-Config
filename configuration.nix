@@ -472,13 +472,25 @@
   ];
 
   # ═══════════════════════════════════════════════════════════
-  # Home Manager 全局配置（仅保留 NixOS 集成所需）
+  # Home Manager 全局配置（NixOS 集成模式）
   # ═══════════════════════════════════════════════════════════
-  # ⚠️ 注意：Home Manager 用户配置已迁移到 flake.nix 独立管理
-  # 这里只保留系统级集成所需的模块加载
-  home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = true;
-  home-manager.extraSpecialArgs = { inherit pkgs-unstable; };
+  # ✅ 启用 Home Manager 作为 NixOS 模块
+  # 这样在执行 nixos-rebuild switch 时会自动应用用户配置
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    extraSpecialArgs = { inherit pkgs-unstable; };
+    
+    # ✅ 定义用户配置（在 nixos-rebuild 时自动应用）
+    users.zhangchongjie = { config, pkgs, ... }: {
+      imports = [
+        ./home/default.nix
+      ];
+      
+      # 设置状态版本
+      home.stateVersion = "25.11";
+    };
+  };
 
   # 系统版本
   system.stateVersion = "25.11";

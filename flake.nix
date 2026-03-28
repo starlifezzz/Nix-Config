@@ -100,21 +100,10 @@
       ) allHardwareConfigs;
 
       # ═══════════════════════════════════════════════════════════
-      # ✅ Home Manager 独立配置（与 NixOS 分离）
+      # ✅ Home Manager 已集成到 NixOS（不再需要独立配置）
       # ═══════════════════════════════════════════════════════════
-      homeConfigurations = {
-        "zhangchongjie" = home-manager.lib.homeManagerConfiguration {
-          pkgs = pkgs-unstable;  # 使用 unstable pkgs 获取最新软件
-          
-          modules = [
-            ./home/default.nix
-          ];
-          
-          extraSpecialArgs = {
-            inherit self pkgs-unstable;
-          };
-        };
-      };
+      # 注意：Home Manager 用户配置已迁移到 configuration.nix
+      # 作为 NixOS 模块管理，在 nixos-rebuild 时自动应用
 
       # ✅ 使用第一个配置作为 default（或可通过环境变量覆盖）
       defaultCPU = "ryzen-2600";
@@ -131,12 +120,6 @@
 
         # ✅ 添加简短别名 "nixos" 指向默认配置（方便命令使用）
         nixos = defaultNixosConfig;
-      };
-
-      # ✅ Home Manager 配置
-      homeConfigurations = homeConfigurations // {
-        # ✅ 添加默认别名
-        default = homeConfigurations."zhangchongjie";
       };
 
       # ✅ 添加默认配置包 - 必须提供 nixos-rebuild 需要的属性

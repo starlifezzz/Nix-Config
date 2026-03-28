@@ -362,7 +362,8 @@ nix flake show
 
 **默认配置** (当前设备：Ryzen 2600 + RX 5500):
 
-```bash
+```
+# NixOS 集成模式：系统 + Home Manager 自动同步
 sudo nixos-rebuild switch --flake .#nixos
 ```
 
@@ -379,9 +380,14 @@ sudo nixos-rebuild switch --flake .#nixos-2600-rx6600xt
 sudo nixos-rebuild switch --flake .#nixos-3600-rx6600xt
 ```
 
+**说明**:
+- ✅ **Home Manager 已集成到 NixOS**，执行 `nixos-rebuild` 时会自动应用用户配置
+- ✅ 无需单独执行 `home-manager switch`
+- ✅ 系统配置与用户配置保持原子性更新
+
 #### 4. 初始化 Home Manager
 
-```bash
+```
 cd /etc/nixos && home-manager switch --flake .#zhangchongjie
 ```
 

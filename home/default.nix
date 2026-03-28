@@ -13,6 +13,9 @@
   # 禁用 Nixpkgs 版本检查（因为我们在用 unstable）
   home.enableNixpkgsReleaseCheck = false;
 
+  # 允许 unfree 软件包
+  nixpkgs.config.allowUnfree = true;
+
   # ═══════════════════════════════════════════════════════════
   # 启用 Home Manager systemd 服务 - 关键配置！
   # ═══════════════════════════════════════════════════════════
