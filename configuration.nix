@@ -271,10 +271,12 @@
     # 确保 D-Bus 服务启用，这对 Flatpak 应用很重要
   services.dbus.enable = true;
 
-  # zRAM 配置
+  # zRAM 配置（动态启用策略）
+  # 注意：hardware.memorySize 在某些 NixOS 版本可能不可用
+  # 使用简化的启用策略
   zramSwap = {
-    enable = true;
-    memoryPercent = 90;
+    enable = true;  # 始终启用，zram-generator 会自动管理
+    memoryPercent = 90;  # 降低到 50% 以防过度占用
     algorithm = "zstd";
     priority = 100;
   };
@@ -313,12 +315,12 @@
       ];
       
       # 开放必要的端口
-      allowedTCPPorts = [ 
-        7897  # Clash Dashboard
-        7890  # Clash HTTP 代理端口
-        7891  # Clash SOCKS5 代理端口
-        9090  # Clash External Controller (可选)
-      ];
+      # allowedTCPPorts = [ 
+      #   7897  # Clash Dashboard
+      #   7890  # Clash HTTP 代理端口
+      #   7891  # Clash SOCKS5 代理端口
+      #   9090  # Clash External Controller (可选)
+      # ];
       allowedTCPPortRanges = [
         { from = 1714; to = 1764; }  # KDE Connect
       ];
@@ -467,7 +469,6 @@
   systemd.tmpfiles.rules = [
     "d /etc/nixos 0775 root users -"
     "d /run/polkit-1/rules.d 0755 root root -"
-    "d /usr/local/share/polkit-1/rules.d 0755 root root -"
   ];
 
   # ═══════════════════════════════════════════════════════════
