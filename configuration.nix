@@ -153,7 +153,9 @@
     ffmpeg-full       # 完整的 FFmpeg（多媒体库）
     
     # ⚠️ 用户级应用由 Home Manager 管理（programs.x + home.packages）
-    # 包括：vscode, vim, fish, alacritty, zellij, git, direnv, nodejs, python3, uv, clash-verge-rev 等
+    # 包括：vscode, vim, fish, alacritty, zellij, git, direnv, nodejs, python3, uv, 等
+    clash-verge-rev
+    kdePackages.kdeconnect-kde
   ];
 
 # 传感器支持
@@ -469,27 +471,13 @@
   ];
 
   # ═══════════════════════════════════════════════════════════
-  # Home Manager 全局配置（在 users 之前定义）
+  # Home Manager 全局配置（仅保留 NixOS 集成所需）
   # ═══════════════════════════════════════════════════════════
+  # ⚠️ 注意：Home Manager 用户配置已迁移到 flake.nix 独立管理
+  # 这里只保留系统级集成所需的模块加载
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
-  home-manager.backupFileExtension = "bak";
-  
-  # ═══════════════════════════════════════════════════════════
-  # Home Manager 用户配置
-  # ═══════════════════════════════════════════════════════════
-  home-manager.users.zhangchongjie = { config, pkgs, ... }: {
-    # 允许 Home Manager 管理用户环境
-    home.enableNixpkgsReleaseCheck = false;
-    
-    # 导入用户配置文件
-    imports = [
-      ./home/default.nix
-    ];
-    
-    # 关键：确保状态版本与系统一致
-    home.stateVersion = "25.11";
-  };
+  home-manager.extraSpecialArgs = { inherit pkgs-unstable; };
 
   # 系统版本
   system.stateVersion = "25.11";
