@@ -37,26 +37,7 @@
           (lib.attrNames gpuFiles));
 
 
-      # ✅ 从环境变量读取当前配置，支持动态覆盖
-      currentCPU = builtins.getEnv "NIXOS_CPU";
-      currentGPU = builtins.getEnv "NIXOS_GPU";
-      currentHostName = builtins.getEnv "NIXOS_HOSTNAME";
-      
-      # ✅ 显示警告（如果有环境变量覆盖）
-      _ = 
-        if currentCPU != "" || currentGPU != "" || currentHostName != ""
-        then builtins.trace "⚠️ WARNING: Using environment variables! NIXOS_CPU='${currentCPU}', NIXOS_GPU='${currentGPU}', NIXOS_HOSTNAME='${currentHostName}'" null
-        else null;
-
-      # ✅ 使用环境变量或默认值
-      currentConfig = {
-        cpu = if currentCPU != "" then currentCPU else "ryzen-1600x";
-        gpu = if currentGPU != "" then currentGPU else "r9-370";
-        hostName = if currentHostName != "" then currentHostName else "nixos";
-      };
-
-
-      # ✅ 生成所有可能的硬件组合
+      # ✅ 生成所有可能的硬件组合（移除环境变量默认值）
       allHardwareConfigs = lib.listToAttrs (
         lib.concatMap (cpu:
           lib.concatMap (gpu:
@@ -135,19 +116,21 @@
         };
       };
 
-      # ✅ 获取当前配置实例，带错误检查
-      currentConfigKey = "nixos-${currentConfig.cpu}-${currentConfig.gpu}";
-      currentNixosConfig = nixosConfigs.${currentConfigKey} or
-        (builtins.abort "Configuration '${currentConfigKey}' not found. Available configurations: ${builtins.concatStringsSep ", " (lib.attrNames nixosConfigs)}");
+      # ✅ 使用第一个配置作为 default（或可通过环境变量覆盖）
+      defaultCPU = "ryzen-2600";
+      defaultGPU = "rx-5500";
+      defaultConfigKey = "nixos-${defaultCPU}-${defaultGPU}";
+      defaultNixosConfig = nixosConfigs.${defaultConfigKey} or
+        (builtins.abort "Default configuration '${defaultConfigKey}' not found. Available configurations: ${builtins.concatStringsSep ", " (lib.attrNames nixosConfigs)}");
     in
     {
       # ✅ 自动生成所有组合的配置
       nixosConfigurations = nixosConfigs // {
-        # ✅ 添加 default 别名指向当前配置
-        default = currentNixosConfig;
+        # ✅ 添加 default 别名指向默认配置
+        default = defaultNixosConfig;
 
-        # ✅ 添加简短别名 "nixos" 指向当前配置（方便命令使用）
-        nixos = currentNixosConfig;
+        # ✅ 添加简短别名 "nixos" 指向默认配置（方便命令使用）
+        nixos = defaultNixosConfig;
       };
 
       # ✅ Home Manager 配置
@@ -158,8 +141,8 @@
 
       # ✅ 添加默认配置包 - 必须提供 nixos-rebuild 需要的属性
       packages.${system} = {
-        default = currentNixosConfig.config.system.build.toplevel;
-        nixos = currentNixosConfig.config.system.build.toplevel;
+        default = defaultNixosConfig.config.system.build.toplevel;
+        nixos = defaultNixosConfig.config.system.build.toplevel;
       } // lib.mapAttrs (_: config: config.config.system.build.toplevel) nixosConfigs;
     };
 }

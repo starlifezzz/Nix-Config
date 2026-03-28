@@ -51,7 +51,6 @@
     # 工具软件
     environment.systemPackages = with pkgs; [
       radeontop
-      vkmark
     ];
   };
 }

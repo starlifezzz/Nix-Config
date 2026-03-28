@@ -13,12 +13,12 @@
         TERM = "xterm-256color";
       };
 
-      # terminal = {
-      #   shell = {
-      #     program = "${pkgs.zellij}/bin/zellij";
-      #     args = [ ];
-      #   };
-      # };
+      terminal = {
+        shell = {
+          program = "${pkgs.zellij}/bin/zellij";
+          args = [ ];
+        };
+      };
 
       colors = {
         draw_bold_text_with_bright_colors = false;

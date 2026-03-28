@@ -382,7 +382,7 @@ sudo nixos-rebuild switch --flake .#nixos-3600-rx6600xt
 #### 4. 初始化 Home Manager
 
 ```bash
-home-manager switch --flake .#nixos.users.zhangchongjie
+cd /etc/nixos && home-manager switch --flake .#zhangchongjie
 ```
 
 #### 5. 设置用户密码
