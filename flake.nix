@@ -2,19 +2,26 @@
   description = "NixOS configuration with flexible hardware selection";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
   };
 
-  outputs = { self, nixpkgs, home-manager, nixos-hardware, ... }:
+  outputs = { self, nixpkgs, home-manager, nixos-hardware, nixpkgs-unstable, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
+
+      # ✅ 添加 unstable pkgs 用于获取最新 VSCode
+      pkgs-unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+        config.allowBroken = true;
+      };
 
       # ✅ 动态扫描 CPU 和 GPU 模块文件
       cpuFiles = builtins.readDir ./modules/hardware/cpu;
@@ -72,7 +79,7 @@
 
           specialArgs = {
             inherit (hw) cpu gpu;
-            inherit self;
+            inherit self pkgs-unstable;
           };
 
           modules = [
@@ -100,9 +107,10 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "hm-backup";
+              # ✅ 使用简单的备份后缀
+              home-manager.backupFileExtension = "backup";
               home-manager.users.zhangchongjie = import ./home;
-              home-manager.extraSpecialArgs = { inherit self; };
+              home-manager.extraSpecialArgs = { inherit self pkgs-unstable; };
             }
           ];
         };

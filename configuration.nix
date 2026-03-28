@@ -1,7 +1,7 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running 'nixos-help').
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, pkgs-unstable, ... }:
 
 {
   imports =
@@ -24,7 +24,7 @@
     };
     
     # 内核配置 - 使用最新稳定版内核
-    kernelPackages = pkgs.linuxPackages;
+    kernelPackages = pkgs.linuxPackages_latest;
     kernelParams = [
       # ═══════════════════════════════════════════════════════════
       # USB 设备稳定性优化 - NixOS 官方推荐设置
@@ -154,37 +154,35 @@
     fastfetch
     home-manager
     vscode
-    pkgs.direnv
+    direnv
     
     # KDE 应用
     kdePackages.kdeconnect-kde
 
-    # ✅ Clash Meta 内核 GUI（支持 TUN模式）
+    # ✅ Clash Meta 内核 GUI（支持 TUN 模式）
     #一定要保证/home/zhangchongjie/.local/share/io.github.clash-verge-rev.clash-verge-rev/
-    #有clash-verge-check.yaml,没有的话打开clash verge的客户端导入订阅后会生成
+    #有 clash-verge-check.yaml，没有的话打开 clash verge 的客户端导入订阅后会生成
     clash-verge-rev  
+    
     # 系统维护工具
     timeshift
   
     # 多媒体支持
-    #ffmpeg-full       # 完整的 FFmpeg
+    ffmpeg-full       # 完整的 FFmpeg
+    
+    # ✅ Node.js (用于 MCP Server Playwright)
+    nodejs            # 使用完整版而非 slim 版本
+    
+    # ✅ uv (Python 包管理器，提供 uvx 命令用于 MCP Server)
+    uv
+    
+    # ✅ Python 3.14 (用于 MCP Server nixos - 解决动态链接库问题)
+    python314
+    python314Packages.pip
+    
+    # ✅ 创建 wrapper 脚本目录
+    # 注意：wrapper 脚本将在下面的 postBuild 中创建
 ];
-
-# ═══════════════════════════════════════════════════════════
-# Clash TUN 模式支持 - 通过脚本管理（非 systemd 服务）
-# ═══════════════════════════════════════════════════════════
-# 注意：TUN 设备由 start-clash-tun.sh 脚本在运行时创建
-# 不需要 systemd 服务，避免与脚本产生竞争条件
-
-# ═══════════════════════════════════════════════════════════
-# 自定义脚本别名（方便直接运行）
-# ═══════════════════════════════════════════════════════════
-environment.shellAliases = {
-  # Clash TUN 配置脚本别名
-  setup-clash = "sudo /etc/nixos/scripts/start-clash-tun.sh";
-  check-clash = "/etc/nixos/scripts/check-clash-tun.sh";
-  clash-tun = "sudo /etc/nixos/scripts/start-clash-tun.sh";
-};
 
 # 传感器支持
   hardware.sensor.iio.enable = true;
@@ -222,6 +220,9 @@ environment.shellAliases = {
         # 备用镜像源 1 - 上海交通大学（稳定性优秀）
         "https://mirror.sjtu.edu.cn/nix-channels/store"
         
+        # 备用镜像源 2 - 清华大学
+        "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+        
         # 官方源（最后的选择）
         "https://cache.nixos.org"
       ];
@@ -245,6 +246,9 @@ environment.shellAliases = {
       # 连接超时优化
       connect-timeout = 10;  # 降低超时时间，快速失败
       log-lines = 25;        # 增加日志行数
+      
+      # ✅ 不强制要求签名，允许从未签名的镜像源下载
+      require-sigs = false;
     };
     
     # 垃圾回收
@@ -296,7 +300,7 @@ environment.shellAliases = {
   # zRAM 配置
   zramSwap = {
     enable = true;
-    memoryPercent = 50;
+    memoryPercent = 90;
     algorithm = "zstd";
     priority = 100;
   };
@@ -354,18 +358,17 @@ environment.shellAliases = {
   # ═══════════════════════════════════════════════════════════
   # 环境变量配置 - TUN 模式下无需全局代理设置
   # ═══════════════════════════════════════════════════════════
-  # 已移除：TUN 模式会自动拦截并转发所有流量，无需设置 HTTP_PROXY/HTTPS_PROXY
 
   # systemd-resolved DNS 服务（与 NetworkManager 协同工作）
   services.resolved = {
     enable = true;
-    dnssec = "false";
-    # 注意：NetworkManager 会动态更新 DNS，systemd-resolved 作为后端
-    # 仅在 NetworkManager 未提供 DNS 时使用以下静态配置
-    extraConfig = ''
-      DNSStubListener=yes
-      DNS=119.29.29.29 223.5.5.5
-    '';
+    settings = {
+      Resolve = {
+        DNSStubListener = "yes";
+        DNS = "119.29.29.29 223.5.5.5";
+        DNSSEC = "false";
+      };
+    };
   };
 
   # 字体配置（系统级）
@@ -436,8 +439,8 @@ environment.shellAliases = {
         preferLocalBuild = true;
         nativeBuildInputs = with pkgs; [
           gzip
-          xorg.mkfontscale
-          xorg.mkfontdir
+          pkgs.mkfontscale
+          pkgs.mkfontdir
         ];
       }
       (''
@@ -453,7 +456,7 @@ environment.shellAliases = {
         cd "$out/share/fonts"
         mkfontscale
         mkfontdir
-        cat $(find ${pkgs.xorg.fontalias}/ -name fonts.alias) >fonts.alias
+        cat $(find ${pkgs.font-alias}/ -name fonts.alias) >fonts.alias
       '');
     aggregatedIcons = pkgs.buildEnv {
       name = "system-icons";
@@ -493,6 +496,32 @@ environment.shellAliases = {
     "d /usr/local/share/polkit-1/rules.d 0755 root root -"
   ];
 
+  # ✅ MCP Server Python Wrapper - 解决动态链接库问题
+  # 在系统激活时创建 Python wrapper 脚本
+  system.activationScripts.preUserUnits.text = ''
+    # 创建用户 bin 目录
+    mkdir -p /home/zhangchongjie/bin
+    chown zhangchongjie:users /home/zhangchongjie/bin
+    
+    # 创建 Python wrapper 脚本
+    cat > /home/zhangchongjie/bin/mcp-python << 'WRAPPER'
+#!/run/current-system/sw/bin/bash
+# Wrapper script for MCP Server to use Nix-managed Python
+# 解决 uv 安装的 Python 动态链接库缺失问题
+
+export PATH="/run/current-system/sw/bin:$PATH"
+export PYTHONPATH=""
+export LD_LIBRARY_PATH="/run/current-system/sw/lib:/run/current-system/sw/lib64"
+
+# 使用 Nix 管理的 Python 3.14
+exec /run/current-system/sw/bin/python3.14 "$@"
+WRAPPER
+    
+    chmod +x /home/zhangchongjie/bin/mcp-python
+    chown zhangchongjie:users /home/zhangchongjie/bin/mcp-python
+    
+    echo "✅ MCP Python wrapper created at /home/zhangchongjie/bin/mcp-python"
+  '';
 
   # 系统版本
   system.stateVersion = "25.11";
