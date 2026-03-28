@@ -72,11 +72,12 @@
 ### 开发工具
 
 #### 系统级
-- **VSCode** - 主代码编辑器
+- **VSCode** - 主代码编辑器（unstable 版本）
 - **Git** - 版本控制
 - **Vim** - 文本编辑器
 - **Alacritty** - GPU 加速终端
 - **Zellij** - Terminal 多路复用器
+- **direnv** - 环境变量管理
 
 #### 用户级 (Home Manager)
 - **JetBrains Mono** - 编程字体
@@ -85,7 +86,8 @@
 ### 网络应用
 
 - **Firefox** - 浏览器 (Wayland 原生)
-- **Clash Verge Rev** - 代理客户端
+- **Clash Verge Rev** - 代理客户端 (TUN 模式)
+- **FlClash** - 备用代理客户端
 - **KDE Connect** - 设备互联
 
 ### 游戏相关
@@ -101,6 +103,7 @@
 - **Home Manager** - 用户配置管理
 - **Flatpak** - 通用包管理
 - **FFmpeg (Full)** - 音视频处理
+- **Node.js** - JavaScript 运行时 (完整版，支持 MCP Server)
 
 ---
 
@@ -150,7 +153,7 @@
 
 #### CPU 频率调节
 
-- **默认策略**: Performance (高性能)
+- **默认策略**: ondemand (按需动态调节)
 - **AMD P-State**: 主动模式 (Ryzen 2600+)
 
 #### USB 电源管理
@@ -184,7 +187,8 @@ amdgpu.dc=1                    # Display Core
 
 - **Sudo**: Wheel 组需密码
 - **防火墙**: 启用
-- **TUN 模块**: 加载 (FlClash)
+- **TUN 模块**: 加载 (Clash Verge Rev)
+- **网络管理权限**: netadmin 组
 
 ---
 
@@ -194,19 +198,23 @@ amdgpu.dc=1                    # Display Core
 
 - **状态**: 启用
 - **允许 Ping**: 是
+- **信任接口**: Mihomo, Meta, clash0, utun* (Clash TUN 模式)
 - **开放端口**:
-  - TCP: 7897 (Clash Dashboard)
+  - TCP: 7897 (Clash Dashboard), 7890-7891 (代理端口), 9090 (External Controller)
   - UDP/TCP: 1714-1764 (KDE Connect)
 
 ### 代理服务
 
-- **HTTP Proxy**: http://127.0.0.1:7897
-- **HTTPS Proxy**: http://127.0.0.1:7897
-- **No Proxy**: localhost, 127.0.0.1, ::1, .localdomain.com
+- **Clash Verge Rev**: 主代理客户端
+  - TUN 模式：启动脚本自动配置
+  - HTTP 代理：http://127.0.0.1:7897
+  - SOCKS5 代理：socks5://127.0.0.1:7891
+- **FlClash**: 备用代理客户端
 
 ### DNS
 
-- **DNS 服务器**: 119.29.29.29, 223.5.5.5
+- **DNS 服务器**: 119.29.29.29 (腾讯 DNSPod), 223.5.5.5 (阿里 DNS)
+- **DNSSEC**: 禁用
 - **Avahi/mDNS**: 启用 (IPv4)
 
 ---
@@ -215,7 +223,7 @@ amdgpu.dc=1                    # Display Core
 
 ### 主用户：zhangchongjie
 
-- **用户组**: networkmanager, wheel, flatpak, video, render, input
+- **用户组**: networkmanager, wheel, flatpak, video, render, input, netadmin
 - **默认 Shell**: Fish
 - **Sudo 权限**: 需要密码
 
@@ -255,10 +263,8 @@ optimise = "sudo nix-store --optimise"
 
 优先级从高到低：
 
-1. https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store
-2. https://mirrors.ustc.edu.cn/nix-channels/store
-3. https://mirrors.cernet.edu.cn/nix-channels/store
-4. https://cache.nixos.org
+1. https://mirrors.ustc.edu.cn/nix-channels/nixpkgs-unstable (中科大 unstable)
+2. https://cache.nixos.org (官方源)
 
 **公钥**: cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
 
@@ -286,7 +292,7 @@ optimise = "sudo nix-store --optimise"
 ```
 /etc/nixos/
 ├── configuration.nix              # 系统主配置
-├── hardware-configuration-2600.nix # 当前硬件配置 (BTRFS)
+├── hardware-configuration.nix     # 当前硬件配置 (BTRFS, 自动生成)
 ├── flake.nix                      # Flakes 多硬件配置入口 ⭐
 ├── flake.lock                     # 版本锁定文件
 ├── .gitignore                     # Git 忽略规则
@@ -310,7 +316,12 @@ optimise = "sudo nix-store --optimise"
 │       ├── rx-5500.nix           # 当前使用
 │       └── rx-6600xt.nix
 │
-└── scripts/                       # 实用脚本 (预留)
+├── scripts/                       # 实用脚本
+│   ├── start-clash-tun.sh        # Clash TUN 模式启动脚本
+│   └── check-clash-tun.sh        # TUN 状态检查脚本
+│
+├── QUICK_REFERENCE.md             # 快速参考手册
+└── CLASH_TUN_GUIDE.md             # Clash TUN 配置指南
 ```
 
 ---
@@ -374,6 +385,12 @@ sudo nixos-rebuild switch --flake .#nixos-3600-rx6600xt
 home-manager switch --flake .#nixos.users.zhangchongjie
 ```
 
+#### 5. 设置用户密码
+
+```bash
+sudo passwd zhangchongjie
+```
+
 ### 日常维护
 
 #### 系统重建 (推荐工作流)
@@ -417,6 +434,115 @@ sudo nix-store --optimise
 fastfetch
 ```
 
+### 🔍 硬件配置验证
+
+#### 使用验证脚本（推荐）
+
+```bash
+# 运行硬件配置验证脚本
+./scripts/verify-hardware.sh
+```
+
+该脚本会自动检查：
+- ✅ 环境变量设置（NIXOS_CPU, NIXOS_GPU, NIXOS_HOSTNAME）
+- ✅ 当前主机名与配置是否匹配
+- ✅ 加载的 CPU/GPU 模块名称
+- ✅ 内核参数是否正确应用
+- ✅ AMDGPU 驱动状态
+- ✅ 所有可用的 Flake 配置
+
+#### 手动验证命令
+
+```bash
+# 1. 查看当前使用的硬件模块
+nix eval '.#nixos.config.hardware.cpu.manualModel'  # 应返回如 "ryzen-2600"
+nix eval '.#nixos.config.hardware.gpu.manualModel'  # 应返回如 "rx-5500"
+
+# 2. 查看当前配置的主机名
+nix eval '.#nixos.config.networking.hostName'
+
+# 3. 查看所有可用配置
+nix flake show
+
+# 4. 对比不同配置的差异
+nix eval '.#nixos-2600-rx5500.config.boot.kernelParams' --json
+nix eval '.#nixos-3600-rx6600xt.config.boot.kernelParams' --json
+
+# 5. 检查实际运行的内核参数
+cat /proc/cmdline
+
+# 6. 查看当前系统引用的模块路径
+nix-store -q --references /run/current-system | grep -E 'ryzen|rx-'
+
+# 7. 验证 GPU 驱动加载
+lspci -k | grep -A 2 -i vga
+```
+
+#### 预期输出示例
+
+**CPU 模块验证：**
+```bash
+$ nix eval '.#nixos.config.hardware.cpu.manualModel'
+"ryzen-2600"
+```
+
+**GPU 模块验证：**
+```bash
+$ nix eval '.#nixos.config.hardware.gpu.manualModel'
+"rx-5500"
+```
+
+**内核参数验证（应包含 USB 优化等）：**
+```bash
+$ cat /proc/cmdline
+... usbcore.autosuspend=-1 usbcore.usbfs_memory_mb=1024 ...
+```
+
+**驱动验证（应显示 amdgpu）：**
+```bash
+$ lspci -k | grep -A 2 -i vga
+VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] ...
+	Kernel driver in use: amdgpu
+	Kernel modules: amdgpu
+```
+
+---
+
+### Clash TUN 模式
+
+#### 启动 TUN 模式
+
+```bash
+# 启动 TUN 模式 (需要 sudo)
+sudo clash-tun
+# 或
+sudo ./scripts/start-clash-tun.sh
+```
+
+#### 检查 TUN 状态
+
+```bash
+# 检查 TUN 接口
+ip link show Mihomo
+# 或
+ip link show Meta
+
+# 检查进程
+ps aux | grep verge-mihomo
+```
+
+#### 停止 TUN 模式
+
+```bash
+sudo pkill -f verge-mihomo
+```
+
+#### 注意事项
+
+- TUN 设备在每次重启后需要重新运行启动脚本
+- 确保 `netadmin` 用户组已生效（需重新登录）
+- Clash Verge Rev GUI 会自动生成配置文件
+
 ### 故障排查
 
 #### 无法启动
@@ -440,7 +566,7 @@ sudo nixos-rebuild switch --flake .#nixos --option substituters ""
 
 # 使用命令行指定镜像源
 sudo nixos-rebuild switch --flake .#nixos \
-  --option substituters "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store" \
+  --option substituters "https://mirrors.ustc.edu.cn/nix-channels/store" \
   --option trusted-public-keys "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
 ```
 
@@ -487,13 +613,15 @@ nix eval '.#nixos.config'
 
 1. 确保 BIOS 中启用了 EFI 启动
 2. 准备好网络连接 (有线优先)
-3. 首次构建时间较长 (约 30-60 分钟)
+3. 首次构建时间较长（约 30-60 分钟）
+4. 首次启动后记得设置用户密码
 
 ### 网络配置
 
-- **代理设置**: 根据需要修改 `environment.variables` 中的代理地址
+- **代理设置**: Clash Verge Rev 默认监听 7897 端口
 - **镜像源**: 已配置国内镜像，若失效请参考 NixOS 官方文档更新
 - **离线使用**: 日常重建无需网络 (使用本地 lock 文件)
+- **TUN 模式**: 每次重启后需手动运行 `sudo clash-tun`
 
 ### 用户安全
 
@@ -501,7 +629,7 @@ nix eval '.#nixos.config'
   ```bash
   sudo passwd zhangchongjie
   ```
-- 若需免密码 sudo，修改 `users.users.<name>.extraGroups` 添加 `nopasswd`
+- `netadmin` 用户组修改后需重新登录生效
 
 ### Flatpak 使用
 
@@ -517,6 +645,12 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 - 不同硬件的 firmware 可能不同，请确保内核固件包完整
 - 建议在 `/etc/nixos` 目录下执行重建命令
 
+### Boot 分区保护
+
+- 已配置 `configurationLimit = 10` 限制启动项数量
+- 定期执行 `sudo nix-collect-garbage -d` 清理旧世代
+- 使用 `bootctl list` 或 `df -h /boot` 定期检查空间
+
 ---
 
 ## 📚 参考资料
@@ -527,17 +661,20 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 - [Home Manager](https://github.com/nix-community/home-manager)
 - [NixOS Hardware](https://github.com/NixOS/nixos-hardware)
 - [Flakes 文档](https://nixos.wiki/wiki/Flakes)
+- [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev)
+- [NixOS Networking](https://nixos.org/manual/nixos/stable/index.html#chap-networking)
 
 ---
 
 ## 🛠️ 技术栈
 
-- **基础系统**: NixOS 25.11
+- **基础系统**: NixOS 25.11 (Unstable)
 - **配置管理**: Nix Flakes
 - **用户配置**: Home Manager
 - **桌面环境**: KDE Plasma 6
 - **显示协议**: Wayland
-- **硬件支持**: AMD Ryzen + AMD Radeon
+- **硬件支持**: AMD Ryzen (1600X/2600/3600) + AMD Radeon (R9 370/RX 5500/RX 6600 XT)
+- **代理方案**: Clash Verge Rev (TUN 模式)
 
 ---
 
