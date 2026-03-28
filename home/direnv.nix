@@ -19,10 +19,8 @@
       log_filter = "info";
     };
     
-    # 全局环境变量
-    global = {
-      # 添加额外的 PATH
-      # PATH_add = "...";
-    };
+    # ⚠️ 注意：programs.direnv 没有 global 选项
+    # 如需设置全局环境变量，应使用 home.sessionVariables
+    # 或在 .envrc 文件中定义
   };
 }

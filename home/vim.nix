@@ -6,26 +6,24 @@
   programs.vim = {
     enable = true;
     
-    # 基础设置
-    settings = {
-      number = true;          # 显示行号
-      relativenumber = true;  # 相对行号
-      wrap = false;           # 不换行
-      cursorline = true;      # 高亮当前行
-      shiftwidth = 2;         # 缩进宽度
-      tabstop = 2;            # Tab 宽度
-      expandtab = true;       # Tab 转空格
-      ignorecase = true;      # 忽略大小写
-      smartcase = true;       # 智能大小写
-      hlsearch = true;        # 高亮搜索结果
-      incsearch = true;       # 增量搜索
-      showmode = true;        # 显示当前模式
-      ruler = true;           # 显示标尺
-      backspace = "indent,eol,start";  # Backspace 行为
-    };
-    
-    # 额外配置
+    # 所有配置都通过 extraConfig 完成
     extraConfig = ''
+      " 基本设置
+      set number                  " 显示行号
+      set relativenumber          " 相对行号
+      set nowrap                  " 不换行
+      set cursorline              " 高亮当前行
+      set shiftwidth=2            " 缩进宽度
+      set tabstop=2               " Tab 宽度
+      set expandtab               " Tab 转空格
+      set ignorecase              " 忽略大小写
+      set smartcase               " 智能大小写
+      set hlsearch                " 高亮搜索结果
+      set incsearch               " 增量搜索
+      set showmode                " 显示当前模式
+      set ruler                   " 显示标尺
+      set backspace=indent,eol,start
+      
       " 基本映射
       nnoremap <C-s> :w<CR>
       nnoremap <C-q> :q!<CR>

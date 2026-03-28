@@ -107,8 +107,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              # ✅ 禁用自动备份
-              home-manager.backupFileExtension = null;
+              # ⚠️ backupFileExtension 已移至 configuration.nix 统一管理
               home-manager.extraSpecialArgs = { inherit self pkgs-unstable; };
             }
           ];

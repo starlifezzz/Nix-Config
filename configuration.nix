@@ -141,48 +141,20 @@
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowBroken = true;
 
-  # 系统软件包
+  # 系统软件包 - 仅保留系统级必需的工具
   environment.systemPackages = with pkgs; [
-    # 基础工具
-    vim
-    git
-
-    # 终端和开发工具
-    fish
-    alacritty
-    zellij
-    fastfetch
-    home-manager
-    vscode
-    direnv
+    # 系统核心工具
+    home-manager      # Home Manager（NixOS 集成模式）
     
-    # KDE 应用
-    kdePackages.kdeconnect-kde
-
-    # ✅ Clash Meta 内核 GUI（支持 TUN 模式）
-    #一定要保证/home/zhangchongjie/.local/share/io.github.clash-verge-rev.clash-verge-rev/
-    #有 clash-verge-check.yaml，没有的话打开 clash verge 的客户端导入订阅后会生成
-    clash-verge-rev  
-    
-    # 系统维护工具
-    timeshift
+    # 系统维护工具（需要 root 权限）
+    timeshift         # 系统备份工具
   
-    # 多媒体支持
-    ffmpeg-full       # 完整的 FFmpeg
+    # 全局依赖库
+    ffmpeg-full       # 完整的 FFmpeg（多媒体库）
     
-    # ✅ Node.js (用于 MCP Server Playwright)
-    nodejs            # 使用完整版而非 slim 版本
-    
-    # ✅ uv (Python 包管理器，提供 uvx 命令用于 MCP Server)
-    uv
-    
-    # ✅ Python 3.14 (用于 MCP Server nixos - 解决动态链接库问题)
-    python314
-    python314Packages.pip
-    
-    # ✅ 创建 wrapper 脚本目录
-    # 注意：wrapper 脚本将在下面的 postBuild 中创建
-];
+    # ⚠️ 用户级应用由 Home Manager 管理（programs.x + home.packages）
+    # 包括：vscode, vim, fish, alacritty, zellij, git, direnv, nodejs, python3, uv, clash-verge-rev 等
+  ];
 
 # 传感器支持
   hardware.sensor.iio.enable = true;
@@ -496,32 +468,28 @@
     "d /usr/local/share/polkit-1/rules.d 0755 root root -"
   ];
 
-  # ✅ MCP Server Python Wrapper - 解决动态链接库问题
-  # 在系统激活时创建 Python wrapper 脚本
-  system.activationScripts.preUserUnits.text = ''
-    # 创建用户 bin 目录
-    mkdir -p /home/zhangchongjie/bin
-    chown zhangchongjie:users /home/zhangchongjie/bin
+  # ═══════════════════════════════════════════════════════════
+  # Home Manager 全局配置（在 users 之前定义）
+  # ═══════════════════════════════════════════════════════════
+  home-manager.useGlobalPkgs = true;
+  home-manager.useUserPackages = true;
+  home-manager.backupFileExtension = "bak";
+  
+  # ═══════════════════════════════════════════════════════════
+  # Home Manager 用户配置
+  # ═══════════════════════════════════════════════════════════
+  home-manager.users.zhangchongjie = { config, pkgs, ... }: {
+    # 允许 Home Manager 管理用户环境
+    home.enableNixpkgsReleaseCheck = false;
     
-    # 创建 Python wrapper 脚本
-    cat > /home/zhangchongjie/bin/mcp-python << 'WRAPPER'
-#!/run/current-system/sw/bin/bash
-# Wrapper script for MCP Server to use Nix-managed Python
-# 解决 uv 安装的 Python 动态链接库缺失问题
-
-export PATH="/run/current-system/sw/bin:$PATH"
-export PYTHONPATH=""
-export LD_LIBRARY_PATH="/run/current-system/sw/lib:/run/current-system/sw/lib64"
-
-# 使用 Nix 管理的 Python 3.14
-exec /run/current-system/sw/bin/python3.14 "$@"
-WRAPPER
+    # 导入用户配置文件
+    imports = [
+      ./home/default.nix
+    ];
     
-    chmod +x /home/zhangchongjie/bin/mcp-python
-    chown zhangchongjie:users /home/zhangchongjie/bin/mcp-python
-    
-    echo "✅ MCP Python wrapper created at /home/zhangchongjie/bin/mcp-python"
-  '';
+    # 关键：确保状态版本与系统一致
+    home.stateVersion = "25.11";
+  };
 
   # 系统版本
   system.stateVersion = "25.11";
