@@ -34,7 +34,7 @@
       "kernel.sched_migration_cost_ns" = lib.mkForce 50000;  # 调度迁移成本
       
       # 内存优化 - Zen+ 优化的值
-      "vm.swappiness" = lib.mkForce 10;  # 减少 swap 使用
+      "vm.swappiness" = lib.mkForce 12;  # 减少 swap 使用
       "vm.vfs_cache_pressure" = lib.mkForce 50;  # 降低 VFS 缓存压力
       "vm.dirty_ratio" = lib.mkForce 20;  # 提高脏页比例
       "vm.dirty_background_ratio" = lib.mkForce 10;
@@ -42,6 +42,7 @@
       # AMD Zen+ 专属
       # 使用 lib.mkForce 确保覆盖 configuration.nix 中的默认设置
       "kernel.page-table-isolation" = lib.mkForce 0;  # Zen+ 有硬件缓解，可以禁用 PTI 提升性能
+      "vm.transparent_hugepage_defrag" = lib.mkForce 0;  # ✅ 新增
     };
   };
 }

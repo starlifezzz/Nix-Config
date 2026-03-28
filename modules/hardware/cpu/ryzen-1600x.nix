@@ -22,10 +22,10 @@
     
     boot.kernel.sysctl = {
       "kernel.sched_autogroup_enabled" = lib.mkForce 1;
-      "kernel.sched_migration_cost_ns" = lib.mkForce 50000;
-      "vm.swappiness" = lib.mkForce 10;
+      "kernel.sched_migration_cost_ns" = lib.mkForce 100000;
+      "vm.swappiness" = lib.mkForce 15;
       "vm.vfs_cache_pressure" = lib.mkForce 50;
-      "vm.dirty_ratio" = lib.mkForce 20;
+      "vm.dirty_ratio" = lib.mkForce 15;
       "vm.dirty_background_ratio" = lib.mkForce 10;
       "kernel.page-table-isolation" = lib.mkForce 1;
     };

@@ -23,10 +23,11 @@
   # 启用 XDG 规范支持（管理 XDG 目录、MIME 类型等）
   xdg.enable = true;
 
-  # 配置 XDG 用户目录（符合 freedesktop.org 标准）
+ # 配置 XDG 用户目录（符合 freedesktop.org 标准）
   xdg.userDirs = {
     enable = true;
     createDirectories = true;
+    setSessionVariables = false;
     desktop = "$HOME/Desktop";
     documents = "$HOME/Documents";
     download = "$HOME/Downloads";
@@ -70,7 +71,7 @@
     jetbrains-mono
     fira-code
     # 游戏相关
-    pkgs.lutris
+    lutris
   ];
 
   # ═══════════════════════════════════════════════════════════

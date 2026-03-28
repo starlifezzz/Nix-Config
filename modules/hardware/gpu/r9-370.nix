@@ -41,8 +41,12 @@
     # 在 initrd 阶段加载 amdgpu
     boot.initrd.kernelModules = [ "amdgpu" ];
     
+    hardware.firmware = [ pkgs.linux-firmware ];  # ✅ 新增
+    hardware.enableRedistributableFirmware = true;  # ✅ 新增
+
     environment.systemPackages = with pkgs; [
       radeontop
+      lm_sensors  # ✅ 新增
     ];
   };
 }

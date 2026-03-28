@@ -1,16 +1,17 @@
 { config, lib, pkgs, ... }:
 
 {
-  config = lib.mkIf (config.hardware.cpu.manualModel == "ryzen-3600" || config.hardware.cpu.model == "ryzen-3600") {
+  config = lib.mkIf (config.hardware.cpu.manualModel == "ryzen-3600") {
     hardware.cpu.model = "ryzen-3600";
     
     boot.kernelParams = [
       "amd_pstate=active"
       "processor.max_cstate=5"
       "init_on_alloc=1"
-      "pcie_aspm=performance"
+      "pcie_aspm=off"  # ✅ 改为保守设置，提高稳定性
       "transparent_hugepage=madvise"
       "numa_balancing=1"
+
     ];
     
     powerManagement = {
@@ -31,6 +32,7 @@
       
       # Zen 2 架构可以禁用 PTI
       "kernel.page-table-isolation" = lib.mkForce 0;
+      "vm.transparent_hugepage_defrag" = lib.mkForce 0;  # ✅ 新增
     };
   };
 }

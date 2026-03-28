@@ -1,8 +1,8 @@
 { config, lib, pkgs, ... }:
 
 {
-  config = lib.mkIf (config.hardware.gpu.manualModel == "rx-6600-xt") {
-    hardware.gpu.model = "rx-6600-xt";
+  config = lib.mkIf (config.hardware.gpu.manualModel == "rx-6600xt") {
+    hardware.gpu.model = "rx-6600xt";
     
     services.xserver.videoDrivers = [ "amdgpu" ];
     
