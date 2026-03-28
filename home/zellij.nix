@@ -1,3 +1,5 @@
+# /etc/nixos/home/zellij.nix
+# Zellij Terminal Multiplexer 配置
 { config, pkgs, lib, ... }:
 
 {

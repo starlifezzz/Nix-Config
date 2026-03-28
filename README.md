@@ -543,6 +543,58 @@ sudo pkill -f verge-mihomo
 - 确保 `netadmin` 用户组已生效（需重新登录）
 - Clash Verge Rev GUI 会自动生成配置文件
 
+---
+
+### MCP Server NixOS（灵码 AI 助手）
+
+#### 快速启动
+
+配置已完成！只需重启 VSCode 或重新加载窗口即可。
+
+```bash
+# 确保 Clash TUN 模式运行（如果需要访问 PyPI）
+sudo clash-tun
+
+# 重启 VSCode 后按 Ctrl+Shift+P，选择 "Developer: Reload Window"
+```
+
+#### 手动测试
+
+```bash
+# 测试包装脚本（应该没有输出）
+timeout 3 /etc/nixos/scripts/mcp-nixos-wrapper.sh
+
+# 查看原始输出（调试用）
+timeout 3 uvx mcp-nixos
+```
+
+#### 配置位置
+
+- **包装脚本**: `/etc/nixos/scripts/mcp-nixos-wrapper.sh`
+- **VSCode 配置**: 已在 `settings.json` 中自动配置
+- **详细文档**: `/etc/nixos/MCP_SERVER_GUIDE.md`
+
+#### 常见问题
+
+**Q: 首次启动很慢怎么办？**
+- A: 首次运行需要下载 Python 依赖包（约 1-2 分钟），请耐心等待
+
+**Q: 提示连接超时？**
+- A: 确保 Clash TUN 模式已启动：`sudo clash-tun`
+
+**Q: 如何查看详细日志？**
+- A: 在 VSCode 中打开输出面板（View -> Output -> 选择 MCP）
+
+#### 故障排查
+
+```bash
+# 运行快速配置检查脚本
+/etc/nixos/scripts/setup-mcp-server.sh
+
+# 查看完整文档
+cat /etc/nixos/MCP_SERVER_FIX.md
+```
+
 ### 故障排查
 
 #### 无法启动

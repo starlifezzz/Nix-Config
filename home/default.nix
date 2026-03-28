@@ -1,5 +1,6 @@
 # /etc/nixos/home/default.nix
-{ config, pkgs, lib, ... }:
+# Home Manager 主配置文件 - 统一管理所有应用配置
+{ config, pkgs, lib, pkgs-unstable, ... }:
 
 {
   # ═══════════════════════════════════════════════════════════
@@ -65,13 +66,27 @@
     "${pkgs.lutris}/share/applications/net.lutris.Lutris.desktop";
 
   # ═══════════════════════════════════════════════════════════
-  # 用户软件包
+  # 用户软件包 - 仅包含不支持 programs.x 的包
   # ═══════════════════════════════════════════════════════════
   home.packages = with pkgs; [
+    # 字体
     jetbrains-mono
     fira-code
+    
     # 游戏相关
     lutris
+    
+    # 开发运行时（不支持 programs.x 或仅需包）
+    nodejs            # Node.js 运行时
+    python3           # Python 3 解释器
+    uv                # Python 包管理器
+    
+    # 系统信息工具
+    fastfetch
+    
+    # GUI 应用
+    clash-verge-rev
+    kdePackages.kdeconnect-kde
   ];
 
   # ═══════════════════════════════════════════════════════════
@@ -97,11 +112,30 @@
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
   };
 
+  # ═══════════════════════════════════════════════════════════
+  # 导入所有应用配置模块
+  # ═══════════════════════════════════════════════════════════
   imports = [
-    ./home.nix
-    ./kde.nix
-    ./Alacritty.nix
-    ./zellij.nix
+    # 基础 Shell 和版本控制
+    ./fish.nix          # Fish Shell 配置
+    ./git.nix           # Git 版本控制配置
+    
+    # 终端模拟器和 Multiplexer
+    ./alacritty.nix     # Alacritty 终端模拟器配置
+    ./zellij.nix        # Zellij Terminal Multiplexer 配置
+    
+    # 开发环境工具
+    ./direnv.nix        # Direnv 开发环境配置
+    
+    # 代码编辑器
+    ./vscode.nix        # VSCode 代码编辑器配置
+    ./vim.nix           # Vim 文本编辑器配置
+    
+    # 桌面环境
+    ./kde.nix           # KDE Plasma 6 详细设置
+    
+    # 占位符文件（保留以便未来扩展）
+    ./home.nix          # 基础配置占位符
+    ./Alacritty.nix     # 旧文件名占位符（保持兼容）
   ];
-
 }

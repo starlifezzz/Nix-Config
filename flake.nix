@@ -107,9 +107,8 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              # ✅ 使用简单的备份后缀
-              home-manager.backupFileExtension = "backup";
-              home-manager.users.zhangchongjie = import ./home;
+              # ✅ 禁用自动备份
+              home-manager.backupFileExtension = null;
               home-manager.extraSpecialArgs = { inherit self pkgs-unstable; };
             }
           ];
