@@ -29,11 +29,6 @@
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  fileSystems."/root/.cache/doc" =
-    { device = "portal";
-      fsType = "fuse.portal";
-    };
-
   swapDevices = [ ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
