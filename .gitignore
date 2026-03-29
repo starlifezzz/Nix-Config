@@ -14,6 +14,12 @@ result-*
 *.tmp
 *.log
 
-# 不能提交的文件
-# secrets/
-# hardware-configuration*.nix 
+# ═══════════════════════════════════════════════════════════
+# ✅ 不能提交的文件（每台设备独有）
+# ═══════════════════════════════════════════════════════════
+# 硬件配置文件（包含分区 UUID、MAC 地址等设备特定信息）
+hardware-configuration.nix
+hardware-configuration-*.nix
+
+# 本地覆盖配置（可选，用于高级自定义）
+configuration.local.nix
