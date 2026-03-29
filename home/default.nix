@@ -13,8 +13,9 @@
   # 禁用 Nixpkgs 版本检查（因为我们在用 unstable）
   home.enableNixpkgsReleaseCheck = false;
 
-  # 允许 unfree 软件包
-  nixpkgs.config.allowUnfree = true;
+  # ✅ 已移除 nixpkgs.config.allowUnfree
+  # 该设置已在 configuration.nix 系统级配置中声明
+  # Home Manager 使用 useGlobalPkgs = true 会自动继承系统级设置
 
   # ═══════════════════════════════════════════════════════════
   # 启用 Home Manager systemd 服务 - 关键配置！

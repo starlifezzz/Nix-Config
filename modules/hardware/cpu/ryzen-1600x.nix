@@ -29,5 +29,17 @@
       "vm.dirty_background_ratio" = lib.mkForce 10;
       "kernel.page-table-isolation" = lib.mkForce 1;
     };
+    
+    # ═══════════════════════════════════════════════════════════
+    # Zram 虚拟内存配置 - Ryzen 1600X 专属启用
+    # ═══════════════════════════════════════════════════════════
+    # 适用于低内存场景（如 8GB），提供额外的压缩交换空间
+    services.zram-generator.enable = true;
+    zramSwap = {
+      enable = true;
+      memoryPercent = 90;  # 使用 90% 的物理内存作为 zram
+      algorithm = "zstd";  # Zstandard 压缩算法（高压缩比）
+      priority = 100;      # 高于普通 swap 的优先级
+    };
   };
 }

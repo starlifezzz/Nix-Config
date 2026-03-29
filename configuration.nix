@@ -271,14 +271,16 @@
     # 确保 D-Bus 服务启用，这对 Flatpak 应用很重要
   services.dbus.enable = true;
 
-  # zRAM 配置（动态启用策略）
-  # 注意：hardware.memorySize 在某些 NixOS 版本可能不可用
-  # 使用简化的启用策略
+  # Zram 虚拟内存配置 - 默认禁用，仅在特定硬件模块中启用
+  # ═══════════════════════════════════════════════════════════
+  # 当前策略：仅在 Ryzen 1600X (低内存场景) 中启用
+  # 其他 CPU 配置如需启用，请在对应硬件模块中添加配置
+  services.zram-generator.enable = lib.mkDefault false;
   zramSwap = {
-    enable = true;  # 始终启用，zram-generator 会自动管理
-    memoryPercent = 90;  # 降低到 50% 以防过度占用
-    algorithm = "zstd";
-    priority = 100;
+    enable = lib.mkDefault false;  # 默认禁用
+    memoryPercent = 90;  # 使用 90% 的物理内存作为 zram
+    algorithm = "zstd";  # Zstandard 压缩算法（高压缩比）
+    priority = 100;      # 高于普通 swap 的优先级
   };
 
   # Avahi 服务（mDNS）
