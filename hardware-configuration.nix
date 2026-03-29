@@ -18,15 +18,20 @@
       fsType = "xfs";
     };
 
+  fileSystems."/home" =
+    { device = "/dev/disk/by-uuid/5ac20756-f595-4ac1-aa68-5eb0e94b03ad";
+      fsType = "xfs";
+    };
+
   fileSystems."/boot" =
     { device = "/dev/disk/by-uuid/44C5-8813";
       fsType = "vfat";
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/5ac20756-f595-4ac1-aa68-5eb0e94b03ad";
-      fsType = "xfs";
+  fileSystems."/root/.cache/doc" =
+    { device = "portal";
+      fsType = "fuse.portal";
     };
 
   swapDevices = [ ];
