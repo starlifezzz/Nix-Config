@@ -490,43 +490,9 @@
       General = {
         EnableAvatars = false;
         InputMethod = "qtvirtualkeyboard";
-        # ✅ SDDM 背景图片配置
-        # 可以设置纯色背景或图片背景
-        # 方式 1：使用系统内置壁纸（KDE 自带）
-        # Background = "${pkgs.kdePackages.plasma-workspace}/share/wallpapers/Next/contents/images/1920x1080.jpg";
-        # 方式 2：使用自定义壁纸（推荐）
-        Background = "/etc/nixos/wallpapers/sddm-background.jpg";  # 把你的壁纸放在这里
-      };
-      Theme = {
-        # ✅ SDDM 主题配置
-        Current = "chili";  # 可选主题：chili, elarun, maya, breath, etc.
-        # 主题颜色方案
-        # Color = "#313648";  # 深蓝色背景（如果不用图片）
       };
     };
   };
-  
-  # ✅ 复制自定义壁纸到系统目录（如果文件存在）
-  # 这样壁纸会被包含在系统构建中，并在每次重建时更新
-  environment.etc."nixos/wallpapers".source = 
-    let
-      # 检查自定义壁纸是否存在
-      customWallpaperPath = "/etc/nixos/wallpapers/sddm-background.jpg";
-      # 使用 KDE 自带的默认壁纸作为备选
-      defaultWallpaper = pkgs.kdePackages.plasma-workspace + "/share/wallpapers/Next/contents/images/1920x1080.jpg";
-    in
-    if builtins.pathExists customWallpaperPath then
-      # 如果自定义壁纸存在，使用它
-      pkgs.runCommand "sddm-wallpaper-custom" {} ''
-        mkdir -p $out
-        cp ${customWallpaperPath} $out/sddm-background.jpg
-      ''
-    else
-      # 否则使用默认壁纸
-      pkgs.runCommand "sddm-wallpaper-default" {} ''
-        mkdir -p $out
-        cp ${defaultWallpaper} $out/sddm-background.jpg
-      '';
 
   # 设置 /etc/nixos 目录权限，允许 zhangchongjie 用户完全控制
   systemd.tmpfiles.rules = [
