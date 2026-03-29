@@ -1,69 +1,159 @@
-# 🚀 NixOS Flake 多硬件配置系统
+# 🚀 NixOS 系统配置 - 极简手动硬件选择
 
 <div align="center">
 
 ![NixOS](https://img.shields.io/badge/NixOS-25.11-blue?style=for-the-badge&logo=nixos)
 ![Plasma](https://img.shields.io/badge/Plasma-6-green?style=for-the-badge&logo=kde)
-![Flakes](https://img.shields.io/badge/Flakes-Enabled-purple?style=for-the-badge&logo=nix)
+![Home Manager](https://img.shields.io/badge/Home_Manager-Integrated-purple?style=for-the-badge&logo=nix)
 
-**模块化、可切换的多硬件 NixOS 系统配置**
+**简单直接的模块化 NixOS 配置 • 手动指定硬件 • 清晰可预测**
 
-[📋 核心配置](#-核心配置) • [🖥️ 桌面环境](#️-桌面环境) • [📦 软件包](#-软件包) • [⚙️ 系统优化](#️-系统优化) • [🔧 使用指南](#-使用指南) • [📁 目录结构](#-目录结构)
+[📋 快速开始](#-快速开始) • [🔧 切换硬件](#-切换硬件配置) • [📦 软件包](#-软件包) • [⚙️ 系统优化](#️-系统优化) • [📁 目录结构](#-目录结构)
 
 </div>
 
 ---
 
-## 📋 核心配置
+## 🎯 架构特点
 
-### 系统信息
+### ⚡ 设计理念
 
-| 项目 | 配置 |
-|------|------|
+**放弃 Flakes 的"伪动态"，回归简单直接！**
+
+- ✅ **CPU/GPU 配置直接硬编码在 [`configuration.nix`](configuration.nix)**
+- ✅ **`flake.nix` 只保留最简框架（用于 Home Manager）**
+- ✅ **支持 `sudo nixos-rebuild switch --flake .#nixos` 构建**
+- ✅ **配置清晰明了，一眼看出用的什么硬件**
+
+### 📊 架构对比
+
+| 之前 (复杂 Flakes) | 现在 (简单直接) |
+|-------------------|----------------|
+| 动态扫描所有 `.nix` 文件 | 直接在 `imports` 中写死路径 |
+| 生成所有硬件组合配置 | 只有唯一配置 `.#nixos` |
+| 需要环境变量或默认值 | 无需任何隐式逻辑 |
+| 修改后需重建多个配置 | 修改即生效 |
+
+---
+
+## 📋 快速开始
+
+### 当前配置
+
+| 项目 | 值 |
+|------|-----|
 | **系统版本** | NixOS 25.11 (Unstable) |
-| **配置管理** | Flakes + Home Manager |
 | **桌面环境** | KDE Plasma 6 (Wayland 原生) |
-| **显示管理器** | SDDM (Wayland 支持) |
+| **显示管理器** | SDDM |
 | **内核** | Linux Latest (最新稳定版) |
-| **文件系统** | BTRFS (自动 scrub) |
+| **文件系统** | BTRFS |
 | **默认 Shell** | Fish |
 | **时区** | Asia/Shanghai |
 | **语言** | zh_CN.UTF-8 |
 
-### 支持的硬件配置
+### 当前硬件配置
 
-通过 Flake 输出多硬件配置，支持快速切换：
+**CPU**: AMD Ryzen 5 2600  
+**GPU**: AMD Radeon RX 5500
 
-| 配置名称 | CPU | GPU | 主机名 |
-|---------|-----|-----|--------|
-| `nixos` (默认) | Ryzen 2600 | RX 5500 | nixos-2600-rx5500 |
-| `nixos-1600x-r9370` | Ryzen 1600X | R9 370 | nixos-1600x-r9370 |
-| `nixos-2600-rx6600xt` | Ryzen 2600 | RX 6600 XT | nixos-2600-rx6600xt |
-| `nixos-3600-rx6600xt` | Ryzen 3600 | RX 6600 XT | nixos-3600-rx6600xt |
+### 首次部署
+
+```bash
+# 1. 克隆配置到 /etc/nixos
+sudo su
+cd /etc
+git clone <your-repo-url> nixos
+cd nixos
+
+# 2. 构建并切换
+sudo nixos-rebuild switch --flake .#nixos
+
+# 3. 设置用户密码
+sudo passwd zhangchongjie
+```
 
 ---
 
-## 🖥️ 桌面环境
+## 🔧 切换硬件配置
 
-### 核心组件
+### 步骤超简单
 
-- **显示协议**: Wayland 原生 (X11 兼容层)
-- **桌面环境**: KDE Plasma 6
-- **显示管理器**: SDDM
-  - Wayland 会话已启用
-  - 默认会话：Plasma
-- **输入法**: Fcitx5
-  - Rime 引擎
-  - 中文拼音支持
-  - Qt6 集成
+#### 1️⃣ 编辑 [`configuration.nix`](configuration.nix)
 
-### 多媒体
+找到第 6-20 行的 `imports` 部分：
 
-- **音频**: PipeWire
-  - PulseAudio 兼容层
-  - ALSA 支持 (32 位)
-  - JACK 支持
-- **打印服务**: 禁用
+```nix
+imports =
+  [
+    # ... 其他配置保持不变 ...
+    
+    # ═══════════════════════════════════════════════════════════
+    # ✅ 手动指定 CPU 和 GPU 配置文件
+    # 修改这里来切换硬件配置
+    # ═══════════════════════════════════════════════════════════
+    ./modules/hardware/cpu/ryzen-2600.nix   # ← 改这里！
+    ./modules/hardware/gpu/rx-5500.nix      # ← 改这里！
+  ];
+```
+
+#### 2️⃣ 修改为想要的硬件
+
+**CPU 选项**（`modules/hardware/cpu/`）：
+- `./modules/hardware/cpu/ryzen-1600x.nix`
+- `./modules/hardware/cpu/ryzen-2600.nix` ← 当前
+- `./modules/hardware/cpu/ryzen-3600.nix`
+
+**GPU 选项**（`modules/hardware/gpu/`）：
+- `./modules/hardware/gpu/r9-370.nix`
+- `./modules/hardware/gpu/rx-5500.nix` ← 当前
+- `./modules/hardware/gpu/rx-5500xt.nix`
+- `./modules/hardware/gpu/rx-5700.nix`
+- `./modules/hardware/gpu/rx-5700-xt.nix`
+- `./modules/hardware/gpu/rx-6600xt.nix`
+
+#### 3️⃣ 执行构建
+
+```bash
+cd /etc/nixos
+sudo nixos-rebuild switch --flake .#nixos
+```
+
+或使用 Fish Shell 别名：
+```fish
+rebuild-flake  # 已配置国内镜像源
+```
+
+#### 4️⃣ 重启系统（建议）
+
+```bash
+reboot
+```
+
+### 💡 示例：切换到 Ryzen 3600 + RX 6600XT
+
+**Step 1**: 编辑 `configuration.nix`
+```diff
+  imports =
+    [
+      # ... 其他配置 ...
+-     ./modules/hardware/cpu/ryzen-2600.nix
++     ./modules/hardware/cpu/ryzen-3600.nix
+-     ./modules/hardware/gpu/rx-5500.nix
++     ./modules/hardware/gpu/rx-6600xt.nix
+    ];
+```
+
+**Step 2**: 构建
+```bash
+sudo nixos-rebuild switch --flake .#nixos
+```
+
+**Step 3**: 重启
+```bash
+reboot
+```
+
+**完成！** 🎉
 
 ---
 
@@ -71,15 +161,15 @@
 
 ### 开发工具
 
-#### 系统级
-- **VSCode** - 主代码编辑器（unstable 版本）
+**系统级**:
+- **VSCode** (unstable 版本) - 主代码编辑器
 - **Git** - 版本控制
 - **Vim** - 文本编辑器
 - **Alacritty** - GPU 加速终端
 - **Zellij** - Terminal 多路复用器
 - **direnv** - 环境变量管理
 
-#### 用户级 (Home Manager)
+**用户级 (Home Manager)**:
 - **JetBrains Mono** - 编程字体
 - **Fira Code** - 连字编程字体
 
@@ -93,14 +183,13 @@
 ### 游戏相关
 
 - **Lutris** - 游戏平台
-- **桌面快捷方式**: 已通过 `xdg.dataFile` 配置
+- 桌面快捷方式已配置
 
 ### 系统工具
 
 - **Fastfetch** - 系统信息显示
 - **Timeshift** - 系统备份
 - **BleachBit** - 系统清理
-- **Home Manager** - 用户配置管理
 - **Flatpak** - 通用包管理
 - **FFmpeg (Full)** - 音视频处理
 - **Node.js** - JavaScript 运行时 (完整版，支持 MCP Server)
@@ -115,23 +204,23 @@
 
 **显示器分辨率策略**：
 - ✅ **自动检测 EDID**：移除硬编码的 `video=` 参数
-- ✅ **KScreen 自动管理**：KDE Plasma Wayland 自动检测显示器并应用最佳分辨率
-- ✅ **热插拔支持**：更换显示器（如 4K）时自动适配，无需修改配置
+- ✅ **KScreen 自动管理**：KDE Plasma Wayland 自动检测并应用最佳分辨率
+- ✅ **热插拔支持**：更换显示器自动适配
 
 **USB 稳定性优化**：
 ```
-"usbcore.autosuspend=-1"       # 禁用 USB 自动挂起
-"usbcore.usbfs_memory_mb=1024" # USBFS 内存优化
+usbcore.autosuspend=-1       # 禁用 USB 自动挂起
+usbcore.usbfs_memory_mb=1024 # USBFS 内存优化
 ```
 
 **其他优化**：
 - TCP 拥塞控制：BBR
 - 内存交换策略：Swappiness = 1 (最小化 swap)
-- 页面表隔离：针对 AMD 优化
+- AMD P-State：主动模式 (Ryzen 2600+)
 
 #### 内存管理
 
-- **Swappiness**: 1 (最小化 swap 使用)
+- **Swappiness**: 1
 - **VFS 缓存压力**: 100
 - **Inotify 监视数**: 524288
 
@@ -148,17 +237,6 @@
 - **大小**: 50% 物理内存
 - **压缩算法**: ZSTD
 - **优先级**: 100
-
-### 电源管理
-
-#### CPU 频率调节
-
-- **默认策略**: ondemand (按需动态调节)
-- **AMD P-State**: 主动模式 (Ryzen 2600+)
-
-#### USB 电源管理
-
-- **自动挂起**: 禁用 (提高稳定性)
 
 ### AMD GPU 优化 (RX 5500)
 
@@ -192,6 +270,53 @@ amdgpu.dc=1                    # Display Core
 
 ---
 
+## 👤 用户配置
+
+### 主用户：zhangchongjie
+
+- **用户组**: networkmanager, wheel, flatpak, video, render, input, netadmin
+- **默认 Shell**: Fish
+- **Sudo 权限**: 需要密码
+
+### Fish Shell 配置
+
+#### 实用别名
+
+```fish
+ll = "ls -la"
+la = "ls -A"
+rebuild = "sudo -E nixos-rebuild switch"
+rebuild-test = "sudo -E nixos-rebuild test"
+gc = "sudo nix-collect-garbage -d"
+optimise = "sudo nix-store --optimise"
+c = "clear"
+s = "sudo"
+update = "sudo nixos-rebuild switch"
+nrs = "sudo nixos-rebuild switch"
+```
+
+#### 重建命令（推荐）
+
+```fish
+# 使用国内镜像源重建
+rebuild-flake
+
+# 离线重建
+rebuild-offline
+```
+
+### Git 配置
+
+- **用户名**: zhangchongjie
+- **邮箱**: 778280151@qq.com
+- **默认分支**: main
+- **编辑器**: Vim
+- **推送策略**: Simple
+- **拉取策略**: Rebase
+- **自动修剪**: 启用
+
+---
+
 ## 🌐 网络配置
 
 ### 防火墙
@@ -219,199 +344,68 @@ amdgpu.dc=1                    # Display Core
 
 ---
 
-## 👤 用户配置
-
-### 主用户：zhangchongjie
-
-- **用户组**: networkmanager, wheel, flatpak, video, render, input, netadmin
-- **默认 Shell**: Fish
-- **Sudo 权限**: 需要密码
-
-### Fish Shell 配置
-
-#### 实用别名
-
-```fish
-ll = "ls -la"
-la = "ls -A"
-rebuild = "sudo -E nixos-rebuild switch"
-rebuild-test = "sudo -E nixos-rebuild test"
-gc = "sudo nix-collect-garbage -d"
-optimise = "sudo nix-store --optimise"
-```
-
-#### 重建命令
-
-- **rebuild-flake**: 使用国内镜像源重建
-- **rebuild-offline**: 离线重建 (无网络)
-
-### Git 配置
-
-- **用户名**: zhangchongjie
-- **邮箱**: 778280151@qq.com
-- **默认分支**: main
-- **编辑器**: Vim
-- **推送策略**: Simple
-- **拉取策略**: Rebase
-- **自动修剪**: 启用
-
----
-
-## 🔧 Nix 配置
-
-### 二进制缓存 (镜像源)
-
-优先级从高到低：
-
-1. https://mirrors.ustc.edu.cn/nix-channels/nixpkgs-unstable (中科大 unstable)
-2. https://cache.nixos.org (官方源)
-
-**公钥**: cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
-
-### 实验特性
-
-- ✅ Nix Command
-- ✅ Flakes
-
-### 垃圾回收
-
-- **自动 GC**: 每天执行
-- **保留策略**: 删除 >3 天的 derivations
-- **存储优化**: 自动启用
-
-### 并行构建
-
-- **最大任务数**: Auto (CPU 核心数)
-- **构建核心数**: 0 (无限制)
-- **沙箱**: 启用
-
----
-
 ## 📁 目录结构
 
 ```
 /etc/nixos/
-├── configuration.nix              # 系统主配置
-├── hardware-configuration.nix     # 当前硬件配置 (BTRFS, 自动生成)
-├── flake.nix                      # Flakes 多硬件配置入口 ⭐
+├── configuration.nix              # 系统主配置 ⭐ (直接导入 CPU/GPU 模块)
+├── hardware-configuration.nix     # 硬件配置 (BTRFS, 自动生成)
+├── flake.nix                      # Flakes 入口 (简化版，仅用于 Home Manager)
 ├── flake.lock                     # 版本锁定文件
 ├── .gitignore                     # Git 忽略规则
-├── README.md                      # 项目文档
 │
 ├── home/                          # Home Manager 用户配置
 │   ├── default.nix               # Home Manager 入口
 │   ├── home.nix                  # Fish + Git 配置
 │   ├── kde.nix                   # KDE Plasma 详细配置
-│   ├── Alacritty.nix             # Alacritty 终端配置
+│   ├── alacritty.nix             # Alacritty 终端配置
+│   ├── vim.nix                   # Vim 配置
+│   ├── direnv.nix                # direnv 配置
+│   ├── git.nix                   # Git 配置
 │   └── zellij.nix                # Zellij 多路复用器配置
 │
-├── modules/hardware/              # 自定义硬件模块 ⭐
-│   ├── detection.nix             # 基础选项定义
+├── modules/hardware/              # 自定义硬件模块
+│   ├── detection.nix             # 基础选项定义 (类型检查)
 │   ├── cpu/                      # CPU 特定配置
 │   │   ├── ryzen-1600x.nix
-│   │   ├── ryzen-2600.nix        # 当前使用
+│   │   ├── ryzen-2600.nix        # ← 当前使用
 │   │   └── ryzen-3600.nix
 │   └── gpu/                      # GPU 特定配置
 │       ├── r9-370.nix
-│       ├── rx-5500.nix           # 当前使用
+│       ├── rx-5500.nix           # ← 当前使用
+│       ├── rx-5500xt.nix
+│       ├── rx-5700.nix
+│       ├── rx-5700-xt.nix
 │       └── rx-6600xt.nix
 │
 ├── scripts/                       # 实用脚本
-│   ├── start-clash-tun.sh        # Clash TUN 模式启动脚本
-│   └── check-clash-tun.sh        # TUN 状态检查脚本
+│   ├── start-clash-tun.sh        # Clash TUN 模式启动
+│   └── check-clash-tun.sh        # TUN 状态检查
 │
 ├── QUICK_REFERENCE.md             # 快速参考手册
-└── CLASH_TUN_GUIDE.md             # Clash TUN 配置指南
+└── README.md                      # 本文档
 ```
 
 ---
 
-## 🔧 使用指南
+## 🔧 日常维护
 
-### 前置要求
-
-1. **BIOS 设置**:
-   - 启用 EFI 启动
-   - 禁用 Secure Boot
-   - 启用 AHCI/SATA 模式
-
-2. **网络准备**:
-   - 首次构建需访问 GitHub (下载 flake inputs)
-   - 建议配置代理或使用镜像源
-
-### 系统部署
-
-#### 1. 克隆配置
-
-```bash
-sudo su
-cd /etc
-git clone <your-repo-url> nixos
-cd nixos
-```
-
-#### 2. 选择硬件配置
-
-查看可用配置：
-
-```bash
-nix flake show
-```
-
-#### 3. 构建并切换
-
-**默认配置** (当前设备：Ryzen 2600 + RX 5500):
-
-```
-# NixOS 集成模式：系统 + Home Manager 自动同步
-sudo nixos-rebuild switch --flake .#nixos
-```
-
-**切换到其他硬件配置**:
-
-```bash
-# Ryzen 1600X + R9 370
-sudo nixos-rebuild switch --flake .#nixos-1600x-r9370
-
-# Ryzen 2600 + RX 6600 XT
-sudo nixos-rebuild switch --flake .#nixos-2600-rx6600xt
-
-# Ryzen 3600 + RX 6600 XT
-sudo nixos-rebuild switch --flake .#nixos-3600-rx6600xt
-```
-
-**说明**:
-- ✅ **Home Manager 已集成到 NixOS**，执行 `nixos-rebuild` 时会自动应用用户配置
-- ✅ 无需单独执行 `home-manager switch`
-- ✅ 系统配置与用户配置保持原子性更新
-
-#### 4. 初始化 Home Manager
-
-```
-cd /etc/nixos && home-manager switch --flake .#zhangchongjie
-```
-
-#### 5. 设置用户密码
-
-```bash
-sudo passwd zhangchongjie
-```
-
-### 日常维护
-
-#### 系统重建 (推荐工作流)
+### 系统重建（推荐工作流）
 
 ```bash
 cd /etc/nixos
 
-# 快速重建 (使用本地 lock 文件，无需网络)
-sudo nixos-rebuild switch --flake .#nixos
+# 方式 1: 使用 Fish alias (推荐)
+rebuild-flake
 
-# 或使用 Fish alias
-rebuild
+# 方式 2: 使用简短别名
+nrs --flake .#nixos
+
+# 方式 3: 完整命令
+sudo nixos-rebuild switch --flake .#nixos
 ```
 
-#### 更新依赖 (需网络)
+### 更新依赖（需网络）
 
 ```bash
 # 更新 flake inputs (每月/每季度执行)
@@ -421,7 +415,7 @@ nix flake update
 sudo nix-channel --update
 ```
 
-#### 垃圾回收
+### 垃圾回收
 
 ```bash
 # 清理旧世代
@@ -434,89 +428,30 @@ gc
 sudo nix-store --optimise
 ```
 
-#### 查看系统信息
+### 查看系统信息
 
 ```bash
 fastfetch
 ```
 
-### 🔍 硬件配置验证
-
-#### 使用验证脚本（推荐）
+### 验证当前硬件配置
 
 ```bash
-# 运行硬件配置验证脚本
-./scripts/verify-hardware.sh
-```
+# 查看导入的 CPU 配置
+grep "cpu/" /etc/nixos/configuration.nix
 
-该脚本会自动检查：
-- ✅ 环境变量设置（NIXOS_CPU, NIXOS_GPU, NIXOS_HOSTNAME）
-- ✅ 当前主机名与配置是否匹配
-- ✅ 加载的 CPU/GPU 模块名称
-- ✅ 内核参数是否正确应用
-- ✅ AMDGPU 驱动状态
-- ✅ 所有可用的 Flake 配置
+# 查看导入的 GPU 配置
+grep "gpu/" /etc/nixos/configuration.nix
 
-#### 手动验证命令
-
-```bash
-# 1. 查看当前使用的硬件模块
-nix eval '.#nixos.config.hardware.cpu.manualModel'  # 应返回如 "ryzen-2600"
-nix eval '.#nixos.config.hardware.gpu.manualModel'  # 应返回如 "rx-5500"
-
-# 2. 查看当前配置的主机名
+# 查看当前配置的主机名
 nix eval '.#nixos.config.networking.hostName'
-
-# 3. 查看所有可用配置
-nix flake show
-
-# 4. 对比不同配置的差异
-nix eval '.#nixos-2600-rx5500.config.boot.kernelParams' --json
-nix eval '.#nixos-3600-rx6600xt.config.boot.kernelParams' --json
-
-# 5. 检查实际运行的内核参数
-cat /proc/cmdline
-
-# 6. 查看当前系统引用的模块路径
-nix-store -q --references /run/current-system | grep -E 'ryzen|rx-'
-
-# 7. 验证 GPU 驱动加载
-lspci -k | grep -A 2 -i vga
-```
-
-#### 预期输出示例
-
-**CPU 模块验证：**
-```bash
-$ nix eval '.#nixos.config.hardware.cpu.manualModel'
-"ryzen-2600"
-```
-
-**GPU 模块验证：**
-```bash
-$ nix eval '.#nixos.config.hardware.gpu.manualModel'
-"rx-5500"
-```
-
-**内核参数验证（应包含 USB 优化等）：**
-```bash
-$ cat /proc/cmdline
-... usbcore.autosuspend=-1 usbcore.usbfs_memory_mb=1024 ...
-```
-
-**驱动验证（应显示 amdgpu）：**
-```bash
-$ lspci -k | grep -A 2 -i vga
-VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] ...
-	Kernel driver in use: amdgpu
-	Kernel modules: amdgpu
 ```
 
 ---
 
-### Clash TUN 模式
+## 🎮 Clash TUN 模式
 
-#### 启动 TUN 模式
+### 启动 TUN 模式
 
 ```bash
 # 启动 TUN 模式 (需要 sudo)
@@ -525,25 +460,23 @@ sudo clash-tun
 sudo ./scripts/start-clash-tun.sh
 ```
 
-#### 检查 TUN 状态
+### 检查 TUN 状态
 
 ```bash
 # 检查 TUN 接口
 ip link show Mihomo
-# 或
-ip link show Meta
 
 # 检查进程
 ps aux | grep verge-mihomo
 ```
 
-#### 停止 TUN 模式
+### 停止 TUN 模式
 
 ```bash
 sudo pkill -f verge-mihomo
 ```
 
-#### 注意事项
+### ⚠️ 注意事项
 
 - TUN 设备在每次重启后需要重新运行启动脚本
 - 确保 `netadmin` 用户组已生效（需重新登录）
@@ -551,9 +484,9 @@ sudo pkill -f verge-mihomo
 
 ---
 
-### MCP Server NixOS（灵码 AI 助手）
+## 🤖 MCP Server NixOS（灵码 AI 助手）
 
-#### 快速启动
+### 快速启动
 
 配置已完成！只需重启 VSCode 或重新加载窗口即可。
 
@@ -564,150 +497,79 @@ sudo clash-tun
 # 重启 VSCode 后按 Ctrl+Shift+P，选择 "Developer: Reload Window"
 ```
 
-#### 手动测试
-
-```bash
-# 测试包装脚本（应该没有输出）
-timeout 3 /etc/nixos/scripts/mcp-nixos-wrapper.sh
-
-# 查看原始输出（调试用）
-timeout 3 uvx mcp-nixos
-```
-
-#### 配置位置
+### 配置位置
 
 - **包装脚本**: `/etc/nixos/scripts/mcp-nixos-wrapper.sh`
 - **VSCode 配置**: 已在 `settings.json` 中自动配置
-- **详细文档**: `/etc/nixos/MCP_SERVER_GUIDE.md`
 
-#### 常见问题
+### 常见问题
 
-**Q: 首次启动很慢怎么办？**
-- A: 首次运行需要下载 Python 依赖包（约 1-2 分钟），请耐心等待
+**Q: 首次启动很慢怎么办？**  
+A: 首次运行需要下载 Python 依赖包（约 1-2 分钟），请耐心等待
 
-**Q: 提示连接超时？**
-- A: 确保 Clash TUN 模式已启动：`sudo clash-tun`
-
-**Q: 如何查看详细日志？**
-- A: 在 VSCode 中打开输出面板（View -> Output -> 选择 MCP）
-
-#### 故障排查
-
-```bash
-# 运行快速配置检查脚本
-/etc/nixos/scripts/setup-mcp-server.sh
-
-# 查看完整文档
-cat /etc/nixos/MCP_SERVER_FIX.md
-```
-
-### 故障排查
-
-#### 无法启动
-
-```bash
-# 进入恢复模式
-nixos-rebuild boot --flake .#nixos
-
-# 重启 NetworkManager
-sudo systemctl restart NetworkManager
-
-# 清理 7 天前的世代
-sudo nix-collect-garbage --delete-older-than 7d
-```
-
-#### 二进制缓存问题
-
-```bash
-# 临时禁用所有缓存 (纯净模式测试)
-sudo nixos-rebuild switch --flake .#nixos --option substituters ""
-
-# 使用命令行指定镜像源
-sudo nixos-rebuild switch --flake .#nixos \
-  --option substituters "https://mirrors.ustc.edu.cn/nix-channels/store" \
-  --option trusted-public-keys "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-```
-
-#### 验证配置
-
-```bash
-# 检查语法
-nix flake check
-
-# 仅构建不切换
-sudo nixos-rebuild build --flake .#nixos
-
-# 查看生成的配置
-nix eval '.#nixos.config'
-```
+**Q: 提示连接超时？**  
+A: 确保 Clash TUN 模式已启动：`sudo clash-tun`
 
 ---
 
-## 🎯 设计原则
-
-### 模块化架构
-
-1. **硬件解耦**: CPU/GPU 配置完全分离，可自由组合
-2. **动态导入**: 使用 `lib.optional + builtins.pathExists` 安全包含模块
-3. **参数传递**: 通过 `specialArgs` 传递硬件参数到所有层级
-
-### 配置规范
-
-1. **单一干预**: 仅针对具体问题优化，避免多重干预
-2. **默认保守**: 优先使用 NixOS 默认值，确保稳定性
-3. **作用域清晰**: 系统级 vs 用户级职责分明
-
-### 可维护性
-
-1. **版本锁定**: flake.lock 确保可重复构建
-2. **条件导入**: 硬件模块按需加载
-3. **命名约定**: 标准化配置命名 (nixos-{cpu}-{gpu})
-
----
-
-## 📝 注意事项
+## ❗ 注意事项
 
 ### 首次启动
 
 1. 确保 BIOS 中启用了 EFI 启动
 2. 准备好网络连接 (有线优先)
 3. 首次构建时间较长（约 30-60 分钟）
-4. 首次启动后记得设置用户密码
-
-### 网络配置
-
-- **代理设置**: Clash Verge Rev 默认监听 7897 端口
-- **镜像源**: 已配置国内镜像，若失效请参考 NixOS 官方文档更新
-- **离线使用**: 日常重建无需网络 (使用本地 lock 文件)
-- **TUN 模式**: 每次重启后需手动运行 `sudo clash-tun`
-
-### 用户安全
-
-- 首次启动后记得设置用户密码：
-  ```bash
-  sudo passwd zhangchongjie
-  ```
-- `netadmin` 用户组修改后需重新登录生效
-
-### Flatpak 使用
-
-首次使用后添加远程仓库：
-
-```bash
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
-```
+4. 首次启动后记得设置用户密码：
+   ```bash
+   sudo passwd zhangchongjie
+   ```
 
 ### 硬件切换
 
-- 切换硬件配置后建议重启系统
-- 不同硬件的 firmware 可能不同，请确保内核固件包完整
-- 建议在 `/etc/nixos` 目录下执行重建命令
+- ✅ **修改 `configuration.nix` 后立即生效**
+- ✅ 切换硬件配置后建议重启系统
+- ✅ 不同硬件的 firmware 可能不同，请确保内核固件包完整
+- ✅ 建议在 `/etc/nixos` 目录下执行重建命令
 
 ### Boot 分区保护
 
 - 已配置 `configurationLimit = 10` 限制启动项数量
 - 定期执行 `sudo nix-collect-garbage -d` 清理旧世代
 - 使用 `bootctl list` 或 `df -h /boot` 定期检查空间
+
+### Flatpak 使用
+
+首次使用后添加远程仓库：
+```bash
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
+```
+
+### 用户安全
+
+- `netadmin` 用户组修改后需重新登录生效
+- 防火墙已启用，按需开放端口
+
+---
+
+## 🎯 设计原则
+
+### 简单至上
+
+1. **放弃"伪动态"**: 不再尝试在 Nix 代码中做运行时检测
+2. **显式优于隐式**: 硬件配置一目了然
+3. **修改即生效**: 无需理解复杂的 Flakes 求值机制
+
+### 模块化架构
+
+1. **硬件解耦**: CPU/GPU 配置完全分离
+2. **职责分明**: 系统级 vs 用户级配置清晰
+3. **类型安全**: 通过 `detection.nix` 提供基本检查
+
+### 可维护性
+
+1. **版本锁定**: flake.lock 确保可重复构建
+2. **命名规范**: 标准化的文件名和路径
+3. **文档齐全**: 每个配置都有清晰注释
 
 ---
 
@@ -718,27 +580,26 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 - [Nixpkgs 软件包搜索](https://search.nixos.org/packages)
 - [Home Manager](https://github.com/nix-community/home-manager)
 - [NixOS Hardware](https://github.com/NixOS/nixos-hardware)
-- [Flakes 文档](https://nixos.wiki/wiki/Flakes)
+- [KDE Plasma 6](https://kde.org/plasma-desktop)
 - [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev)
-- [NixOS Networking](https://nixos.org/manual/nixos/stable/index.html#chap-networking)
 
 ---
 
 ## 🛠️ 技术栈
 
 - **基础系统**: NixOS 25.11 (Unstable)
-- **配置管理**: Nix Flakes
-- **用户配置**: Home Manager
+- **配置管理**: Nix Flakes (简化版)
+- **用户配置**: Home Manager (NixOS 集成模式)
 - **桌面环境**: KDE Plasma 6
 - **显示协议**: Wayland
-- **硬件支持**: AMD Ryzen (1600X/2600/3600) + AMD Radeon (R9 370/RX 5500/RX 6600 XT)
+- **硬件支持**: AMD Ryzen (1600X/2600/3600) + AMD Radeon (R9 370/RX 5500/RX 6600XT 等)
 - **代理方案**: Clash Verge Rev (TUN 模式)
 
 ---
 
 <div align="center">
 
-**Made with ❤️ using NixOS Flakes**
+**Made with ❤️ using NixOS • 简单就是美**
 
 [![Built with Nix](https://img.shields.io/static/v1?label=Built%20with&message=Nix&color=5277C6&style=for-the-badge&logo=nixos)](https://nixos.org)
 
