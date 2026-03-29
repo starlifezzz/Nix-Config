@@ -546,7 +546,7 @@ services.displayManager.sddm = {
 
 ### 💡 示例：下载网络壁纸
 
-```bash
+```
 # 下载 Unsplash 壁纸作为 SDDM 背景
 curl -o /etc/nixos/wallpapers/sddm-background.jpg \
   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920"
@@ -592,7 +592,7 @@ sudo nixos-rebuild switch --flake .#nixos
 
 ### 启动 TUN 模式
 
-```bash
+```
 # 启动 TUN 模式 (需要 sudo)
 sudo clash-tun
 # 或
@@ -601,7 +601,7 @@ sudo ./scripts/start-clash-tun.sh
 
 ### 检查 TUN 状态
 
-```bash
+```
 # 检查 TUN 接口
 ip link show Mihomo
 
@@ -611,7 +611,7 @@ ps aux | grep verge-mihomo
 
 ### 停止 TUN 模式
 
-```bash
+```
 sudo pkill -f verge-mihomo
 ```
 
@@ -858,9 +858,225 @@ nix eval '.#nixos.config.hardware.gpu.model'
 - ✅ **`flake.nix` 只保留最简框架（用于 Home Manager）**
 - ✅ **支持 `sudo nixos-rebuild switch` 直接构建**
 
+---
+
+## 🖥️ 多设备部署方案（优雅版）
+
+### 📋 问题背景
+
+如果你有多台设备（如 Ryzen 2600+RX5500, Ryzen 3600+RX6600XT），想要复用同一套配置，但不想每次都修改 Git 仓库，这个方案完美解决！
+
+### ✅ 解决方案：`.gitignore` + 本地配置
+
+#### 核心思路
+
+1. **`hardware-configuration.nix` 不提交到 Git**
+   - 每台设备生成自己的硬件配置文件
+   - 包含分区 UUID、MAC 地址等设备特定信息
+   - 通过 `.gitignore` 忽略，不会污染仓库
+
+2. **CPU/GPU 配置在每台设备上独立修改**
+   - 修改 [`configuration.nix`](configuration.nix) 中的导入路径
+   - 改完后本地测试，确认无误后再提交
+
+3. **Git 仓库只保存通用配置**
+   - 所有设备共享的代码在仓库中
+   - 设备特定的配置在本地
+
+### 🔧 部署步骤
+
+#### 设备 A：Ryzen 2600 + RX 5500
+
+```bash
+# 1. 克隆配置到 /etc/nixos
+sudo su
+cd /etc
+git clone <your-repo-url> nixos
+cd nixos
+
+# 2. 生成当前设备的 hardware-configuration.nix
+nixos-generate-config --no-filesystems --root /
+
+# 3. 编辑 configuration.nix，设置正确的 CPU/GPU
+vim configuration.nix
+# 修改第 16-17 行：
+#   ./modules/hardware/cpu/ryzen-2600.nix
+#   ./modules/hardware/gpu/rx-5500.nix
+
+# 4. 构建并测试
+sudo nixos-rebuild switch --flake .#nixos
+
+# 5. 确认无误后，提交通用配置（可选）
+git add configuration.nix  # 如果这次改动是通用的
+git commit -m "feat: update configuration for Ryzen 2600 + RX 5500"
+git push
+
+# ⚠️ 注意：hardware-configuration.nix 不会被提交（已在 .gitignore 中）
+```
+
+#### 设备 B：Ryzen 3600 + RX 6600XT
+
+```bash
+# 1. 克隆配置（拉取设备 A 的提交）
+sudo su
+cd /etc
+git clone <your-repo-url> nixos
+cd nixos
+
+# 2. 生成当前设备的 hardware-configuration.nix
+nixos-generate-config --no-filesystems --root /
+
+# 3. 编辑 configuration.nix，修改为当前硬件
+vim configuration.nix
+# 修改第 16-17 行：
+#   ./modules/hardware/cpu/ryzen-3600.nix
+#   ./modules/hardware/gpu/rx-6600xt.nix
+
+# 4. 构建并测试
+sudo nixos-rebuild switch --flake .#nixos
+
+# 5. （可选）如果这是通用更新，提交到仓库
+git add configuration.nix
+git commit -m "feat: switch to Ryzen 3600 + RX 6600XT"
+git push
+```
+
+### 🔄 切换设备时的操作
+
+当你把硬盘从设备 A 移到设备 B 时：
+
+```bash
+# 1. 切换到新配置的分支（如果你有多个分支）
+git checkout ryzen-3600-rx6600xt
+
+# 2. 或者直接修改 configuration.nix
+vim configuration.nix
+# 修改 CPU/GPU 导入路径
+
+# 3. 重建系统
+sudo nixos-rebuild switch --flake .#nixos
+
+# 4. 重启
+reboot
+```
+
+### 📦 Git 工作流建议
+
+#### 方案 1：单分支 + 手动修改（推荐）
+
+- **主分支**：保持一套默认配置（如 Ryzen 2600 + RX 5500）
+- **切换设备**：手动修改 `configuration.nix` -> 重建 -> （可选）提交
+
+**优点**：简单直接，适合 2-3 台设备  
+**缺点**：每次切换需要手动修改
+
+#### 方案 2：多分支（适合设备固定）
+
+```bash
+# 为每台设备创建分支
+git checkout -b device-a-ryzen2600-rx5500
+git checkout -b device-b-ryzen3600-rx6600xt
+
+# 在每个分支中设置对应的 hardware-configuration.nix 和 CPU/GPU 配置
+```
+
+**优点**：每台设备配置清晰，切换只需 `git checkout`  
+**缺点**：分支多了管理复杂
+
+#### 方案 3：Git Submodule（高级玩家）
+
+```bash
+# 将 hardware-configuration.nix 放到单独的子模块
+git submodule add <your-hardware-config-repo> local-hardware
+```
+
+**优点**：完全解耦，每台设备有自己的硬件配置仓库  
+**缺点**：配置复杂，不适合新手
+
+### 🛡️ 最佳实践
+
+#### 1. 定期备份 hardware-configuration.nix
+
+```bash
+# 备份到安全位置
+cp /etc/nixos/hardware-configuration.nix \
+   ~/backups/hardware-configuration-$(hostname)-$(date +%Y%m%d).nix
+```
+
+#### 2. 使用注释标记设备特定配置
+
+在 `configuration.nix` 中添加注释：
+
+```nix
+imports =
+  [
+    ./hardware-configuration.nix  # 此文件不提交到 Git（设备特定）
+    
+    # 当前设备：Ryzen 2600 + RX 5500
+    # 切换设备时修改下面两行：
+    ./modules/hardware/cpu/ryzen-2600.nix
+    ./modules/hardware/gpu/rx-5500.nix
+  ];
+```
+
+#### 3. 创建快速切换脚本（可选）
+
+创建 `scripts/switch-hardware.sh`：
+
+```bash
+#!/usr/bin/env bash
+set -e
+
+CPU=$1
+GPU=$2
+
+if [ -z "$CPU" ] || [ -z "$GPU" ]; then
+  echo "用法：$0 <cpu> <gpu>"
+  echo "示例：$0 ryzen-2600 rx-5500"
+  exit 1
+fi
+
+CONFIG_FILE="/etc/nixos/configuration.nix"
+
+# 备份原文件
+cp "$CONFIG_FILE" "${CONFIG_FILE}.bak"
+
+# 替换 CPU 配置
+sed -i "s|modules/hardware/cpu/.*\.nix|modules/hardware/cpu/${CPU}.nix|g" "$CONFIG_FILE"
+
+# 替换 GPU 配置
+sed -i "s|modules/hardware/gpu/.*\.nix|modules/hardware/gpu/${GPU}.nix|g" "$CONFIG_FILE"
+
+echo "✅ 配置已切换到：${CPU} + ${GPU}"
+echo "💡 执行以下命令应用更改："
+echo "   sudo nixos-rebuild switch --flake .#nixos"
+```
+
+使用方法：
+```bash
+chmod +x scripts/switch-hardware.sh
+./scripts/switch-hardware.sh ryzen-3600 rx-6600xt
+```
+
+### ⚠️ 注意事项
+
+1. **`hardware-configuration.nix` 必须存在**
+   - 虽然不提交到 Git，但重建时必须存在
+   - 首次克隆后记得运行 `nixos-generate-config`
+
+2. **切换硬件后建议重启**
+   - 确保内核固件正确加载
+   - 特别是 GPU 驱动
+
+3. **Git 冲突处理**
+   - 如果多人协作，注意 `configuration.nix` 的冲突
+   - 建议在提交前 pull 最新代码
+
+---
+
 ## 🔧 如何切换硬件配置
 
-### 1. 编辑 [`configuration.nix`](configuration.nix) 第 6-20 行
+### 1. 编辑 [`configuration.nix`](configuration.nix) 第 16-17 行
 
 找到 `imports` 部分，修改 CPU 和 GPU 配置文件路径：
 
@@ -895,19 +1111,12 @@ imports =
 
 ### 3. 构建并应用配置
 
-#### 方式 1：使用 Flakes（推荐，支持 Home Manager）
-```bash
+```
 cd /etc/nixos
 sudo nixos-rebuild switch --flake .#nixos
 ```
 
-#### 方式 2：直接使用 configuration.nix（无 Flakes）
-```bash
-cd /etc/nixos
-sudo nixos-rebuild switch
-```
-
-⚠️ **注意**：方式 2 需要你有 `/etc/nixos/configuration.nix` 的传统 NixOS 安装。
+---
 
 ## ⚡ 快速切换示例
 
@@ -934,11 +1143,13 @@ sudo nixos-rebuild switch
    reboot
    ```
 
+---
+
 ## 💡 Shell 别名（已配置）
 
 你的 Fish Shell 已经有现成的别名：
 
-```bash
+```
 # 使用 Flakes 重建（推荐）
 rebuild-flake
 
@@ -949,10 +1160,12 @@ nrs --flake .#nixos
 sudo nixos-rebuild switch --flake .#nixos
 ```
 
+---
+
 ## 📋 当前配置
 
 查看当前生效的硬件配置：
-```bash
+```
 # 查看导入的 CPU 配置
 grep "cpu/" /etc/nixos/configuration.nix
 
@@ -960,12 +1173,17 @@ grep "cpu/" /etc/nixos/configuration.nix
 grep "gpu/" /etc/nixos/configuration.nix
 ```
 
+---
+
 ## ❗ 注意事项
 
 1. **必须指定有效的文件路径**：如果 `.nix` 文件不存在，构建会失败
 2. **建议重启**：切换硬件配置后最好重启，确保内核固件正确加载
 3. **Lock 文件**：`flake.lock` 会锁定所有依赖版本，确保可复现性
 4. **Home Manager**：仍然通过 Flakes 集成，建议使用 `--flake` 参数
+5. **`hardware-configuration.nix`**：此文件不提交到 Git，每台设备独立生成
+
+---
 
 ## 🛠️ 添加新硬件支持
 
@@ -988,6 +1206,8 @@ grep "gpu/" /etc/nixos/configuration.nix
    ];
    ```
 
+---
+
 ## 📊 架构对比
 
 ### 之前（复杂 Flakes）
@@ -1004,4 +1224,5 @@ configuration.nix → 直接导入 CPU/GPU 文件 → 构建
 - ✅ 配置清晰明了，一眼看出用的什么硬件
 - ✅ 修改简单，只需改一个文件路径
 - ✅ 不再跟 Flakes 的求值机制较劲
-- ✅ 支持 `sudo nixos-rebuild switch` 直接构建
+- ✅ 支持 `sudo nixos-rebuild switch --flake .#nixos` 直接构建
+- ✅ **多设备友好：每台设备有自己的本地配置，不污染仓库**
