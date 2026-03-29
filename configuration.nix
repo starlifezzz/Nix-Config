@@ -8,8 +8,16 @@
     [
       # 基础硬件检测模块（提供 hardware.cpu.manualModel 等选项）
       ./modules/hardware/detection.nix
-      # # 硬件配置文件（包含文件系统和 BTRFS 配置）
+      
+      # 硬件配置文件（包含文件系统和 BTRFS 配置）
       ./hardware-configuration.nix
+      
+      # ═══════════════════════════════════════════════════════════
+      # ✅ 手动指定 CPU 和 GPU 配置文件
+      # 修改这里来切换硬件配置
+      # ═══════════════════════════════════════════════════════════
+      ./modules/hardware/cpu/ryzen-2600.nix   # 可选：ryzen-1600x, ryzen-2600, ryzen-3600
+      ./modules/hardware/gpu/rx-5500.nix      # 可选：r9-370, rx-5500, rx-6600xt
     ];
 
   # 启动配置

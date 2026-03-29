@@ -745,85 +745,263 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 </div>
 
 ```
-# NixOS 配置说明
+# NixOS 配置 - 手动硬件选择模式
 
-本目录包含 NixOS 系统的完整配置。
+## 📝 架构说明
 
-## 📁 文件结构
+本配置已移除 Flakes 的动态硬件检测，改为**手动指定 CPU 和 GPU 配置文件**，简单直接！
 
+## 🔧 如何切换硬件配置
+
+### 1. 编辑 `flake.nix`
+
+打开 [`flake.nix`](flake.nix) 文件，修改第 18-19 行：
+
+```nix
+# ✅ 手动指定 CPU 和 GPU 配置文件
+# 修改这里来切换硬件配置
+cpuConfig = "ryzen-2600";  # 可选：ryzen-1600x, ryzen-2600, ryzen-3600
+gpuConfig = "rx-5500";     # 可选：r9-370, rx-5500, rx-6600xt
 ```
-/etc/nixos/
-├── configuration.nix          # 主配置文件
-├── flake.nix                  # Flake 配置（可选）
-├── hardware-configuration.nix # 硬件配置（自动生成）
-├── scripts/                   # 自定义脚本
-│   ├── start-clash-tun.sh    # Clash TUN 启动脚本
-│   └── check-clash-tun.sh    # Clash TUN 检查脚本
-├── CLASH_TUN_GUIDE.md         # Clash TUN 详细指南
-└── README.md                  # 本文件
-```
 
-## 🚀 快速开始
+### 2. 可用的硬件选项
 
-### 系统重建
+**CPU 选项**（位于 `modules/hardware/cpu/`）：
+- `ryzen-1600x`
+- `ryzen-2600`
+- `ryzen-3600`
+
+**GPU 选项**（位于 `modules/hardware/gpu/`）：
+- `r9-370`
+- `rx-5500`
+- `rx-5500xt`
+- `rx-5700`
+- `rx-5700-xt`
+- `rx-6600-xt` / `rx-6600xt`
+
+### 3. 构建并应用配置
 
 ```bash
+cd /etc/nixos
+sudo nixos-rebuild switch --flake .#nixos
+```
+
+## ⚡ 快速切换示例
+
+### 示例 1：从 Ryzen 2600 + RX 5500 切换到 Ryzen 3600 + RX 6600XT
+
+1. 编辑 `flake.nix`：
+   ```nix
+   cpuConfig = "ryzen-3600";
+   gpuConfig = "rx-6600xt";
+   ```
+
+2. 执行构建：
+   ```bash
+   sudo nixos-rebuild switch --flake .#nixos
+   ```
+
+3. 重启系统（建议）：
+   ```bash
+   reboot
+   ```
+
+### 示例 2：临时测试另一套配置
+
+如果想测试但不立即切换：
+```bash
+sudo nixos-rebuild test --flake .#nixos
+```
+
+这样下次重启后会回到旧配置。
+
+## 📋 当前配置
+
+查看当前生效的硬件配置：
+```bash
+nix eval '.#nixos.config.hardware.cpu.model'
+nix eval '.#nixos.config.hardware.gpu.model'
+```
+
+## ❗ 注意事项
+
+1. **必须指定有效的硬件名称**：如果文件名不存在，构建会失败
+2. **建议重启**：切换硬件配置后最好重启，确保内核固件正确加载
+3. **Lock 文件**：`flake.lock` 会锁定所有依赖版本，确保可复现性
+
+## 🛠️ 添加新硬件支持
+
+如果要支持新的 CPU/GPU：
+
+1. 在对应目录创建配置文件：
+   ```bash
+   touch modules/hardware/cpu/new-cpu.nix
+   touch modules/hardware/gpu/new-gpu.nix
+   ```
+
+2. 编写配置内容（参考现有文件）
+
+3. 在 `flake.nix` 中添加新选项：
+   ```nix
+   cpuConfig = "new-cpu";
+   gpuConfig = "new-gpu";
+   ```
+
+```
+# NixOS 配置 - 极简手动硬件选择模式
+
+## 🎯 架构说明
+
+**已完全摆脱 Flakes 的复杂硬件选择逻辑！**
+
+- ✅ **CPU/GPU 配置直接硬编码在 [`configuration.nix`](configuration.nix) 中**
+- ✅ **`flake.nix` 只保留最简框架（用于 Home Manager）**
+- ✅ **支持 `sudo nixos-rebuild switch` 直接构建**
+
+## 🔧 如何切换硬件配置
+
+### 1. 编辑 [`configuration.nix`](configuration.nix) 第 6-20 行
+
+找到 `imports` 部分，修改 CPU 和 GPU 配置文件路径：
+
+```
+imports =
+  [
+    # ... 其他配置 ...
+    
+    # ═══════════════════════════════════════════════════════════
+    # ✅ 手动指定 CPU 和 GPU 配置文件
+    # 修改这里来切换硬件配置
+    # ═══════════════════════════════════════════════════════════
+    ./modules/hardware/cpu/ryzen-2600.nix   # 改成你想要的 CPU
+    ./modules/hardware/gpu/rx-5500.nix      # 改成你想要的 GPU
+  ];
+```
+
+### 2. 可用的硬件选项
+
+**CPU 选项**（位于 `modules/hardware/cpu/`）：
+- `ryzen-1600x.nix`
+- `ryzen-2600.nix`
+- `ryzen-3600.nix`
+
+**GPU 选项**（位于 `modules/hardware/gpu/`）：
+- `r9-370.nix`
+- `rx-5500.nix`
+- `rx-5500xt.nix`
+- `rx-5700.nix`
+- `rx-5700-xt.nix`
+- `rx-6600-xt.nix` / `rx-6600xt.nix`
+
+### 3. 构建并应用配置
+
+#### 方式 1：使用 Flakes（推荐，支持 Home Manager）
+```bash
+cd /etc/nixos
+sudo nixos-rebuild switch --flake .#nixos
+```
+
+#### 方式 2：直接使用 configuration.nix（无 Flakes）
+```bash
+cd /etc/nixos
 sudo nixos-rebuild switch
 ```
 
-### 应用更新后重建
+⚠️ **注意**：方式 2 需要你有 `/etc/nixos/configuration.nix` 的传统 NixOS 安装。
+
+## ⚡ 快速切换示例
+
+### 示例：从 Ryzen 2600 + RX 5500 切换到 Ryzen 3600 + RX 6600XT
+
+1. **编辑 [`configuration.nix`](configuration.nix)**：
+   ```nix
+   imports =
+     [
+       # ... 其他配置保持不变 ...
+       ./modules/hardware/cpu/ryzen-3600.nix   # ← 改这里
+       ./modules/hardware/gpu/rx-6600xt.nix    # ← 改这里
+     ];
+   ```
+
+2. **执行构建**：
+   ```bash
+   cd /etc/nixos
+   sudo nixos-rebuild switch --flake .#nixos
+   ```
+
+3. **重启系统**（建议）：
+   ```bash
+   reboot
+   ```
+
+## 💡 Shell 别名（已配置）
+
+你的 Fish Shell 已经有现成的别名：
 
 ```bash
-sudo nixos-rebuild switch --upgrade
+# 使用 Flakes 重建（推荐）
+rebuild-flake
+
+# 或简短版本
+nrs --flake .#nixos
+
+# 完整命令
+sudo nixos-rebuild switch --flake .#nixos
 ```
 
-## 🔧 常用命令
+## 📋 当前配置
 
-### Clash TUN 模式
-
+查看当前生效的硬件配置：
 ```bash
-# 启动 TUN 模式
-sudo clash-tun
+# 查看导入的 CPU 配置
+grep "cpu/" /etc/nixos/configuration.nix
 
-# 检查状态
-sudo check-clash-tun.sh
-
-# 停止
-sudo pkill -f verge-mihomo
+# 查看导入的 GPU 配置
+grep "gpu/" /etc/nixos/configuration.nix
 ```
 
-### 系统维护
+## ❗ 注意事项
 
-```bash
-# 查看当前配置
-nixos-rebuild build
+1. **必须指定有效的文件路径**：如果 `.nix` 文件不存在，构建会失败
+2. **建议重启**：切换硬件配置后最好重启，确保内核固件正确加载
+3. **Lock 文件**：`flake.lock` 会锁定所有依赖版本，确保可复现性
+4. **Home Manager**：仍然通过 Flakes 集成，建议使用 `--flake` 参数
 
-# 回滚到上一代
-sudo nixos-rebuild switch --rollback
+## 🛠️ 添加新硬件支持
 
-# 清理旧世代
-sudo nix-collect-garbage -d
+如果要支持新的 CPU/GPU：
+
+1. **创建配置文件**：
+   ```bash
+   touch modules/hardware/cpu/new-cpu.nix
+   touch modules/hardware/gpu/new-gpu.nix
+   ```
+
+2. **编写配置内容**（参考现有文件）
+
+3. **在 [`configuration.nix`](configuration.nix) 中添加导入**：
+   ```nix
+   imports = [
+     # ...
+     ./modules/hardware/cpu/new-cpu.nix
+     ./modules/hardware/gpu/new-gpu.nix
+   ];
+   ```
+
+## 📊 架构对比
+
+### 之前（复杂 Flakes）
+```
+flake.nix → 动态扫描文件 → 生成所有组合 → 选择配置 → configuration.nix
 ```
 
-## 📚 文档链接
+### 现在（简单直接）
+```
+configuration.nix → 直接导入 CPU/GPU 文件 → 构建
+```
 
-- [Clash TUN 配置指南](./CLASH_TUN_GUIDE.md) - 详细的 TUN 模式配置和故障排查
-- [NixOS 官方文档](https://nixos.org/manual/nixos/stable/)
-- [NixOS Wiki](https://wiki.nixos.org/)
-
-## ⚙️ 系统信息
-
-- **主机名**: nixos
-- **用户**: zhangchongjie
-- **桌面环境**: COSMIC (Wayland)
-- **网络**: iptables 防火墙
-
-## 📝 注意事项
-
-1. **TUN 设备易失性** - 每次重启后需要重新运行 `sudo clash-tun`
-2. **用户组修改** - 添加到 `netadmin` 组后需要重新登录
-3. **防火墙服务** - 修改 firewall 配置后需重启服务或重建系统
-
----
-
-**最后更新**: 2026-03-25
+**优点**：
+- ✅ 配置清晰明了，一眼看出用的什么硬件
+- ✅ 修改简单，只需改一个文件路径
+- ✅ 不再跟 Flakes 的求值机制较劲
+- ✅ 支持 `sudo nixos-rebuild switch` 直接构建
