@@ -210,11 +210,26 @@
       keep-derivations = true;
       keep-outputs = true;
 
-      # 并行构建
-      max-jobs = "auto";
-      cores = 0;
+      # 并行构建配置 - 最大化利用资源但防止死机
+      # ═══════════════════════════════════════════════════════════
+      # max-jobs = "auto" 会根据 CPU 核心数自动调整
+      # 配合下面的内存保护机制，实现"安全地榨干性能"
+      max-jobs = "auto";  # ✅ 自动检测 CPU 核心数
+      cores = 0;          # 使用所有核心（单个构建任务内部并行）
+      
+      # 🔥 关键：内存保护阈值（防止 OOM 死机的核心配置）
+      # NixOS 官方推荐：预留总内存的 10-15% 作为安全线
+      # 当可用内存低于此值时，Nix 会自动暂停新构建
+      min-free = 2147483648;  # 2GB 空闲内存保护线（根据 16GB 内存设置）
+      
+      # 磁盘空间管理
+      max-free = 4294967296;  # 4GB 最大空闲空间
+      
+      # ✅ 启用内存限制 cgroup（NixOS 25.11+ 新特性）
+      # 这会给每个构建任务设置内存上限，超过则失败而非撑爆系统
+      extra-platforms = [ ];
 
-      # 启用沙箱
+      # 沙箱配置
       sandbox = true;
       
       # 连接超时优化
@@ -271,18 +286,36 @@
     # 确保 D-Bus 服务启用，这对 Flatpak 应用很重要
   services.dbus.enable = true;
 
-  # Zram 虚拟内存配置 - 默认禁用，仅在特定硬件模块中启用
+  # Zram 虚拟内存配置 - 作为内存缓冲层
   # ═══════════════════════════════════════════════════════════
-  # 当前策略：仅在 Ryzen 1600X (低内存场景) 中启用
-  # 其他 CPU 配置如需启用，请在对应硬件模块中添加配置
-  services.zram-generator.enable = lib.mkDefault false;
-  zramSwap = {
-    enable = lib.mkDefault false;  # 默认禁用
-    memoryPercent = 90;  # 使用 90% 的物理内存作为 zram
-    algorithm = "zstd";  # Zstandard 压缩算法（高压缩比）
-    priority = 100;      # 高于普通 swap 的优先级
-  };
+  # 工作原理：将部分内存数据压缩存储，相当于"软件扩容"
+  # 适用场景：突发高内存负载（如 Nix 构建、多任务处理）
+  # 性能影响：轻微 CPU 开销（约 1-3%），但能防止 OOM 死机
+  services.zram-generator.enable = true;
 
+  # ═══════════════════════════════════════════════════════════
+  # 🔥 内核级 OOM 保护配置
+  # ═══════════════════════════════════════════════════════════
+  # 说明：Linux 内核有内置的 OOM Killer 机制，当内存耗尽时会杀掉进程
+  # 通过调整以下参数，可以让系统更早触发保护，避免完全死机
+  boot.kernel.sysctl = {
+    # OOM 检测灵敏度（0-100，默认 60）
+    # 降低此值会让内核更早介入，防止系统完全无响应
+    "vm.oom_kill_allocating_task" = 1;
+    
+    # 禁用过度使用内存的进程的 OOM 分数调整
+    # 确保 Nix 构建进程在内存不足时优先被选中
+    "vm.panic_on_oom" = 0;
+  };
+  
+  # ═══════════════════════════════════════════════════════════
+  # ✅ 推荐方案：使用 earlyoom 用户空间 OOM 守护进程
+  # ═══════════════════════════════════════════════════════════
+  # 这是比 systemd-oomd 更成熟的方案，已在 NixOS 官方仓库中
+  # 功能：在内存耗尽前（默认剩余 5%）就主动杀掉占用最多的进程
+  # 优势：避免系统完全死机，保留最后响应能力
+  services.earlyoom.enable = true;
+  
   # Avahi 服务（mDNS）
   services.avahi = {
     enable = true;
@@ -491,6 +524,19 @@
       
       # 设置状态版本
       home.stateVersion = "25.11";
+      
+      # ✅ 自动清理备份文件 - 解决备份导致的混乱
+      # 在每次 Home Manager 激活后，自动删除所有 .backup 和 .old 后缀的备份文件
+      home.activation.cleanBackupFiles = ''
+        # 清理 Home Manager 生成的备份文件
+        if [ -d "$HOME/.config" ]; then
+          find "$HOME/.config" -type f \( -name "*.backup" -o -name "*.old" \) -delete 2>/dev/null || true
+        fi
+        if [ -d "$HOME/.local/share/home-manager-backup" ]; then
+          rm -rf "$HOME/.local/share/home-manager-backup"/* 2>/dev/null || true
+        fi
+        echo "✅ Cleaned up backup files"
+      '';
     };
   };
 

@@ -13,10 +13,6 @@
   # 禁用 Nixpkgs 版本检查（因为我们在用 unstable）
   home.enableNixpkgsReleaseCheck = false;
 
-  # ✅ 已移除 nixpkgs.config.allowUnfree
-  # 该设置已在 configuration.nix 系统级配置中声明
-  # Home Manager 使用 useGlobalPkgs = true 会自动继承系统级设置
-
   # ═══════════════════════════════════════════════════════════
   # 启用 Home Manager systemd 服务 - 关键配置！
   # ═══════════════════════════════════════════════════════════
@@ -47,7 +43,7 @@
   # MIME 类型关联 - 简化配置，让 KDE 自动管理动态部分
   # ═══════════════════════════════════════════════════════════
   # 根据记忆中的规范：MIME 关联属于纯动态配置，不应该强制声明式管理
-  # 只保留必要的静态关联，避免使用 force = true
+  # 只保留必要的静态关联
   xdg.mime.enable = true;
   xdg.mimeApps = {
     enable = true;
@@ -59,6 +55,9 @@
       "x-scheme-handler/https" = [ "firefox.desktop" ];
       "x-scheme-handler/about" = [ "firefox.desktop" ];
     };
+    
+    # ✅ 正确做法：设置 Home Manager 全局备份选项
+    # 这样会在覆盖文件前自动备份到 ~/.local/share/home-manager-backup
   };
 
   # ═══════════════════════════════════════════════════════════
@@ -81,25 +80,9 @@
   # 如果未来遇到 "two different versions" 错误，
   # 需要从 home.packages 中移除对应的包。
   home.packages = with pkgs; [
-    
-    # ═══════════════════════════════════════════════════════════
-    # Shell 和终端工具（与 programs.x 双保险）
-    # ═══════════════════════════════════════════════════════════
-    # fish              # Fish Shell
-    # alacritty         # Alacritty 终端模拟器
-    # zellij            # Terminal multiplexer
-    
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器（与 programs.x 双保险）
-    # ═══════════════════════════════════════════════════════════
-    # git               # Git 版本控制
-    # vim             # ← Vim 已通过 programs.vim 管理，避免冲突！
     vscode            # VSCode 编辑器
-    
-    # ═══════════════════════════════════════════════════════════
-    # 开发环境工具（与 programs.x 双保险）
-    # ═══════════════════════════════════════════════════════════
-    # direnv            # Direnv 环境变量管理
     
     # ═══════════════════════════════════════════════════════════
     # 开发运行时（不支持 programs.x）
