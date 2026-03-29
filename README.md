@@ -58,7 +58,7 @@
 
 ### 首次部署
 
-```bash
+```
 # 1. 克隆配置到 /etc/nixos
 sudo su
 cd /etc
@@ -82,7 +82,7 @@ sudo passwd zhangchongjie
 
 找到第 6-20 行的 `imports` 部分：
 
-```nix
+```
 imports =
   [
     # ... 其他配置保持不变 ...
@@ -113,7 +113,7 @@ imports =
 
 #### 3️⃣ 执行构建
 
-```bash
+```
 cd /etc/nixos
 sudo nixos-rebuild switch --flake .#nixos
 ```
@@ -125,14 +125,21 @@ rebuild-flake  # 已配置国内镜像源
 
 #### 4️⃣ 重启系统（建议）
 
-```bash
+```
 reboot
 ```
+
+### ⚡ 架构优势
+
+**✅ 直接了当**: 配置文件路径就是硬件型号，一目了然  
+**✅ 无需判断**: 移除了所有 `lib.mkIf` 条件判断  
+**✅ 即改即用**: 修改 imports 后立即生效  
+**✅ 清晰透明**: 没有隐式逻辑或动态检测
 
 ### 💡 示例：切换到 Ryzen 3600 + RX 6600XT
 
 **Step 1**: 编辑 `configuration.nix`
-```diff
+``diff
   imports =
     [
       # ... 其他配置 ...
@@ -282,7 +289,7 @@ amdgpu.dc=1                    # Display Core
 
 #### 实用别名
 
-```fish
+``fish
 ll = "ls -la"
 la = "ls -A"
 rebuild = "sudo -E nixos-rebuild switch"
@@ -365,7 +372,6 @@ rebuild-offline
 │   └── zellij.nix                # Zellij 多路复用器配置
 │
 ├── modules/hardware/              # 自定义硬件模块
-│   ├── detection.nix             # 基础选项定义 (类型检查)
 │   ├── cpu/                      # CPU 特定配置
 │   │   ├── ryzen-1600x.nix
 │   │   ├── ryzen-2600.nix        # ← 当前使用
@@ -383,8 +389,30 @@ rebuild-offline
 │   └── check-clash-tun.sh        # TUN 状态检查
 │
 ├── QUICK_REFERENCE.md             # 快速参考手册
+├── ARCHITECTURE_CHANGE.md         # 架构改进说明
 └── README.md                      # 本文档
 ```
+
+---
+
+## 💡 架构演进
+
+### 最新版本 (2026-03-29)
+
+**✅ 完全移除条件判断**: 
+- 删除了 `detection.nix` 模块
+- 移除了所有 `lib.mkIf` 条件判断
+- 不再需要 `hardware.*.manualModel` 中间变量
+
+**🎯 极简架构**:
+```
+configuration.nix (imports) → 硬件模块 (直接应用配置)
+```
+
+**优势**:
+- 导入即生效，不会遗漏
+- 配置透明，一目了然
+- 维护成本最低
 
 ---
 

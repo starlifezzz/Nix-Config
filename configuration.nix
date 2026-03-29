@@ -6,9 +6,6 @@
 {
   imports =
     [
-      # 基础硬件检测模块（提供 hardware.cpu.manualModel 等选项）
-      ./modules/hardware/detection.nix
-      
       # 硬件配置文件（包含文件系统和 BTRFS 配置）
       ./hardware-configuration.nix
       
@@ -100,7 +97,7 @@
   # 打印服务（默认禁用）
   services.printing.enable = false;
 
-  # 音频配置 - PipeWire
+  # 音频配置 - PipeWire（支持 DSD 硬解）
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -299,7 +296,7 @@
   # 工作原理：将部分内存数据压缩存储，相当于"软件扩容"
   # 适用场景：突发高内存负载（如 Nix 构建、多任务处理）
   # 性能影响：轻微 CPU 开销（约 1-3%），但能防止 OOM 死机
-  services.zram-generator.enable = true;
+  # ✅ 配置已移至硬件模块 (modules/hardware/cpu/ryzen-1600x.nix)
 
   # ═══════════════════════════════════════════════════════════
   # 🔥 内核级 OOM 保护配置
