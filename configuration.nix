@@ -16,8 +16,8 @@
       # ✅ 手动指定 CPU 和 GPU 配置文件
       # 修改这里来切换硬件配置
       # ═══════════════════════════════════════════════════════════
-      ./modules/hardware/cpu/ryzen-2600.nix   # 可选：ryzen-1600x, ryzen-2600, ryzen-3600
-      ./modules/hardware/gpu/rx-5500.nix      # 可选：r9-370, rx-5500, rx-6600xt
+      ./modules/hardware/cpu/ryzen-1600x.nix   # 可选：ryzen-1600x, ryzen-2600, ryzen-3600
+      ./modules/hardware/gpu/r9-370.nix      # 可选：r9-370, rx-5500, rx-6600xt
     ];
 
   # 启动配置
@@ -508,9 +508,9 @@
     };
   };
 
-  # 设置 /etc/nix 目录权限，允许 users 组写入
+  # 设置 /etc/nixos 目录权限，允许 zhangchongjie 用户完全控制
   systemd.tmpfiles.rules = [
-    "d /etc/nixos 0775 root users -"
+    "d /etc/nixos 0775 zhangchongjie users -"
     "d /run/polkit-1/rules.d 0755 root root -"
   ];
 
@@ -547,6 +547,7 @@
       '';
     };
   };
+
 
   # 系统版本
   system.stateVersion = "25.11";

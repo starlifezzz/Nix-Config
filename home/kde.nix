@@ -584,4 +584,9 @@
   dconf = {
     enable = true;
   };
+
+    # ✅ 修复文件冲突：强制覆盖现有文件
+  xdg.configFile."mimeapps.list".force = true;
+  xdg.configFile."fish/config.fish".force = true;
+
 }
