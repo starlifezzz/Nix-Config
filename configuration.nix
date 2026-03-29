@@ -243,6 +243,9 @@
       
       # ✅ 不强制要求签名，允许从未签名的镜像源下载
       require-sigs = false;
+      
+      # ✅ 构建超时保护 - 防止单个 derivations 卡死超过 1 小时
+      build-timeout = 3600;
     };
     
     # 垃圾回收
@@ -319,8 +322,19 @@
   # 这是比 systemd-oomd 更成熟的方案，已在 NixOS 官方仓库中
   # 功能：在内存耗尽前（默认剩余 5%）就主动杀掉占用最多的进程
   # 优势：避免系统完全死机，保留最后响应能力
-  services.earlyoom.enable = true;
-  
+  services.earlyoom = {
+    enable = true;
+    # ✅ 针对 Nix 构建场景优化阈值
+    # 默认 10% 对于构建来说太激进，降低到 5% 给构建更多缓冲空间
+    freeMemThreshold = 5;      # 内存低于 5% 时触发 SIGTERM
+    freeSwapThreshold = 5;     # Swap 低于 5% 时触发 SIGKILL
+    
+    # ✅ 保护关键系统进程和桌面环境
+    # 注意：由于 systemd 引号转义问题，暂时不使用 --avoid 和 --prefer 参数
+    # 让 earlyoom 使用默认策略（根据 RSS 内存占用选择进程）
+    # 如需自定义，可通过配置文件方式实现
+  };
+
   # Avahi 服务（mDNS）
   services.avahi = {
     enable = true;
@@ -434,56 +448,31 @@
     };
   };
 
+  # ✅ Flatpak 字体访问 - NixOS 官方推荐方案
   # ═══════════════════════════════════════════════════════════
-  # Flatpak 字体访问支持（可选配置）
-  # ═══════════════════════════════════════════════════════════
-  # 注意：Flatpak 应用通常通过 Portal 自动访问系统字体
-  # 此配置为某些需要直接访问 /usr/share/fonts 的旧应用提供兼容
-  # 如果所有 Flatpak 应用字体正常，可以考虑移除此配置
+  # 说明：Flatpak 沙盒无法直接访问 Nix Store 中的字体
+  # 官方方案：启用 fontDir + 简化 bindfs 挂载
+  # 参考：https://wiki.nixos.org/wiki/Fonts#flatpak-applications-cant-find-system-fonts
+  
+  # ✅ 启用字体目录统一入口（/run/current-system/sw/share/X11/fonts）
+  fonts.fontDir.enable = true;
+  
+  # ✅ 简化 bindfs 挂载 - 直接映射统一字体目录
+  # 优势：无需复杂的 runCommand 和字体链接，配置简洁
   system.fsPackages = [ pkgs.bindfs ];
-  fileSystems = let
-    mkRoSymBind = path: {
-      device = path;
+  fileSystems = {
+    "/usr/share/fonts" = {
+      device = "/run/current-system/sw/share/X11/fonts";
       fsType = "fuse.bindfs";
       options = [ "ro" "resolve-symlinks" "x-gvfs-hide" ];
     };
-    fontsPkgs = config.fonts.packages ++ (with pkgs; [
-        # 图标和光标主题（如有需要可在此添加）
-      ]);
-    x11Fonts = pkgs.runCommand "X11-fonts"
-      {
-        preferLocalBuild = true;
-        nativeBuildInputs = with pkgs; [
-          gzip
-          pkgs.mkfontscale
-          pkgs.mkfontdir
-        ];
-      }
-      (''
-        mkdir -p "$out/share/fonts"
-        font_regexp='.*\.\(ttf\|ttc\|otb\|otf\|pcf\|pfa\|pfb\|bdf\)\(\.gz\)?'
-      ''
-      + (builtins.concatStringsSep "\n" (builtins.map (pkg: ''
-          find ${toString pkg} -regex "$font_regexp" \
-            -exec ln -sf -t "$out/share/fonts" '{}' \;
-        '') fontsPkgs
-        ))
-      + ''
-        cd "$out/share/fonts"
-        mkfontscale
-        mkfontdir
-        cat $(find ${pkgs.font-alias}/ -name fonts.alias) >fonts.alias
-      '');
-    aggregatedIcons = pkgs.buildEnv {
-      name = "system-icons";
-      paths = fontsPkgs;
-      pathsToLink = [
-        "/share/icons"
-      ];
+    
+    # ✅ 同时挂载图标主题（Flatpak 应用需要）
+    "/usr/share/icons" = {
+      device = "/run/current-system/sw/share/icons";
+      fsType = "fuse.bindfs";
+      options = [ "ro" "resolve-symlinks" "x-gvfs-hide" ];
     };
-  in {
-    "/usr/share/icons" = mkRoSymBind (aggregatedIcons + "/share/icons");
-    "/usr/share/fonts" = mkRoSymBind (x11Fonts + "/share/fonts");
   };
 
   # SSD 优化 - 定期 TRIM
@@ -501,9 +490,43 @@
       General = {
         EnableAvatars = false;
         InputMethod = "qtvirtualkeyboard";
+        # ✅ SDDM 背景图片配置
+        # 可以设置纯色背景或图片背景
+        # 方式 1：使用系统内置壁纸（KDE 自带）
+        # Background = "${pkgs.kdePackages.plasma-workspace}/share/wallpapers/Next/contents/images/1920x1080.jpg";
+        # 方式 2：使用自定义壁纸（推荐）
+        Background = "/etc/nixos/wallpapers/sddm-background.jpg";  # 把你的壁纸放在这里
+      };
+      Theme = {
+        # ✅ SDDM 主题配置
+        Current = "chili";  # 可选主题：chili, elarun, maya, breath, etc.
+        # 主题颜色方案
+        # Color = "#313648";  # 深蓝色背景（如果不用图片）
       };
     };
   };
+  
+  # ✅ 复制自定义壁纸到系统目录（如果文件存在）
+  # 这样壁纸会被包含在系统构建中，并在每次重建时更新
+  environment.etc."nixos/wallpapers".source = 
+    let
+      # 检查自定义壁纸是否存在
+      customWallpaperPath = "/etc/nixos/wallpapers/sddm-background.jpg";
+      # 使用 KDE 自带的默认壁纸作为备选
+      defaultWallpaper = pkgs.kdePackages.plasma-workspace + "/share/wallpapers/Next/contents/images/1920x1080.jpg";
+    in
+    if builtins.pathExists customWallpaperPath then
+      # 如果自定义壁纸存在，使用它
+      pkgs.runCommand "sddm-wallpaper-custom" {} ''
+        mkdir -p $out
+        cp ${customWallpaperPath} $out/sddm-background.jpg
+      ''
+    else
+      # 否则使用默认壁纸
+      pkgs.runCommand "sddm-wallpaper-default" {} ''
+        mkdir -p $out
+        cp ${defaultWallpaper} $out/sddm-background.jpg
+      '';
 
   # 设置 /etc/nixos 目录权限，允许 zhangchongjie 用户完全控制
   systemd.tmpfiles.rules = [

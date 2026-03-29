@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![NixOS](https://img.shields.io/badge/NixOS-25.11-blue?style=for-the-badge&logo=nixos)
+![NixOS](https://img.shields.io/badge/NixOS-26.05-blue?style=for-the-badge&logo=nixos)
 ![Plasma](https://img.shields.io/badge/Plasma-6-green?style=for-the-badge&logo=kde)
 ![Home Manager](https://img.shields.io/badge/Home_Manager-Integrated-purple?style=for-the-badge&logo=nix)
 
@@ -42,7 +42,7 @@
 
 | 项目 | 值 |
 |------|-----|
-| **系统版本** | NixOS 25.11 (Unstable) |
+| **系统版本** | NixOS 26.05 (Unstable) |
 | **桌面环境** | KDE Plasma 6 (Wayland 原生) |
 | **显示管理器** | SDDM |
 | **内核** | Linux Latest (最新稳定版) |
@@ -53,8 +53,8 @@
 
 ### 当前硬件配置
 
-**CPU**: AMD Ryzen 5 2600  
-**GPU**: AMD Radeon RX 5500
+**CPU**: AMD Ryzen 5 1600X  
+**GPU**: AMD Radeon R9 370
 
 ### 首次部署
 
@@ -99,16 +99,13 @@ imports =
 #### 2️⃣ 修改为想要的硬件
 
 **CPU 选项**（`modules/hardware/cpu/`）：
-- `./modules/hardware/cpu/ryzen-1600x.nix`
-- `./modules/hardware/cpu/ryzen-2600.nix` ← 当前
+- `./modules/hardware/cpu/ryzen-1600x.nix` ← 当前
+- `./modules/hardware/cpu/ryzen-2600.nix`
 - `./modules/hardware/cpu/ryzen-3600.nix`
 
 **GPU 选项**（`modules/hardware/gpu/`）：
-- `./modules/hardware/gpu/r9-370.nix`
-- `./modules/hardware/gpu/rx-5500.nix` ← 当前
-- `./modules/hardware/gpu/rx-5500xt.nix`
-- `./modules/hardware/gpu/rx-5700.nix`
-- `./modules/hardware/gpu/rx-5700-xt.nix`
+- `./modules/hardware/gpu/r9-370.nix` ← 当前
+- `./modules/hardware/gpu/rx-5500.nix`
 - `./modules/hardware/gpu/rx-6600xt.nix`
 
 #### 3️⃣ 执行构建
@@ -136,17 +133,17 @@ reboot
 **✅ 即改即用**: 修改 imports 后立即生效  
 **✅ 清晰透明**: 没有隐式逻辑或动态检测
 
-### 💡 示例：切换到 Ryzen 3600 + RX 6600XT
+### 💡 示例：切换到 Ryzen 2600 + RX 5500
 
 **Step 1**: 编辑 `configuration.nix`
-``diff
+```diff
   imports =
     [
       # ... 其他配置 ...
--     ./modules/hardware/cpu/ryzen-2600.nix
-+     ./modules/hardware/cpu/ryzen-3600.nix
--     ./modules/hardware/gpu/rx-5500.nix
-+     ./modules/hardware/gpu/rx-6600xt.nix
+-     ./modules/hardware/cpu/ryzen-1600x.nix
++     ./modules/hardware/cpu/ryzen-2600.nix
+-     ./modules/hardware/gpu/r9-370.nix
++     ./modules/hardware/gpu/rx-5500.nix
     ];
 ```
 
@@ -240,12 +237,12 @@ usbcore.usbfs_memory_mb=1024 # USBFS 内存优化
 
 ### zRAM Swap
 
-- **启用**: 是
-- **大小**: 50% 物理内存
+- **启用**: 是（仅 Ryzen 1600X，8GB 内存专属）
+- **大小**: 90% 物理内存
 - **压缩算法**: ZSTD
 - **优先级**: 100
 
-### AMD GPU 优化 (RX 5500)
+### AMD GPU 优化 (R9 370)
 
 #### 驱动与内核模块
 
@@ -257,15 +254,17 @@ usbcore.usbfs_memory_mb=1024 # USBFS 内存优化
 
 ```
 amdgpu.runpm=0                 # 禁用运行时 PM
-pcie_aspm=performance          # PCIe ASPM 性能模式
-amdgpu.ppfeaturemask=0xffffffff # 启用所有特性
-amdgpu.dc=1                    # Display Core
+amdgpu.dpm=1                   # 动态电源管理
+amdgpu.dc=0                    # 禁用 Display Core (R9 370 不支持)
+amdgpu.si_support=1            # Southern Islands 支持
+radeon.si_support=0            # 禁用旧驱动
+pcie_aspm=off                  # 禁用 ASPM 提高稳定性
 ```
 
 #### 图形加速
 
-- **Vulkan**: 启用 (含 32 位)
-- **OpenCL**: ROCm CLR
+- **Vulkan**: 禁用 (R9 370 不支持)
+- **OpenCL**: Mesa OpenCL
 - **VA-API/VDPAU**: 视频编解码
 
 ### 安全设置
@@ -477,6 +476,118 @@ nix eval '.#nixos.config.networking.hostName'
 
 ---
 
+## 🖼️ SDDM 登录屏幕壁纸配置
+
+### ✅ 已配置功能
+
+SDDM 显示管理器现已支持自定义壁纸，配置位于 [`configuration.nix`](configuration.nix) 的 `services.displayManager.sddm` 部分。
+
+### 🎨 更换壁纸方法
+
+#### 方式 1：使用自定义壁纸（推荐）
+
+1. **准备壁纸文件**
+   
+   将你的壁纸图片（JPG/PNG 格式）放置到：
+   ```
+   /etc/nixos/wallpapers/sddm-background.jpg
+   ```
+
+2. **支持的格式**
+   - JPG/JPEG
+   - PNG
+   - 推荐分辨率：1920x1080 或更高
+
+3. **应用新壁纸**
+   ```bash
+   cd /etc/nixos
+   sudo nixos-rebuild switch --flake .#nixos
+   ```
+
+4. **重启 SDDM 或系统**
+   ```bash
+   # 方式 1：重启 display-manager 服务
+   sudo systemctl restart display-manager.service
+   
+   # 方式 2：直接重启系统
+   reboot
+   ```
+
+#### 方式 2：使用 KDE 默认壁纸
+
+如果 `/etc/nixos/wallpapers/sddm-background.jpg` 不存在，系统会自动使用 KDE Plasma 的默认壁纸。
+
+### 🎯 配置选项
+
+在 [`configuration.nix`](configuration.nix) 中可以调整以下参数：
+
+```nix
+services.displayManager.sddm = {
+  enable = true;
+  wayland.enable = true;
+  settings = {
+    General = {
+      Background = "/etc/nixos/wallpapers/sddm-background.jpg";  # 壁纸路径
+    };
+    Theme = {
+      Current = "chili";  # 主题：chili, elarun, maya, breath
+      # Color = "#313648";  # 纯色背景（如果不使用图片）
+    };
+  };
+};
+```
+
+### 📦 可用主题
+
+- **chili** - 现代简洁风格（当前使用）
+- **elarun** - 蓝色渐变风格
+- **maya** - 深色优雅风格
+- **breath** - 动态呼吸效果
+
+### 💡 示例：下载网络壁纸
+
+```bash
+# 下载 Unsplash 壁纸作为 SDDM 背景
+curl -o /etc/nixos/wallpapers/sddm-background.jpg \
+  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920"
+
+# 然后重建系统
+sudo nixos-rebuild switch --flake .#nixos
+```
+
+### ⚠️ 注意事项
+
+1. **壁纸尺寸**：建议使用 1920x1080 或更高分辨率的图片
+2. **文件格式**：JPG 或 PNG 格式
+3. **文件位置**：必须放在 `/etc/nixos/wallpapers/` 目录下
+4. **重建系统**：修改壁纸后需要重新构建系统才能生效
+5. **Wayland 支持**：已启用 SDDM Wayland 模式，确保与 Plasma 6 兼容
+
+### 🔧 故障排除
+
+**Q: 壁纸不显示？**  
+A: 检查以下几点：
+- 确认壁纸文件路径正确：`/etc/nixos/wallpapers/sddm-background.jpg`
+- 确认文件格式是 JPG 或 PNG
+- 查看 SDDM 日志：`journalctl -u display-manager -b`
+- 尝试切换主题：修改 `Theme.Current` 为其他值
+
+**Q: 如何恢复默认壁纸？**  
+A: 删除或重命名自定义壁纸文件，系统会自动使用 KDE 默认壁纸：
+```bash
+mv /etc/nixos/wallpapers/sddm-background.jpg \
+   /etc/nixos/wallpapers/sddm-background.jpg.backup
+sudo nixos-rebuild switch --flake .#nixos
+```
+
+### 📚 参考资料
+
+- [NixOS SDDM 模块文档](https://search.nixos.org/options?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=services.displayManager.sddm)
+- [SDDM 官方主题库](https://github.com/sddm/sddm-themes)
+- [KDE Plasma 壁纸](https://store.kde.org/browse?cat=128&ord=latest)
+
+---
+
 ## 🎮 Clash TUN 模式
 
 ### 启动 TUN 模式
@@ -615,12 +726,12 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 
 ## 🛠️ 技术栈
 
-- **基础系统**: NixOS 25.11 (Unstable)
+- **基础系统**: NixOS 26.05 (Unstable)
 - **配置管理**: Nix Flakes (简化版)
 - **用户配置**: Home Manager (NixOS 集成模式)
 - **桌面环境**: KDE Plasma 6
 - **显示协议**: Wayland
-- **硬件支持**: AMD Ryzen (1600X/2600/3600) + AMD Radeon (R9 370/RX 5500/RX 6600XT 等)
+- **硬件支持**: AMD Ryzen (1600X/2600/3600) + AMD Radeon (R9 370/RX 5500/RX 6600XT)
 - **代理方案**: Clash Verge Rev (TUN 模式)
 
 ---

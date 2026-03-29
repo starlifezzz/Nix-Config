@@ -24,19 +24,14 @@
   # 启用 XDG 规范支持（管理 XDG 目录、MIME 类型等）
   xdg.enable = true;
 
- # 配置 XDG 用户目录（符合 freedesktop.org 标准）
+  # 配置 XDG 用户目录（符合 freedesktop.org 标准）
+  # ✅ 注意：KDE 会根据系统 locale 自动创建目录名
+  # 如果系统 locale 是中文，会创建"桌面"、"文档"等中文目录
+  # 这里只启用基础功能，不强制指定路径，避免中英文目录并存
   xdg.userDirs = {
     enable = true;
-    createDirectories = true;
+    createDirectories = false;  # 让 KDE 根据 locale 自动管理
     setSessionVariables = false;
-    desktop = "$HOME/Desktop";
-    documents = "$HOME/Documents";
-    download = "$HOME/Downloads";
-    music = "$HOME/Music";
-    pictures = "$HOME/Pictures";
-    videos = "$HOME/Videos";
-    publicShare = "$HOME/Public";
-    templates = "$HOME/Templates";
   };
 
   # ═══════════════════════════════════════════════════════════
@@ -141,7 +136,6 @@
     ./direnv.nix        # Direnv 开发环境配置
     
     # 代码编辑器
-    # ./vscode.nix        # VSCode 代码编辑器配置
     ./vim.nix           # Vim 文本编辑器配置
     
     # 桌面环境
