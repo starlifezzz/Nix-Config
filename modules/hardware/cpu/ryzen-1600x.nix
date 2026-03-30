@@ -2,7 +2,10 @@
 
 {
   # ✅ CPU 频率调节模块 - Ryzen 1000 系列必需
-  boot.kernelModules = [ "acpi-cpufreq" ];
+  boot.kernelModules = [ 
+    "acpi-cpufreq"
+    "k10temp"       # ✅ 新增：AMD CPU 温度传感器
+  ];
   
   boot.kernelParams = [
     "processor.max_cstate=5"
@@ -10,21 +13,25 @@
     "pcie_aspm=off"
     "transparent_hugepage=madvise"
     "numa_balancing=1"
+    
+    # ✅ 新增：HDMI/DP 音频输出
+    "amdgpu.audio=1"
   ];
   
   powerManagement = {
     powertop.enable = true;
-    cpuFreqGovernor = lib.mkForce "ondemand";
+    # ✅ 统一使用 schedutil（现代内核推荐）
+    cpuFreqGovernor = lib.mkDefault "schedutil";
   };
   
   boot.kernel.sysctl = {
     "kernel.sched_autogroup_enabled" = lib.mkForce 1;
     "kernel.sched_migration_cost_ns" = lib.mkForce 100000;
-    "vm.swappiness" = lib.mkForce 15;
+    "vm.swappiness" = lib.mkForce 15;  # 8GB 内存保持较高值
     "vm.vfs_cache_pressure" = lib.mkForce 50;
     "vm.dirty_ratio" = lib.mkForce 15;
     "vm.dirty_background_ratio" = lib.mkForce 10;
-    "kernel.page-table-isolation" = lib.mkForce 1;
+    "kernel.page-table-isolation" = lib.mkForce 1;  # Zen 需要 PTI
   };
   
   # ═══════════════════════════════════════════════════════════
@@ -43,4 +50,9 @@
       };
     };
   };
+  
+  # ✅ 新增：温度监控工具
+  environment.systemPackages = with pkgs; [
+    lm_sensors  # 传感器读取工具
+  ];
 }

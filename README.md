@@ -53,12 +53,12 @@
 
 ### 当前硬件配置
 
-**CPU**: AMD Ryzen 5 1600X  
-**GPU**: AMD Radeon R9 370
+**CPU**: AMD Ryzen 5 2600  
+**GPU**: AMD Radeon RX 5500
 
 ### 首次部署
 
-```
+```bash
 # 1. 克隆配置到 /etc/nixos
 sudo su
 cd /etc
@@ -80,9 +80,9 @@ sudo passwd zhangchongjie
 
 #### 1️⃣ 编辑 [`configuration.nix`](configuration.nix)
 
-找到第 6-20 行的 `imports` 部分：
+找到 `imports` 部分：
 
-```
+```nix
 imports =
   [
     # ... 其他配置保持不变 ...
@@ -99,18 +99,18 @@ imports =
 #### 2️⃣ 修改为想要的硬件
 
 **CPU 选项**（`modules/hardware/cpu/`）：
-- `./modules/hardware/cpu/ryzen-1600x.nix` ← 当前
-- `./modules/hardware/cpu/ryzen-2600.nix`
+- `./modules/hardware/cpu/ryzen-1600x.nix`
+- `./modules/hardware/cpu/ryzen-2600.nix` ← 当前使用
 - `./modules/hardware/cpu/ryzen-3600.nix`
 
 **GPU 选项**（`modules/hardware/gpu/`）：
-- `./modules/hardware/gpu/r9-370.nix` ← 当前
-- `./modules/hardware/gpu/rx-5500.nix`
+- `./modules/hardware/gpu/r9-370.nix`
+- `./modules/hardware/gpu/rx-5500.nix` ← 当前使用
 - `./modules/hardware/gpu/rx-6600xt.nix`
 
 #### 3️⃣ 执行构建
 
-```
+```bash
 cd /etc/nixos
 sudo nixos-rebuild switch --flake .#nixos
 ```
@@ -122,7 +122,7 @@ rebuild-flake  # 已配置国内镜像源
 
 #### 4️⃣ 重启系统（建议）
 
-```
+```bash
 reboot
 ```
 
@@ -133,17 +133,17 @@ reboot
 **✅ 即改即用**: 修改 imports 后立即生效  
 **✅ 清晰透明**: 没有隐式逻辑或动态检测
 
-### 💡 示例：切换到 Ryzen 2600 + RX 5500
+### 💡 示例：切换到 Ryzen 3600 + RX 6600XT
 
 **Step 1**: 编辑 `configuration.nix`
 ```diff
   imports =
     [
       # ... 其他配置 ...
--     ./modules/hardware/cpu/ryzen-1600x.nix
-+     ./modules/hardware/cpu/ryzen-2600.nix
--     ./modules/hardware/gpu/r9-370.nix
-+     ./modules/hardware/gpu/rx-5500.nix
+-     ./modules/hardware/cpu/ryzen-2600.nix
++     ./modules/hardware/cpu/ryzen-3600.nix
+-     ./modules/hardware/gpu/rx-5500.nix
++     ./modules/hardware/gpu/rx-6600xt.nix
     ];
 ```
 
@@ -181,7 +181,6 @@ reboot
 
 - **Firefox** - 浏览器 (Wayland 原生)
 - **Clash Verge Rev** - 代理客户端 (TUN 模式)
-- **FlClash** - 备用代理客户端
 - **KDE Connect** - 设备互联
 
 ### 游戏相关
@@ -242,7 +241,7 @@ usbcore.usbfs_memory_mb=1024 # USBFS 内存优化
 - **压缩算法**: ZSTD
 - **优先级**: 100
 
-### AMD GPU 优化 (R9 370)
+### AMD GPU 优化 (RX 5500)
 
 #### 驱动与内核模块
 
@@ -255,17 +254,15 @@ usbcore.usbfs_memory_mb=1024 # USBFS 内存优化
 ```
 amdgpu.runpm=0                 # 禁用运行时 PM
 amdgpu.dpm=1                   # 动态电源管理
-amdgpu.dc=0                    # 禁用 Display Core (R9 370 不支持)
-amdgpu.si_support=1            # Southern Islands 支持
-radeon.si_support=0            # 禁用旧驱动
+amdgpu.dc=1                    # 启用 Display Core
 pcie_aspm=off                  # 禁用 ASPM 提高稳定性
 ```
 
 #### 图形加速
 
-- **Vulkan**: 禁用 (R9 370 不支持)
+- **Vulkan**: RADV Vulkan 驱动
 - **OpenCL**: Mesa OpenCL
-- **VA-API/VDPAU**: 视频编解码
+- **VA-API**: 视频编解码加速
 
 ### 安全设置
 
@@ -288,7 +285,7 @@ pcie_aspm=off                  # 禁用 ASPM 提高稳定性
 
 #### 实用别名
 
-``fish
+```fish
 ll = "ls -la"
 la = "ls -A"
 rebuild = "sudo -E nixos-rebuild switch"
@@ -331,7 +328,6 @@ rebuild-offline
 - **允许 Ping**: 是
 - **信任接口**: Mihomo, Meta, clash0, utun* (Clash TUN 模式)
 - **开放端口**:
-  - TCP: 7897 (Clash Dashboard), 7890-7891 (代理端口), 9090 (External Controller)
   - UDP/TCP: 1714-1764 (KDE Connect)
 
 ### 代理服务
@@ -340,7 +336,6 @@ rebuild-offline
   - TUN 模式：启动脚本自动配置
   - HTTP 代理：http://127.0.0.1:7897
   - SOCKS5 代理：socks5://127.0.0.1:7891
-- **FlClash**: 备用代理客户端
 
 ### DNS
 
@@ -378,9 +373,6 @@ rebuild-offline
 │   └── gpu/                      # GPU 特定配置
 │       ├── r9-370.nix
 │       ├── rx-5500.nix           # ← 当前使用
-│       ├── rx-5500xt.nix
-│       ├── rx-5700.nix
-│       ├── rx-5700-xt.nix
 │       └── rx-6600xt.nix
 │
 ├── scripts/                       # 实用脚本
@@ -388,7 +380,6 @@ rebuild-offline
 │   └── check-clash-tun.sh        # TUN 状态检查
 │
 ├── QUICK_REFERENCE.md             # 快速参考手册
-├── ARCHITECTURE_CHANGE.md         # 架构改进说明
 └── README.md                      # 本文档
 ```
 
@@ -396,7 +387,7 @@ rebuild-offline
 
 ## 💡 架构演进
 
-### 最新版本 (2026-03-29)
+### 最新版本 (2026-03-30)
 
 **✅ 完全移除条件判断**: 
 - 删除了 `detection.nix` 模块
@@ -476,123 +467,11 @@ nix eval '.#nixos.config.networking.hostName'
 
 ---
 
-## 🖼️ SDDM 登录屏幕壁纸配置
-
-### ✅ 已配置功能
-
-SDDM 显示管理器现已支持自定义壁纸，配置位于 [`configuration.nix`](configuration.nix) 的 `services.displayManager.sddm` 部分。
-
-### 🎨 更换壁纸方法
-
-#### 方式 1：使用自定义壁纸（推荐）
-
-1. **准备壁纸文件**
-   
-   将你的壁纸图片（JPG/PNG 格式）放置到：
-   ```
-   /etc/nixos/wallpapers/sddm-background.jpg
-   ```
-
-2. **支持的格式**
-   - JPG/JPEG
-   - PNG
-   - 推荐分辨率：1920x1080 或更高
-
-3. **应用新壁纸**
-   ```bash
-   cd /etc/nixos
-   sudo nixos-rebuild switch --flake .#nixos
-   ```
-
-4. **重启 SDDM 或系统**
-   ```bash
-   # 方式 1：重启 display-manager 服务
-   sudo systemctl restart display-manager.service
-   
-   # 方式 2：直接重启系统
-   reboot
-   ```
-
-#### 方式 2：使用 KDE 默认壁纸
-
-如果 `/etc/nixos/wallpapers/sddm-background.jpg` 不存在，系统会自动使用 KDE Plasma 的默认壁纸。
-
-### 🎯 配置选项
-
-在 [`configuration.nix`](configuration.nix) 中可以调整以下参数：
-
-```nix
-services.displayManager.sddm = {
-  enable = true;
-  wayland.enable = true;
-  settings = {
-    General = {
-      Background = "/etc/nixos/wallpapers/sddm-background.jpg";  # 壁纸路径
-    };
-    Theme = {
-      Current = "chili";  # 主题：chili, elarun, maya, breath
-      # Color = "#313648";  # 纯色背景（如果不使用图片）
-    };
-  };
-};
-```
-
-### 📦 可用主题
-
-- **chili** - 现代简洁风格（当前使用）
-- **elarun** - 蓝色渐变风格
-- **maya** - 深色优雅风格
-- **breath** - 动态呼吸效果
-
-### 💡 示例：下载网络壁纸
-
-```
-# 下载 Unsplash 壁纸作为 SDDM 背景
-curl -o /etc/nixos/wallpapers/sddm-background.jpg \
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920"
-
-# 然后重建系统
-sudo nixos-rebuild switch --flake .#nixos
-```
-
-### ⚠️ 注意事项
-
-1. **壁纸尺寸**：建议使用 1920x1080 或更高分辨率的图片
-2. **文件格式**：JPG 或 PNG 格式
-3. **文件位置**：必须放在 `/etc/nixos/wallpapers/` 目录下
-4. **重建系统**：修改壁纸后需要重新构建系统才能生效
-5. **Wayland 支持**：已启用 SDDM Wayland 模式，确保与 Plasma 6 兼容
-
-### 🔧 故障排除
-
-**Q: 壁纸不显示？**  
-A: 检查以下几点：
-- 确认壁纸文件路径正确：`/etc/nixos/wallpapers/sddm-background.jpg`
-- 确认文件格式是 JPG 或 PNG
-- 查看 SDDM 日志：`journalctl -u display-manager -b`
-- 尝试切换主题：修改 `Theme.Current` 为其他值
-
-**Q: 如何恢复默认壁纸？**  
-A: 删除或重命名自定义壁纸文件，系统会自动使用 KDE 默认壁纸：
-```bash
-mv /etc/nixos/wallpapers/sddm-background.jpg \
-   /etc/nixos/wallpapers/sddm-background.jpg.backup
-sudo nixos-rebuild switch --flake .#nixos
-```
-
-### 📚 参考资料
-
-- [NixOS SDDM 模块文档](https://search.nixos.org/options?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=services.displayManager.sddm)
-- [SDDM 官方主题库](https://github.com/sddm/sddm-themes)
-- [KDE Plasma 壁纸](https://store.kde.org/browse?cat=128&ord=latest)
-
----
-
 ## 🎮 Clash TUN 模式
 
 ### 启动 TUN 模式
 
-```
+```bash
 # 启动 TUN 模式 (需要 sudo)
 sudo clash-tun
 # 或
@@ -601,7 +480,7 @@ sudo ./scripts/start-clash-tun.sh
 
 ### 检查 TUN 状态
 
-```
+```bash
 # 检查 TUN 接口
 ip link show Mihomo
 
@@ -611,7 +490,7 @@ ps aux | grep verge-mihomo
 
 ### 停止 TUN 模式
 
-```
+```bash
 sudo pkill -f verge-mihomo
 ```
 
@@ -620,34 +499,6 @@ sudo pkill -f verge-mihomo
 - TUN 设备在每次重启后需要重新运行启动脚本
 - 确保 `netadmin` 用户组已生效（需重新登录）
 - Clash Verge Rev GUI 会自动生成配置文件
-
----
-
-## 🤖 MCP Server NixOS（灵码 AI 助手）
-
-### 快速启动
-
-配置已完成！只需重启 VSCode 或重新加载窗口即可。
-
-```bash
-# 确保 Clash TUN 模式运行（如果需要访问 PyPI）
-sudo clash-tun
-
-# 重启 VSCode 后按 Ctrl+Shift+P，选择 "Developer: Reload Window"
-```
-
-### 配置位置
-
-- **包装脚本**: `/etc/nixos/scripts/mcp-nixos-wrapper.sh`
-- **VSCode 配置**: 已在 `settings.json` 中自动配置
-
-### 常见问题
-
-**Q: 首次启动很慢怎么办？**  
-A: 首次运行需要下载 Python 依赖包（约 1-2 分钟），请耐心等待
-
-**Q: 提示连接超时？**  
-A: 确保 Clash TUN 模式已启动：`sudo clash-tun`
 
 ---
 

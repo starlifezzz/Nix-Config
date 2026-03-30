@@ -137,18 +137,17 @@
       };
 
       keyboard.bindings = [
-        { key = "R"; mods = "Super"; chars = "\f"; mode = "~Vi|~Search"; }
-        { key = "R"; mods = "Super"; action = "ClearHistory"; mode = "~Vi|~Search"; }
-        { key = "W"; mods = "Super"; action = "Hide"; }
-        { key = "W"; mods = "Super|Shift"; action = "Quit"; }
-        { key = "N"; mods = "Super"; action = "SpawnNewInstance"; }
-        { key = "T"; mods = "Super"; action = "CreateNewWindow"; }
-        { key = "Left"; mods = "Alt"; chars = "\u001Bb"; }
-        { key = "Right"; mods = "Alt"; chars = "\u001Bf"; }
-        { key = "Left"; mods = "Super"; chars = "\u0001"; }
-        { key = "Right"; mods = "Super"; chars = "\u0005"; }
-        { key = "Back"; mods = "Super"; chars = "\u0015"; }
-        { key = "Back"; mods = "Alt"; chars = "\u001B\u007F"; }
+        # // 文本编辑相关
+        { key = "Back"; mods = "Super"; chars = "\u0015"; }  # Ctrl+U 删除整行
+        { key = "Back"; mods = "Alt"; chars = "\u001B\u007F"; }  # Alt+Backspace 删除单词
+        
+        # // 单词导航
+        { key = "Left"; mods = "Alt"; chars = "\u001Bb"; }  # Alt+← 跳到前一个单词
+        { key = "Right"; mods = "Alt"; chars = "\u001Bf"; }  # Alt+→ 跳到下一个单词
+        
+        # // Shell 导航快捷键（与 Fish Shell 配合）
+        { key = "Left"; mods = "Super"; chars = "\u0001"; }  # Ctrl+A 行首
+        { key = "Right"; mods = "Super"; chars = "\u0005"; }  # Ctrl+E 行尾
       ];
     };
   };

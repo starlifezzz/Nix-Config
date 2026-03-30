@@ -8,7 +8,12 @@
   boot.kernelParams = [
     # GPU 电源管理
     "amdgpu.runpm=0"  # 禁用运行时电源管理（提高稳定性）
-    "pcie_aspm=performance"  # PCIe ASPM 性能模式
+    
+    # ✅ PCIe ASPM 节能模式（桌面用户推荐）
+    "pcie_aspm=powersupersave"
+    
+    # ✅ HDMI/DP 音频输出
+    "amdgpu.audio=1"
     
     # AMDGPU 特性
     "amdgpu.ppfeaturemask=0xffffffff"  # 启用所有电源管理特性
@@ -28,13 +33,20 @@
       vulkan-loader
       vulkan-tools
       
+      # ✅ OpenCL ICD loader（必需）
+      ocl-icd
+      
       # OpenCL 支持
       rocmPackages.clr.icd
       
-      # 视频编解码加速
-      libva-vdpau-driver
-      libvdpau-va-gl
+      # ✅ 视频编解码加速
       mesa
+      libva
+      libvdpau-va-gl
+      
+      # ✅ AMF 头文件（用于 OBS 等编码加速）
+      # 注意：AMDVLK 已废弃，改用 RADV（Mesa Vulkan，已包含在 mesa 中）
+      # OBS 会自动使用 VAAPI/VDPAU 进行硬件编码
     ];
   };
   
@@ -45,8 +57,9 @@
   # 在 initrd 阶段加载 AMDGPU
   boot.initrd.kernelModules = [ "amdgpu" ];
   
-  # 工具软件
+  # ✅ GPU 监控工具
   environment.systemPackages = with pkgs; [
     radeontop
+    lm_sensors  # 传感器读取工具（与 CPU 模块配合）
   ];
 }
