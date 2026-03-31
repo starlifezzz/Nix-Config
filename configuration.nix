@@ -109,11 +109,84 @@
     alsa.support32Bit = true;
     pulse.enable = true;
     jack.enable = true;
+    
+    # ✅ DSD 硬件直解配置 - WirePlumber
+    wireplumber.extraConfig = {
+      "monitor.alsa" = {
+        "node.name" = "FIIO-K5-Pro";
+        "node.description" = "FIIO K5 Pro (DSD Native)";
+        "api.alsa.dsd-usb" = true;  # 启用 DSD over USB
+        "api.alsa.dsd-native" = true;  # 启用原生 DSD
+        "api.alsa.rate" = "auto";  # 自动采样率
+        "api.alsa.disable-batch" = true;  # 禁用批处理模式，降低延迟
+      };
+    };
   };
   
   # ✅ UPower 服务 - 修复 WirePlumber 电池百分比错误
   services.upower.enable = true;
-
+  
+  # ═══════════════════════════════════════════════════════════
+  # 🔥 ALSA DSD 硬件直解配置
+  # ═══════════════════════════════════════════════════════════
+  # 使用 environment.etc 创建 /etc/asound.conf 文件
+  # 参考：https://wiki.gentoo.org/wiki/ALSA
+  environment.etc."asound.conf".text = ''
+    # FIIO K5 Pro DSD 硬件直解配置
+    
+    # 定义 FIIO K5 Pro 设备别名
+    pcm.fiio_k5_pro {
+      type hw
+      card "K5Pro"  # 使用设备名称而非数字（避免重启后变化）
+      device 0
+    }
+    
+    ctl.fiio_k5_pro {
+      type hw
+      card "K5Pro"
+    }
+    
+    # ✅ DSD over PCM (DoP) 配置
+    # 将 DSD 数据封装到 PCM 帧中传输
+    pcm.dop {
+      type dop
+      slave.pcm "fiio_k5_pro"
+      format "S32_LE"
+    }
+    
+    # ✅ 原生 DSD 配置（如果设备支持）
+    pcm.dsd {
+      type dsd
+      slave.pcm "fiio_k5_pro"
+      format "DSD_U32_BE"
+    }
+    
+    # 默认输出设备（可选：设为 FIIO K5 Pro）
+    # defaults.pcm.card "K5Pro"
+    # defaults.ctl.card "K5Pro"
+    
+    # ✅ USB 音频低延迟优化
+    defaults.usb_audio.period_size 256
+    defaults.usb_audio.buffer_size 2048
+    
+    # ✅ 高质量重采样配置
+    # 当播放非原生采样率时使用 SRC（Sample Rate Converter）
+    pcm.!default {
+      type plug
+      slave {
+        pcm {
+          type softvol
+          slave.pcm "dmix"
+          control {
+            name "PCM"
+            card "K5Pro"
+          }
+        }
+        rate_converter "samplerate_best"
+      }
+    }
+  '';
+  
   # 用户配置
   users.users.zhangchongjie = {
     isNormalUser = true; # 普通用户
@@ -149,8 +222,13 @@
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowBroken = true;
 
-  # 系统软件包 - 仅保留系统级必需的工具
+  # 系统软件包 - 仅保留系统级必需的工具（包含 ALSA DSD 支持）
   environment.systemPackages = with pkgs; [
+    # ✅ ALSA 音频工具（DSD 硬件直解支持）
+    alsa-utils         # aplay, amixer, alsamixer 等
+    alsa-firmware      # 固件支持
+    alsa-lib           # ALSA 库
+    
     # 系统核心工具
     home-manager      # Home Manager（NixOS 集成模式）
     

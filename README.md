@@ -8,7 +8,7 @@
 
 **简单直接的模块化 NixOS 配置 • 手动指定硬件 • 清晰可预测**
 
-[📋 快速开始](#-快速开始) • [🔧 切换硬件](#-切换硬件配置) • [📦 软件包](#-软件包) • [⚙️ 系统优化](#️-系统优化) • [📁 目录结构](#-目录结构)
+[📋 快速开始](#-快速开始) • [🔧 切换硬件](#-切换硬件配置) • [🎵 DSD 音频](#-音频配置 dsd-硬件直解) • [📦 软件包](#-软件包) • [⚙️ 系统优化](#️-系统优化) • [📁 目录结构](#-目录结构)
 
 </div>
 
@@ -196,6 +196,24 @@ reboot
 - **Flatpak** - 通用包管理
 - **FFmpeg (Full)** - 音视频处理
 - **Node.js** - JavaScript 运行时 (完整版，支持 MCP Server)
+
+### 🎵 音频配置（DSD 硬件直解）
+
+- **PipeWire** - 现代音频服务器（支持 DSD）
+- **ALSA** - Linux 音频架构（DSD 硬解配置）
+- **FIIO K5 Pro** - USB DAC（支持原生 DSD256）
+- **MPD** - 音乐播放器守护进程（可选，支持 DSD）
+
+**快速开始**：
+```bash
+# 查看 DSD 配置指南
+cat FIIO_K5_PRO_DSD_GUIDE.md
+
+# 运行音频测试
+sudo ./scripts/test-audio-dsd.sh all
+```
+
+详细文档：[`FIIO_K5_PRO_DSD_GUIDE.md`](FIIO_K5_PRO_DSD_GUIDE.md)
 
 ---
 
