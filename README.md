@@ -8,7 +8,7 @@
 
 **简单直接的模块化 NixOS 配置 • 手动指定硬件 • 清晰可预测**
 
-[📋 快速开始](#-快速开始) • [🔧 切换硬件](#-切换硬件配置) • [🎵 DSD 音频](#-音频配置 dsd-硬件直解) • [📦 软件包](#-软件包) • [⚙️ 系统优化](#️-系统优化) • [📁 目录结构](#-目录结构)
+[📋 快速开始](#-快速开始) • [🔧 切换硬件](#-切换硬件配置) • [⚙️ 系统特性](#️-系统特性) • [📦 软件包](#-软件包) • [🔧 日常维护](#-日常维护) • [📁 目录结构](#-目录结构)
 
 </div>
 
@@ -24,6 +24,7 @@
 - ✅ **`flake.nix` 只保留最简框架（用于 Home Manager）**
 - ✅ **支持 `sudo nixos-rebuild switch --flake .#nixos` 构建**
 - ✅ **配置清晰明了，一眼看出用的什么硬件**
+- ✅ **多设备友好：每台设备独立生成 hardware-configuration.nix**
 
 ### 📊 架构对比
 
@@ -50,6 +51,7 @@
 | **默认 Shell** | Fish |
 | **时区** | Asia/Shanghai |
 | **语言** | zh_CN.UTF-8 |
+| **输入法** | Fcitx5 + Rime |
 
 ### 当前硬件配置
 
@@ -65,10 +67,13 @@ cd /etc
 git clone <your-repo-url> nixos
 cd nixos
 
-# 2. 构建并切换
+# 2. 生成当前设备的 hardware-configuration.nix
+nixos-generate-config --no-filesystems --root /
+
+# 3. 构建并切换
 sudo nixos-rebuild switch --flake .#nixos
 
-# 3. 设置用户密码
+# 4. 设置用户密码
 sudo passwd zhangchongjie
 ```
 
@@ -80,12 +85,13 @@ sudo passwd zhangchongjie
 
 #### 1️⃣ 编辑 [`configuration.nix`](configuration.nix)
 
-找到 `imports` 部分：
+找到 `imports` 部分（第 16-20 行）：
 
 ```nix
 imports =
   [
-    # ... 其他配置保持不变 ...
+    # 硬件配置（设备特定，不提交到 Git）
+    ./hardware-configuration.nix
     
     # ═══════════════════════════════════════════════════════════
     # ✅ 手动指定 CPU 和 GPU 配置文件
@@ -139,6 +145,7 @@ reboot
 ```diff
   imports =
     [
+      ./hardware-configuration.nix
       # ... 其他配置 ...
 -     ./modules/hardware/cpu/ryzen-2600.nix
 +     ./modules/hardware/cpu/ryzen-3600.nix
@@ -158,6 +165,114 @@ reboot
 ```
 
 **完成！** 🎉
+
+---
+
+## ⚙️ 系统特性
+
+### 核心服务
+
+#### 桌面环境
+- **KDE Plasma 6**: 最新 Wayland 桌面体验
+- **SDDM**: 显示管理器
+- **Fcitx5**: 中文输入法（Rime 引擎）
+
+#### 网络配置
+- **防火墙**: 启用状态，信任 Clash TUN 接口
+- **DNS**: 119.29.29.29 (腾讯), 223.5.5.5 (阿里)
+- **Clash Verge Rev**: TUN 模式代理客户端
+
+#### 性能优化
+- **内核参数**:
+  ```nix
+  usbcore.autosuspend=-1       # USB 稳定性
+  usbcore.usbfs_memory_mb=1024 # USBFS 内存优化
+  ```
+- **内存管理**: Swappiness = 1 (最小化 swap)
+- **BTRFS**: 自动碎片整理 + 定期 scrub
+
+### 安全特性
+
+- **Sudo**: Wheel 组需密码
+- **防火墙**: 默认拒绝，按需开放
+- **TUN 模块**: 加载 (Clash Verge Rev)
+- **网络管理权限**: netadmin 组
+
+#### 外设支持
+
+- **游戏手柄**: Xbox/北通鲲鹏 20（1000Hz 高回报率）
+- **输入法**: Fcitx5 + Rime 中文输入
+- **字体**: Noto + 思源 + 霞鹜文楷完整中文字体
+
+---
+
+## 🎮 游戏手柄配置
+
+### 已支持设备
+
+| 设备 | 模式 | 回报率 | 状态 |
+|------|------|--------|------|
+| **Xbox Series X|S** | Xbox | 1000Hz | ✅ 原生支持 |
+| **Xbox One** | Xbox | 1000Hz | ✅ 原生支持 |
+| **Xbox 360** | Xbox | 125Hz | ✅ 原生支持 |
+| **北通鲲鹏 20** | Xbox (强制) | 1000Hz | ✅ 特殊优化 |
+| **其他第三方** | Xbox 兼容 | 自动 | ✅ 通用支持 |
+
+### 北通鲲鹏 20 特别优化
+
+**问题**：默认被识别为 Switch 手柄，无法使用 1000Hz 高回报率  
+**解决**：通过 udev 规则强制切换到 Xbox 模式
+
+**配置位置**：[`modules/hardware/peripherals/gamepad.nix`](modules/hardware/peripherals/gamepad.nix)
+
+**核心功能**：
+- ✅ 强制 xpad 驱动绑定（Xbox 模式）
+- ✅ 解除 hid-nintendo 驱动（Switch 模式）
+- ✅ 设置 USB 轮询间隔 1ms（1000Hz）
+- ✅ Steam Input 集成
+- ✅ 手柄测试工具（jstest-gtk）
+
+### 部署与验证
+
+```bash
+# 1. 应用配置
+sudo nixos-rebuild switch --flake .#nixos
+
+# 2. 重启系统（必需！）
+reboot
+
+# 3. 验证手柄模式
+lsusb | grep -i betop
+cat /proc/bus/input/devices | grep -A 10 -i betop
+
+# 4. 测试手柄
+jstest-gtk
+```
+
+### 故障排查
+
+**仍识别为 Switch 控制器**：
+```bash
+sudo modprobe -r hid-nintendo        # 卸载 Switch 驱动
+sudo udevadm control --reload-rules  # 重载 udev 规则
+sudo udevadm trigger                 # 触发规则
+# 重新插拔手柄
+```
+
+**xpad 驱动未加载**：
+```bash
+lsmod | grep xpad           # 检查驱动状态
+sudo modprobe xpad          # 手动加载
+```
+
+**权限不足**：
+```bash
+groups zhangchongjie | grep input  # 确认在 input 组
+newgrp input                        # 临时切换
+# 或重新登录
+```
+
+详细文档：[`modules/hardware/peripherals/gamepad.nix`](modules/hardware/peripherals/gamepad.nix)
 
 ---
 
@@ -183,11 +298,6 @@ reboot
 - **Clash Verge Rev** - 代理客户端 (TUN 模式)
 - **KDE Connect** - 设备互联
 
-### 游戏相关
-
-- **Lutris** - 游戏平台
-- 桌面快捷方式已配置
-
 ### 系统工具
 
 - **Fastfetch** - 系统信息显示
@@ -196,98 +306,6 @@ reboot
 - **Flatpak** - 通用包管理
 - **FFmpeg (Full)** - 音视频处理
 - **Node.js** - JavaScript 运行时 (完整版，支持 MCP Server)
-
-### 🎵 音频配置（DSD 硬件直解）
-
-- **PipeWire** - 现代音频服务器（支持 DSD）
-- **ALSA** - Linux 音频架构（DSD 硬解配置）
-- **FIIO K5 Pro** - USB DAC（支持原生 DSD256）
-- **MPD** - 音乐播放器守护进程（可选，支持 DSD）
-
-**快速开始**：
-```bash
-# 查看 DSD 配置指南
-cat FIIO_K5_PRO_DSD_GUIDE.md
-
-# 运行音频测试
-sudo ./scripts/test-audio-dsd.sh all
-```
-
-详细文档：[`FIIO_K5_PRO_DSD_GUIDE.md`](FIIO_K5_PRO_DSD_GUIDE.md)
-
----
-
-## ⚙️ 系统优化
-
-### 性能优化
-
-#### 内核参数
-
-**显示器分辨率策略**：
-- ✅ **自动检测 EDID**：移除硬编码的 `video=` 参数
-- ✅ **KScreen 自动管理**：KDE Plasma Wayland 自动检测并应用最佳分辨率
-- ✅ **热插拔支持**：更换显示器自动适配
-
-**USB 稳定性优化**：
-```
-usbcore.autosuspend=-1       # 禁用 USB 自动挂起
-usbcore.usbfs_memory_mb=1024 # USBFS 内存优化
-```
-
-**其他优化**：
-- TCP 拥塞控制：BBR
-- 内存交换策略：Swappiness = 1 (最小化 swap)
-- AMD P-State：主动模式 (Ryzen 2600+)
-
-#### 内存管理
-
-- **Swappiness**: 1
-- **VFS 缓存压力**: 100
-- **Inotify 监视数**: 524288
-
-#### 文件系统
-
-- **BTRFS**: 
-  - 每周自动碎片整理
-  - 定期 scrub 检查
-- **SSD TRIM**: 定期执行
-
-### zRAM Swap
-
-- **启用**: 是（仅 Ryzen 1600X，8GB 内存专属）
-- **大小**: 90% 物理内存
-- **压缩算法**: ZSTD
-- **优先级**: 100
-
-### AMD GPU 优化 (RX 5500)
-
-#### 驱动与内核模块
-
-- **驱动**: AMDGPU (内核内置)
-- **Initrd 加载**: 是
-- **运行库**: 完整固件
-
-#### 内核参数
-
-```
-amdgpu.runpm=0                 # 禁用运行时 PM
-amdgpu.dpm=1                   # 动态电源管理
-amdgpu.dc=1                    # 启用 Display Core
-pcie_aspm=off                  # 禁用 ASPM 提高稳定性
-```
-
-#### 图形加速
-
-- **Vulkan**: RADV Vulkan 驱动
-- **OpenCL**: Mesa OpenCL
-- **VA-API**: 视频编解码加速
-
-### 安全设置
-
-- **Sudo**: Wheel 组需密码
-- **防火墙**: 启用
-- **TUN 模块**: 加载 (Clash Verge Rev)
-- **网络管理权限**: netadmin 组
 
 ---
 
@@ -314,6 +332,8 @@ c = "clear"
 s = "sudo"
 update = "sudo nixos-rebuild switch"
 nrs = "sudo nixos-rebuild switch"
+rebuild-flake = "sudo nixos-rebuild switch --flake .#nixos"
+rebuild-offline = "sudo nixos-rebuild switch --offline"
 ```
 
 #### 重建命令（推荐）
@@ -363,24 +383,62 @@ rebuild-offline
 
 ---
 
+## 🎮 Clash TUN 模式
+
+### 启动 TUN 模式
+
+```bash
+# 启动（需要 sudo）
+sudo clash-tun
+# 或
+sudo ./scripts/start-clash-tun.sh
+```
+
+### 检查 TUN 状态
+
+```bash
+# 检查 TUN 接口
+ip link show Mihomo
+
+# 检查进程
+ps aux | grep verge-mihomo
+
+# 使用检查脚本
+check-clash
+```
+
+### 停止 TUN 模式
+
+```bash
+sudo pkill -f verge-mihomo
+```
+
+### ⚠️ 注意事项
+
+- TUN 设备在每次重启后需要重新运行启动脚本
+- 确保 `netadmin` 用户组已生效（需重新登录）
+- Clash Verge Rev GUI 会自动生成配置文件
+
+---
+
 ## 📁 目录结构
 
 ```
 /etc/nixos/
 ├── configuration.nix              # 系统主配置 ⭐ (直接导入 CPU/GPU 模块)
-├── hardware-configuration.nix     # 硬件配置 (BTRFS, 自动生成)
+├── hardware-configuration.nix     # 硬件配置 (BTRFS, 自动生成，不提交到 Git)
 ├── flake.nix                      # Flakes 入口 (简化版，仅用于 Home Manager)
 ├── flake.lock                     # 版本锁定文件
 ├── .gitignore                     # Git 忽略规则
 │
 ├── home/                          # Home Manager 用户配置
 │   ├── default.nix               # Home Manager 入口
-│   ├── home.nix                  # Fish + Git 配置
+│   ├── fish.nix                  # Fish Shell 配置
+│   ├── git.nix                   # Git 配置
 │   ├── kde.nix                   # KDE Plasma 详细配置
 │   ├── alacritty.nix             # Alacritty 终端配置
 │   ├── vim.nix                   # Vim 配置
 │   ├── direnv.nix                # direnv 配置
-│   ├── git.nix                   # Git 配置
 │   └── zellij.nix                # Zellij 多路复用器配置
 │
 ├── modules/hardware/              # 自定义硬件模块
@@ -388,10 +446,12 @@ rebuild-offline
 │   │   ├── ryzen-1600x.nix
 │   │   ├── ryzen-2600.nix        # ← 当前使用
 │   │   └── ryzen-3600.nix
-│   └── gpu/                      # GPU 特定配置
-│       ├── r9-370.nix
-│       ├── rx-5500.nix           # ← 当前使用
-│       └── rx-6600xt.nix
+│   ├── gpu/                      # GPU 特定配置
+│   │   ├── r9-370.nix
+│   │   ├── rx-5500.nix           # ← 当前使用
+│   │   └── rx-6600xt.nix
+│   └── peripherals/              # 外设配置（手柄、键盘、鼠标等）
+│       └── gamepad.nix           # 游戏手柄通用配置 ⭐
 │
 ├── scripts/                       # 实用脚本
 │   ├── start-clash-tun.sh        # Clash TUN 模式启动
@@ -483,40 +543,18 @@ grep "gpu/" /etc/nixos/configuration.nix
 nix eval '.#nixos.config.networking.hostName'
 ```
 
----
-
-## 🎮 Clash TUN 模式
-
-### 启动 TUN 模式
+### 系统回滚
 
 ```bash
-# 启动 TUN 模式 (需要 sudo)
-sudo clash-tun
-# 或
-sudo ./scripts/start-clash-tun.sh
+# 回滚到上一代
+sudo nixos-rebuild switch --rollback
+
+# 查看可用世代
+nixos-rebuild list-generations
+
+# 回滚到特定世代
+sudo nixos-rebuild switch --switch-generation <generation-number>
 ```
-
-### 检查 TUN 状态
-
-```bash
-# 检查 TUN 接口
-ip link show Mihomo
-
-# 检查进程
-ps aux | grep verge-mihomo
-```
-
-### 停止 TUN 模式
-
-```bash
-sudo pkill -f verge-mihomo
-```
-
-### ⚠️ 注意事项
-
-- TUN 设备在每次重启后需要重新运行启动脚本
-- 确保 `netadmin` 用户组已生效（需重新登录）
-- Clash Verge Rev GUI 会自动生成配置文件
 
 ---
 
@@ -557,6 +595,13 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 - `netadmin` 用户组修改后需重新登录生效
 - 防火墙已启用，按需开放端口
 
+### 多设备部署
+
+- `hardware-configuration.nix` 不提交到 Git
+- 每台设备独立生成自己的硬件配置
+- Git 仓库只保存通用配置
+- 切换设备时只需修改 `configuration.nix` 中的 CPU/GPU 导入路径
+
 ---
 
 ## 🎯 设计原则
@@ -571,7 +616,7 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 
 1. **硬件解耦**: CPU/GPU 配置完全分离
 2. **职责分明**: 系统级 vs 用户级配置清晰
-3. **类型安全**: 通过 `detection.nix` 提供基本检查
+3. **类型安全**: 通过直接导入保证配置正确性
 
 ### 可维护性
 
