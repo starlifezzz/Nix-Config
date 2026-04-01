@@ -1,4 +1,4 @@
- Edit this configuration file to define what should be installed on
+# Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running 'nixos-help').
 { config, lib, pkgs, pkgs-unstable, ... }:
@@ -531,8 +531,10 @@
       # 设置状态版本
       home.stateVersion = "25.11";
       
-      # ✅ 全局强制覆盖 - 不再有任何备份或冲突提示
-      home.activation.checkLinkTargets = false;
+      # ✅ 全局强制覆盖 - 禁用所有文件冲突检查
+      home.activation = {
+        checkLinkTargets = lib.mkForce "";
+      };
     };
   };
 
