@@ -2,8 +2,10 @@
   description = "NixOS configuration - Simple manual hardware selection";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "git+https://mirrors.ustc.edu.cn/nix/nixpkgs.git?ref=nixos-unstable";
+    nixpkgs-unstable.url = "git+https://mirrors.ustc.edu.cn/nix/nixpkgs.git?ref=nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
