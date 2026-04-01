@@ -62,9 +62,6 @@
       "x-scheme-handler/https" = [ "firefox.desktop" ];
       "x-scheme-handler/about" = [ "firefox.desktop" ];
     };
-    
-    # ✅ 正确做法：设置 Home Manager 全局备份选项
-    # 这样会在覆盖文件前自动备份到 ~/.local/share/home-manager-backup
   };
 
   # ═══════════════════════════════════════════════════════════

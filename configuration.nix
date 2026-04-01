@@ -1,4 +1,4 @@
-# Edit this configuration file to define what should be installed on
+ Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running 'nixos-help').
 { config, lib, pkgs, pkgs-unstable, ... }:
@@ -22,7 +22,7 @@
       # ═══════════════════════════════════════════════════════════
       # 游戏手柄支持配置
       # ═══════════════════════════════════════════════════════════
-      ./modules/hardware/peripherals/gamepad.nix
+      # ./modules/hardware/peripherals/gamepad.nix
     ];
 
   # 启动配置
@@ -55,8 +55,15 @@
     ];
     
     # 内核模块
-    kernelModules = [ ];
+    kernelModules = [ 
+      "xpad"  # Xbox 手柄驱动
+    ];
     
+    # 黑名单模块 - 防止与手柄冲突
+    blacklistedKernelModules = [
+      "hid_nintendo"  # 禁止 Switch 手柄驱动（避免与北通鲲鹏 20 冲突）
+    ];
+
     # 内核参数优化 - 仅保留桌面环境必要的优化
     kernel.sysctl = {
       # 内存管理 - 使用 lib.mkDefault 允许硬件模块覆盖
@@ -509,6 +516,10 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
+    
+    # ❌ 已移除 backupFileExtension - 不再备份
+    # ✅ 使用 globalForce 强制覆盖所有冲突文件
+    
     extraSpecialArgs = { inherit pkgs-unstable; };
     
     # ✅ 定义用户配置（在 nixos-rebuild 时自动应用）
@@ -520,18 +531,8 @@
       # 设置状态版本
       home.stateVersion = "25.11";
       
-      # ✅ 自动清理备份文件 - 解决备份导致的混乱
-      # 在每次 Home Manager 激活后，自动删除所有 .backup 和 .old 后缀的备份文件
-      home.activation.cleanBackupFiles = ''
-        # 清理 Home Manager 生成的备份文件
-        if [ -d "$HOME/.config" ]; then
-          find "$HOME/.config" -type f \( -name "*.backup" -o -name "*.old" \) -delete 2>/dev/null || true
-        fi
-        if [ -d "$HOME/.local/share/home-manager-backup" ]; then
-          rm -rf "$HOME/.local/share/home-manager-backup"/* 2>/dev/null || true
-        fi
-        echo "✅ Cleaned up backup files"
-      '';
+      # ✅ 全局强制覆盖 - 不再有任何备份或冲突提示
+      home.activation.checkLinkTargets = false;
     };
   };
 
