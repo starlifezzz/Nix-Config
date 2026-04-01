@@ -19,10 +19,6 @@
       ./modules/hardware/cpu/ryzen-2600.nix   # 可选：ryzen-1600x, ryzen-2600, ryzen-3600
       ./modules/hardware/gpu/rx-5500.nix      # 可选：r9-370, rx-5500, rx-6600xt
       
-      # ═══════════════════════════════════════════════════════════
-      # 游戏手柄支持配置
-      # ═══════════════════════════════════════════════════════════
-      # ./modules/hardware/peripherals/gamepad.nix
     ];
 
   # 启动配置
@@ -310,21 +306,6 @@
   services.dbus.enable = true;
 
   # ═══════════════════════════════════════════════════════════
-  # 🔥 内核级 OOM 保护配置
-  # ═══════════════════════════════════════════════════════════
-  # 说明：Linux 内核有内置的 OOM Killer 机制，当内存耗尽时会杀掉进程
-  # 通过调整以下参数，可以让系统更早触发保护，避免完全死机
-  boot.kernel.sysctl = {
-    # OOM 检测灵敏度（0-100，默认 60）
-    # 降低此值会让内核更早介入，防止系统完全无响应
-    "vm.oom_kill_allocating_task" = 1;
-    
-    # 禁用过度使用内存的进程的 OOM 分数调整
-    # 确保 Nix 构建进程在内存不足时优先被选中
-    "vm.panic_on_oom" = 0;
-  };
-  
-  # ═══════════════════════════════════════════════════════════
   # ✅ 推荐方案：使用 earlyoom 用户空间 OOM 守护进程
   # ═══════════════════════════════════════════════════════════
   # 这是比 systemd-oomd 更成熟的方案，已在 NixOS 官方仓库中
@@ -518,7 +499,6 @@
     useUserPackages = true;
     
     # ❌ 已移除 backupFileExtension - 不再备份
-    # ✅ 使用 globalForce 强制覆盖所有冲突文件
     
     extraSpecialArgs = { inherit pkgs-unstable; };
     
@@ -528,17 +508,14 @@
         ./home/default.nix
       ];
       
-      # 设置状态版本
-      home.stateVersion = "25.11";
+      # ✅ stateVersion 已在 home/default.nix 中定义，此处不再重复
       
       # ✅ 全局强制覆盖 - 禁用所有文件冲突检查
-      home.activation = {
-        checkLinkTargets = lib.mkForce "";
-      };
+      home.activation.checkLinkTargets = lib.mkForce "";
     };
   };
 
 
   # 系统版本
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.05";
 }
