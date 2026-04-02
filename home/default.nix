@@ -99,6 +99,11 @@
     cantata     # KDE 原生 MPD 客户端，支持 DSD
     pavucontrol # PulseAudio 音量控制
     playerctl   # 媒体控制器
+    
+   #下载相关
+    parabolic
+    yt-dlp
+    
   ];
 
   # ═══════════════════════════════════════════════════════════
@@ -145,6 +150,6 @@
     # 桌面环境
     ./kde.nix           # KDE Plasma 6 详细设置
     
-    ../configs/mpd-dsd.nix # MPD DSD 配置
+    # ../configs/mpd-dsd.nix # MPD DSD 配置
   ];
 }
