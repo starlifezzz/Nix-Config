@@ -151,7 +151,7 @@
   };
 
   # Firefox 浏览器
-  programs.firefox.enable = true;
+  programs.firefox.enable = false;
 
   # 允许 unfree 和 broken 包
   nixpkgs.config.allowUnfree = true;
@@ -163,7 +163,7 @@
     home-manager      # Home Manager（NixOS 集成模式）
     
     # 系统维护工具（需要 root 权限）
-    timeshift         # 系统备份工具
+    # timeshift         # 系统备份工具
   
     # 全局依赖库
     ffmpeg-full       # 完整的 FFmpeg（多媒体库）

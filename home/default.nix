@@ -73,9 +73,8 @@
   # 需要从 home.packages 中移除对应的包。
   home.packages = with pkgs; [
     # ═══════════════════════════════════════════════════════════
-    # 版本控制和编辑器（与 programs.x 双保险）
-    vscode            # VSCode 编辑器
-    
+    # 版本控制和编辑器
+    vscode        # vscode 编辑器
     # ═══════════════════════════════════════════════════════════
     # 开发运行时（不支持 programs.x）
     # ═══════════════════════════════════════════════════════════
@@ -96,18 +95,19 @@
     # ═══════════════════════════════════════════════════════════
     # 🎵 音频播放器配置
     # ═══════════════════════════════════════════════════════════
-    cantata     # KDE 原生 MPD 客户端，支持 DSD
-    pavucontrol # PulseAudio 音量控制
-    playerctl   # 媒体控制器
+    # cantata     # KDE 原生 MPD 客户端，支持 DSD
+    # pavucontrol # PulseAudio 音量控制
+    # playerctl   # 媒体控制器
     
    #下载相关
     parabolic
     yt-dlp
     
+    floorp-bin
   ];
 
   # ═══════════════════════════════════════════════════════════
-  # 环境变量
+  # 环境变量 - 简洁配置
   # ═══════════════════════════════════════════════════════════
   home.sessionVariables = {
     # ═══════════════════════════════════════════════════════════
@@ -115,18 +115,24 @@
     # ═══════════════════════════════════════════════════════════
     # 启用 Firefox 的 Wayland 支持
     MOZ_ENABLE_WAYLAND = "1";
+    
     # Qt 应用优先使用 Wayland，回退到 XCB
     QT_QPA_PLATFORM = "wayland;xcb";
-    # GTK 应用优先使用 Wayland，回退到 X11
-    GDK_BACKEND = "wayland,x11";
+    
+    # ⚠️ 注意：不设置全局 GDK_BACKEND，让 GTK 应用自行选择后端
+    # 避免旧版 Electron 和 Flatpak 应用因强制 Wayland 而黑屏
+    
     # 明确会话类型为 Wayland
     XDG_SESSION_TYPE = "wayland";
+    
     # Clutter 工具包使用 Wayland
     CLUTTER_BACKEND = "wayland";
+    
     # SDL 应用使用 Wayland
     SDL_VIDEODRIVER = "wayland";
-    # Electron 应用自动选择平台
-    ELECTRON_OZONE_PLATFORM_HINT = "auto";
+    
+    # ⚠️ 注意：ELECTRON_OZONE_PLATFORM_HINT 在 Electron 38+ 已移除
+    # 需要时应在启动命令中传递 --ozone-platform=x11 参数
   };
 
   # ═══════════════════════════════════════════════════════════
