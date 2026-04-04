@@ -102,7 +102,9 @@
    #下载相关
     parabolic
     yt-dlp
+    motrix
     
+   #浏览器
     floorp-bin
   ];
 
