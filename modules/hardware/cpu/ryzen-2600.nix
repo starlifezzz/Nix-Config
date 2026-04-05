@@ -45,6 +45,25 @@
     "kernel.page-table-isolation" = lib.mkForce 0;  # Zen+ 有硬件缓解，可以禁用 PTI 提升性能
     "vm.transparent_hugepage_defrag" = lib.mkForce 0;  # 禁用透明大页碎片整理
   };
+
+
+
+    # ═══════════════════════════════════════════════════════════
+  # Zram 虚拟内存配置 - Ryzen 2600 专属启用
+  # ═══════════════════════════════════════════════════════════
+  # 适用于低内存场景 (如 16GB),提供额外的压缩交换空间
+  services.zram-generator = {
+    enable = true;
+    settings = {
+      # zram-generator 使用 systemd 配置格式
+      # 参考：https://github.com/systemd/systemd/blob/main/src/zram-generator/zram-generator.conf.example
+      "zram0" = {
+        compression-algorithm = "zstd";  # Zstandard 压缩算法 (高压缩比)
+        zram-size = "ram * 0.5";  # 使用 90% 的物理内存作为 zram
+        swap-priority = 100;  # 高于普通 swap 的优先级
+      };
+    };
+  };
   
   # ✅ 新增：温度监控工具
   environment.systemPackages = with pkgs; [

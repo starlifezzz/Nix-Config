@@ -177,15 +177,6 @@
 # 传感器支持
   hardware.sensor.iio.enable = true;
 
-  # services.dbus.enable = true;
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
@@ -302,7 +293,8 @@
       };
     };
   };
-    # 确保 D-Bus 服务启用，这对 Flatpak 应用很重要
+
+  # 确保 D-Bus 服务启用（Flatpak 应用必需）
   services.dbus.enable = true;
 
   # ═══════════════════════════════════════════════════════════
@@ -349,42 +341,35 @@
       checkReversePath = true;
       
       # 允许 Clash TUN 模式的虚拟网卡流量
-      # 根据 NixOS 官方 issue #477636，TUN 模式需要信任 TUN 接口
       trustedInterfaces = [
-        "Mihomo"  # ✅ Clash Verge Rev 的 TUN 接口名称
-        "Meta"    # 备选：Clash Meta 内核的默认 TUN 接口
-        "clash0"  # 备选 TUN 接口
-        "utun*"   # 通用 TUN 接口通配符
+        "Mihomo"  # Clash Verge Rev 的 TUN 接口
+        "Meta"    # Clash Meta 内核的备选 TUN 接口
       ];
       
-      # 开放必要的端口
-      # allowedTCPPorts = [ 
-      #   7897  # Clash Dashboard
-      #   7890  # Clash HTTP 代理端口
-      #   7891  # Clash SOCKS5 代理端口
-      #   9090  # Clash External Controller (可选)
-      # ];
+      # 开放 KDE Connect 端口
       allowedTCPPortRanges = [
-        { from = 1714; to = 1764; }  # KDE Connect
+        { from = 1714; to = 1764; }
       ];
       allowedUDPPortRanges = [
-        { from = 1714; to = 1764; }  # KDE Connect
+        { from = 1714; to = 1764; }
       ];
     };
   };
 
-
-  # ═══════════════════════════════════════════════════════════
-  # 环境变量配置 - TUN 模式下无需全局代理设置
-  # ═══════════════════════════════════════════════════════════
+  # DNS 配置 - 使用 NetworkManager（已禁用 systemd-resolved 避免冲突）
+  # 在 NetworkManager 中配置：119.29.29.29, 223.5.5.5
 
   # systemd-resolved DNS 服务（与 NetworkManager 协同工作）
+  # ⚠️ 注意：如果 NetworkManager DNS 工作正常，可以禁用此服务避免冲突
   services.resolved = {
     enable = true;
     settings = {
       Resolve = {
         DNSStubListener = "yes";
+        # ✅ 主 DNS: 国内 DNS (快速解析国内域名)
         DNS = "119.29.29.29 223.5.5.5";
+        # ✅ Fallback DNS: 国际 DNS (当国内 DNS 失败时使用)
+        FallbackDNS = "1.1.1.1 8.8.8.8";
         DNSSEC = "false";
       };
     };
@@ -392,25 +377,17 @@
 
   # 字体配置（系统级）
   fonts.packages = with pkgs; [
-    # 中文支持
+    # 中文支持（Noto CJK 包含简繁中日韩）
     noto-fonts-cjk-sans
     noto-fonts-cjk-serif
     noto-fonts-color-emoji
+    
+    # 霞鹜文楷（主要显示字体，Screen 版本优化屏幕显示）
     lxgw-wenkai-screen
     lxgw-wenkai
     
-    # 英文和通用字体
-    noto-fonts
-    source-han-sans
-    source-han-serif
-    
-    # 等宽字体（编程用）
+    # 等宽字体（编程用）- JetBrains Mono 已足够
     jetbrains-mono
-    fira-code
-    
-    # 文泉驿字体（备用）
-    wqy_zenhei
-    wqy_microhei
   ];
   
   # 字体渲染优化
@@ -418,9 +395,9 @@
     enable = true;
     
     defaultFonts = {
-      serif = ["LXGW WenKai Screen" "LXGW WenKai" "Noto Serif CJK SC" "WenQuanYi Micro Hei" ];
-      sansSerif = ["LXGW WenKai Screen" "LXGW WenKai" "Noto Sans CJK SC" "WenQuanYi Zen Hei" ];
-      monospace = ["LXGW WenKai Screen" "LXGW WenKai" "Noto Sans Mono CJK SC" "WenQuanYi Micro Hei Mono"];
+      serif = ["LXGW WenKai Screen" "Noto Serif CJK SC"];
+      sansSerif = ["LXGW WenKai Screen" "Noto Sans CJK SC"];
+      monospace = ["JetBrains Mono" "LXGW WenKai Screen" "Noto Sans Mono CJK SC"];
       emoji = ["Noto Color Emoji"];
     };
     
@@ -467,8 +444,8 @@
   # SSD 优化 - 定期 TRIM
   services.fstrim.enable = true;
 
-  # CPU 频率调节器
-  powerManagement.cpuFreqGovernor = lib.mkForce "ondemand";
+  # ✅ CPU 频率调节器已由 CPU 模块设置（schedutil）
+  # powerManagement.cpuFreqGovernor = lib.mkForce "ondemand";  # ❌ 已移除：与 ryzen-2600.nix 冲突
 
  # SDDM 显示管理器配置
   services.displayManager.defaultSession = "plasma";

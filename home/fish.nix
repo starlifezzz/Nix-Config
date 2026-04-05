@@ -10,40 +10,52 @@
     '';
 
     shellAliases = {
+      # 基础命令
       ll = "ls -la";
       la = "ls -A";
+      c = "clear";
+      s = "sudo";
+      sk = "sudo killall -9";
+      
+      # NixOS 系统管理
       rebuild = "sudo -E nixos-rebuild switch";
       rebuild-test = "sudo -E nixos-rebuild test";
+      update = "sudo nixos-rebuild switch";
+      nrs = "sudo nixos-rebuild switch";
+      nrt = "sudo nixos-rebuild test";
+      
+      # Home Manager
       hm-switch = "home-manager switch";
       rebuild-flake = "rebuild-flake";
       rebuild-offline = "rebuild-offline";
       
-      # 新增实用别名
-      c = "clear";
-      s = "sudo";
-      sk = "sudo killall -9";
-      update = "sudo nixos-rebuild switch";
+      # 垃圾回收与优化
       gc = "sudo nix-collect-garbage -d";
       optimise = "sudo nix-store --optimise";
       
-      # NixOS 专用
+      # Nix 工具
       ns = "nix-shell";
-      nrs = "sudo nixos-rebuild switch";
-      nrt = "sudo nixos-rebuild test";
       generations = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
     };
 
     functions = {
-      # 🔴 Flakes 重建命令（使用国内镜像）
+      # 🔴 Flakes 重建命令（使用国内镜像源加速）
       rebuild-flake = ''
         sudo -E nixos-rebuild switch --flake /etc/nixos#nixos \
           --option substituters "https://mirrors.cernet.edu.cn/nix-channels/store https://mirrors.ustc.edu.cn/nix-channels/store" \
           --option trusted-public-keys "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       '';
 
-      # 🔴 离线重建命令
+      # 🔴 离线重建命令（无网络环境使用）
       rebuild-offline = ''
         sudo -E nixos-rebuild switch --flake /etc/nixos#nixos --offline
+      '';
+      
+      # 🔄 更新依赖并重建系统（一键完成 flake update + rebuild）
+      rebuild-update = ''
+        cd /etc/nixos && \
+        sudo nix flake update && \
+        sudo nixos-rebuild switch --flake .#nixos
       '';
       
       # 目录导航函数

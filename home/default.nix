@@ -8,7 +8,7 @@
   # ═══════════════════════════════════════════════════════════
   home.username = "zhangchongjie";
   home.homeDirectory = "/home/zhangchongjie";
-  home.stateVersion = "25.11";
+  home.stateVersion = "26.05";  # ✅ 与 system.stateVersion 保持一致
 
   # 禁用 Nixpkgs 版本检查（因为我们在用 unstable）
   home.enableNixpkgsReleaseCheck = false;
@@ -35,7 +35,7 @@
   };
 
   # ═══════════════════════════════════════════════════════════
-  # MIME 类型关联 - 简化配置，让 KDE 自动管理动态部分
+  # MIME 类型关联 - Floorp 浏览器（替代 Firefox）
   # ═══════════════════════════════════════════════════════════
   # 根据记忆中的规范：MIME 关联属于纯动态配置，不应该强制声明式管理
   # 只保留必要的静态关联
@@ -45,20 +45,20 @@
     # 只声明基础 Web 浏览器的 MIME 关联
     # 其他应用（如 Lutris、VSCode）的 MIME 关联由 KDE 动态管理
     defaultApplications = {
-      "text/html" = [ "firefox.desktop" ];
-      "x-scheme-handler/http" = [ "firefox.desktop" ];
-      "x-scheme-handler/https" = [ "firefox.desktop" ];
-      "x-scheme-handler/about" = [ "firefox.desktop" ];
+      "text/html" = [ "floorp.desktop" ];
+      "x-scheme-handler/http" = [ "floorp.desktop" ];
+      "x-scheme-handler/https" = [ "floorp.desktop" ];
+      "x-scheme-handler/about" = [ "floorp.desktop" ];
     };
   };
 
   # ═══════════════════════════════════════════════════════════
-  # 桌面快捷方式 - 手动指定 .desktop 文件链接
+  # 桌面快捷方式 - Lutris（lutris-free 版本）
   # ═══════════════════════════════════════════════════════════
   # Home Manager 不会自动扫描 home.packages 创建快捷方式
   # 必须使用 xdg.dataFile 显式链接到 ~/.local/share/applications/
   xdg.dataFile."applications/net.lutris.Lutris.desktop".source = 
-    "${pkgs.lutris}/share/applications/net.lutris.Lutris.desktop";
+    "${pkgs.lutris-free}/share/applications/net.lutris.Lutris.desktop";
 
   # ═══════════════════════════════════════════════════════════
   # 用户软件包 - 包含所有需要通过 Home Manager 安装的包
@@ -158,6 +158,6 @@
     # 桌面环境
     ./kde.nix           # KDE Plasma 6 详细设置
     
-    # ../configs/mpd-dsd.nix # MPD DSD 配置
+    # ../configs/mpd-dsd.nix # MPD DSD 听歌配置
   ];
 }
