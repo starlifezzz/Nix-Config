@@ -29,8 +29,9 @@
     cmake           # CMake 构建系统
     openssl         # OpenSSL 加密库
     
-    # 注意：以下库已通过 gtk3/webkitgtk_4_1 自动引入，无需重复声明
+    # ⚠️ 注意：以下底层依赖由 webkitgtk/gtk3 自动引入，无需手动声明
     # glib, cairo, pango, gdk-pixbuf, atk, librsvg, desktop-file-utils
+    # 手动声明会导致版本冲突（见 NixOS 规范：避免重复声明传递依赖）
     
     # 额外的 Rust 开发工具（可选但推荐）
     cargo-watch       # 文件变化监控和自动重建
