@@ -5,13 +5,19 @@
 ### Rust 工具链
 - **rustup**: Rust 工具链管理器（包含 rustc、cargo、rustfmt、clippy）
 - **cargo-tauri**: Tauri CLI v2.9.6（跨平台桌面应用框架）
-- **Node.js 20 LTS**: Tauri 前端开发必需
+
+### Node.js 管理
+- **系统级 Node.js**: 由 NixOS 系统自动提供（当前为 Node.js 24）
+- **项目级 Node.js**: Tauri 项目通过 `package.json` 和 `engines` 字段声明所需版本
+- **版本切换**: 使用 `nix shell nixpkgs#nodejs_20` 临时切换到特定版本
+
+> **⚠️ 重要说明**：为避免包版本冲突，Home Manager 配置中不显式声明 Node.js 版本。Tauri 项目会根据 `package.json` 中的 `engines` 字段自动适配，或使用系统的默认 Node.js。
 
 ### 系统依赖（Linux Tauri 运行时）
 - **WebKitGTK 4.1**: Linux 平台渲染引擎
 - **GTK3 + libsoup_3**: GUI 工具包和 HTTP 库
 - **libayatana-appindicator**: 系统托盘图标支持
-- **编译工具**: pkg-config, cmake, openssl, glib, cairo, pango 等
+- **编译工具**: pkg-config, cmake, openssl 等
 
 ### 开发辅助工具
 - **cargo-watch**: 文件监控和自动重建
@@ -139,7 +145,7 @@ pnpm add naive-ui vue
 
 ### 示例：在 Vue 组件中使用
 
-```vue
+``vue
 <script setup lang="ts">
 import { NButton, NMessageProvider } from 'naive-ui'
 

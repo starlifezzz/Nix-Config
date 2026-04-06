@@ -13,8 +13,9 @@
     # Tauri CLI（用于构建 Tauri 应用）
     cargo-tauri     # Tauri 2.9.6 - 跨平台桌面应用框架
     
-    # Node.js（Tauri 前端开发必需）
-    nodejs_20       # Node.js 20 LTS - Tauri 2.x 推荐版本
+    # ⚠️ Node.js 已移除：避免与系统已有版本冲突
+    # Tauri 项目会通过 package.json 自动管理所需的 Node.js 版本
+    # 如需特定版本，可在项目中配置或使用 nix shell 临时引入
     
     # 系统依赖（Linux Tauri 运行时必需）
     webkitgtk_4_1   # WebKitGTK 4.1 - Linux 平台 Tauri 渲染引擎
