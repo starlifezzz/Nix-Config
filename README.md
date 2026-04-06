@@ -291,6 +291,18 @@ newgrp input                        # 临时切换
 **用户级 (Home Manager)**:
 - **JetBrains Mono** - 编程字体
 - **Fira Code** - 连字编程字体
+- **Rust 工具链** - rustup, cargo-tauri, Node.js 20 LTS（详见 [Rust 开发指南](home/RUST_DEV_GUIDE.md)）
+
+### Rust + Tauri 开发环境 🆕
+
+专门配置的 Rust 桌面应用开发环境：
+- **rustup**: Rust 工具链管理器
+- **cargo-tauri**: Tauri CLI v2.9.6
+- **Node.js 20 LTS**: 前端开发必需
+- **WebKitGTK**: Linux 平台渲染引擎
+- **辅助工具**: cargo-watch, cargo-expand, cargo-audit, cargo-outdated
+
+详细使用文档：[`home/RUST_DEV_GUIDE.md`](home/RUST_DEV_GUIDE.md)
 
 ### 网络应用
 
@@ -439,7 +451,9 @@ sudo pkill -f verge-mihomo
 │   ├── alacritty.nix             # Alacritty 终端配置
 │   ├── vim.nix                   # Vim 配置
 │   ├── direnv.nix                # direnv 配置
-│   └── zellij.nix                # Zellij 多路复用器配置
+│   ├── zellij.nix                # Zellij 多路复用器配置
+│   ├── rust-dev.nix              # 🆕 Rust + Tauri + Naive UI 开发环境
+│   └── RUST_DEV_GUIDE.md         # 🆕 Rust 开发环境使用指南
 │
 ├── modules/hardware/              # 自定义硬件模块
 │   ├── cpu/                      # CPU 特定配置
