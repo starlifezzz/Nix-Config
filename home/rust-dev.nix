@@ -28,15 +28,9 @@
     pkg-config      # 编译时查找库配置
     cmake           # CMake 构建系统
     openssl         # OpenSSL 加密库
-    glib            # GLib 库（GTK 基础）
-    cairo           # Cairo 图形库
-    pango           # Pango 文本布局引擎
-    gdk-pixbuf      # GDK 像素缓冲库
-    atk             # ATK 无障碍工具包
     
-    # 资源处理工具
-    desktop-file-utils  # .desktop 文件处理
-    librsvg             # SVG 渲染支持
+    # 注意：以下库已通过 gtk3/webkitgtk_4_1 自动引入，无需重复声明
+    # glib, cairo, pango, gdk-pixbuf, atk, librsvg, desktop-file-utils
     
     # 额外的 Rust 开发工具（可选但推荐）
     cargo-watch       # 文件变化监控和自动重建
