@@ -17,21 +17,48 @@
     # Tauri 项目会通过 package.json 自动管理所需的 Node.js 版本
     # 如需特定版本，可在项目中配置或使用 nix shell 临时引入
     
+    # ═══════════════════════════════════════════════════════════
     # 系统依赖（Linux Tauri 运行时必需）
-    webkitgtk_4_1   # WebKitGTK 4.1 - Linux 平台 Tauri 渲染引擎
+    # ═══════════════════════════════════════════════════════════
+    webkitgtk_4_1   # WebKitGTK 4.1 - Linux 平台 Tauri 渲染引擎（包含 JavaScriptCore）
     gtk3            # GTK3 - GUI 工具包
     libsoup_3       # HTTP 库（WebKitGTK 依赖）
+    
+    # GTK 相关图形库
+    cairo           # 2D 图形库
+    pango           # 文本布局和渲染
+    gdk-pixbuf      # 图像加载库
+    atk             # 辅助技术工具包
+    at-spi2-atk     # ATK 桥接
+    at-spi2-core    # 辅助技术服务
+    
+    # 网络和桌面集成
+    glib-networking         # GLib 网络支持
+    gsettings-desktop-schemas  # 桌面模式设置
     
     # 系统托盘支持
     libayatana-appindicator  # AppIndicator 支持（系统托盘图标）
     
     # 编译和构建工具
     pkg-config      # 编译时查找库配置
+    gcc             # C/C++ 编译器（链接器 cc 的来源）
     cmake           # CMake 构建系统
     openssl         # OpenSSL 加密库
     
+    # X11/Wayland 支持
+    libxkbcommon    # 键盘布局处理
+    wayland         # Wayland 显示协议
+    xorg.libX11     # X11 核心库
+    xorg.libXcursor # 光标主题支持
+    xorg.libXi      # X Input 扩展
+    xorg.libXrandr  # RandR 扩展（屏幕旋转/缩放）
+    xorg.libXScrnSaver  # 屏幕保护扩展
+    
+    # D-Bus 进程间通信
+    dbus
+    
     # ⚠️ 注意：以下底层依赖由 webkitgtk/gtk3 自动引入，无需手动声明
-    # glib, cairo, pango, gdk-pixbuf, atk, librsvg, desktop-file-utils
+    # librsvg, desktop-file-utils, javascriptcoregtk 等
     # 手动声明会导致版本冲突（见 NixOS 规范：避免重复声明传递依赖）
     
     # 额外的 Rust 开发工具（可选但推荐）
@@ -53,6 +80,16 @@
     
     # Tauri 开发优化
     TAURI_PLATFORM = "linux";     # 明确目标平台
+    
+    # PKG_CONFIG_PATH - 确保 pkg-config 能找到所有 GTK/WebKit 库
+    PKG_CONFIG_PATH = lib.concatStringsSep ":" [
+      "${pkgs.webkitgtk_4_1}/lib/pkgconfig"
+      "${pkgs.gtk3}/lib/pkgconfig"
+      "$PKG_CONFIG_PATH"
+    ];
+    
+    # SSL 证书路径
+    SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
   };
 
   # ═══════════════════════════════════════════════════════════
