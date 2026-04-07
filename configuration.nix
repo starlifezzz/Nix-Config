@@ -166,10 +166,10 @@
     (final: prev: {
       kdePackages = prev.kdePackages.overrideScope (kdeFinal: kdePrev: {
         # 二维码扫描器（不需要）
-        qrca = final.runCommandNoCC "qrca-empty" {} "mkdir -p $out";
+        qrca = final.runCommand "qrca-empty" {} "mkdir -p $out";
         
         # Konsole 终端（已有 Alacritty + Zellij，不需要）
-        konsole = final.runCommandNoCC "konsole-empty" {} "mkdir -p $out";
+        konsole = final.runCommand "konsole-empty" {} "mkdir -p $out";
       });
     })
   ];

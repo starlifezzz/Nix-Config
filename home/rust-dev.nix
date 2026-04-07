@@ -48,11 +48,11 @@
     # X11/Wayland 支持
     libxkbcommon    # 键盘布局处理
     wayland         # Wayland 显示协议
-    xorg.libX11     # X11 核心库
-    xorg.libXcursor # 光标主题支持
-    xorg.libXi      # X Input 扩展
-    xorg.libXrandr  # RandR 扩展（屏幕旋转/缩放）
-    xorg.libXScrnSaver  # 屏幕保护扩展
+    libX11     # X11 核心库
+    libXcursor # 光标主题支持
+    libXi      # X Input 扩展
+    libXrandr  # RandR 扩展（屏幕旋转/缩放）
+    libXScrnSaver  # 屏幕保护扩展
     
     # D-Bus 进程间通信
     dbus
