@@ -159,7 +159,7 @@
     ./rust-dev.nix      # Rust/Tauri/Node.js 开发工具链
     
     # Android 开发环境 (Tauri 移动端)
-    ./android-dev.nix   # Android SDK, JDK, ADB 等工具链
+    # ./android-dev.nix   # Android SDK, JDK, ADB 等工具链
     
     # 桌面环境
     ./kde.nix           # KDE Plasma 6 详细设置
