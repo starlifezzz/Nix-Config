@@ -572,13 +572,17 @@
   };
 
 
-   # ═══════════════════════════════════════════════════════════
+  # ═══════════════════════════════════════════════════════════
   # KDE Night Color（夜间颜色）- 强制禁用
   # ═══════════════════════════════════════════════════════════
   # 防止系统更新后自动启用夜间颜色导致屏幕泛黄
-  home.activation.disableNightColor = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    $DRY_RUN_CMD rm -f $HOME/.local/state/knighttimestaterc
-    $DRY_RUN_CMD echo "✅ 已清理夜间颜色状态文件"
-  '';
+  # 通过声明式配置直接写入禁用的配置文件，覆盖任何自动生成的设置
+  home.file.".local/state/knighttimestaterc" = {
+    text = ''
+      [AutomaticLocation]
+      Available=false
+    '';
+    force = true;
+  };
 
 }
