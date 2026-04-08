@@ -308,7 +308,9 @@
     wantedBy = [ "multi-user.target" ];
     path = [ pkgs.flatpak ];
     script = ''
+      # 添加 Flathub 官方仓库（如果不存在）
       flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+      # 修改为国内镜像源（上海交通大学）以加速下载
       flatpak remote-modify flathub --url=https://mirror.sjtu.edu.cn/flathub
     '';
   };

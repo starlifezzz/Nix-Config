@@ -35,11 +35,13 @@
     };
   };
 
-  # DNS 配置 - 使用 NetworkManager（已禁用 systemd-resolved 避免冲突）
-  # 在 NetworkManager 中配置：119.29.29.29, 223.5.5.5
+  # DNS 配置说明
+  # ⚠️ 当前同时启用了 NetworkManager 和 systemd-resolved
+  # - NetworkManager: 管理网络连接和基础 DNS
+  # - systemd-resolved: 提供 DNS 缓存、Fallback DNS 等高级功能
+  # 两者可以协同工作，但需确保不冲突（已通过配置验证）
 
   # systemd-resolved DNS 服务（与 NetworkManager 协同工作）
-  # ⚠️ 注意：如果 NetworkManager DNS 工作正常，可以禁用此服务避免冲突
   services.resolved = {
     enable = true;
     settings = {

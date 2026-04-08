@@ -12,7 +12,7 @@
     # ✅ PCIe ASPM 节能模式（桌面用户推荐）
     "pcie_aspm=powersupersave"
     
-    # ✅ HDMI/DP 音频输出
+    # ✅ HDMI/DP 音频输出（GPU 专属配置，CPU 模块不应重复设置）
     "amdgpu.audio=1"
     
     # AMDGPU 特性
@@ -60,6 +60,6 @@
   # ✅ GPU 监控工具
   environment.systemPackages = with pkgs; [
     radeontop
-    lm_sensors  # 传感器读取工具（与 CPU 模块配合）
+    # lm_sensors 已在 CPU 模块中安装，此处不再重复
   ];
 }

@@ -11,7 +11,7 @@
   boot.kernelParams = [
     "amd_pstate=active"  # Zen+ 支持 amd_pstate，启用主动模式
     
-    # ✅ 新增：HDMI/DP 音频输出
+    # ✅ HDMI/DP 音频输出（与 GPU 模块协同设置，确保音频功能启用）
     "amdgpu.audio=1"
     
     # 安全优化
@@ -59,13 +59,13 @@
       # 参考：https://github.com/systemd/systemd/blob/main/src/zram-generator/zram-generator.conf.example
       "zram0" = {
         compression-algorithm = "zstd";  # Zstandard 压缩算法 (高压缩比)
-        zram-size = "ram * 0.5";  # 使用 90% 的物理内存作为 zram
+        zram-size = "ram * 0.5";  # 使用 50% 的物理内存作为 zram
         swap-priority = 100;  # 高于普通 swap 的优先级
       };
     };
   };
   
-  # ✅ 新增：温度监控工具
+  # ✅ 温度监控工具（与 GPU 模块共享，避免重复安装）
   environment.systemPackages = with pkgs; [
     lm_sensors  # 传感器读取工具
   ];

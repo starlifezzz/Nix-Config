@@ -15,7 +15,7 @@
     "transparent_hugepage=madvise"
     "numa_balancing=1"
     
-    # ✅ 新增：HDMI/DP 音频输出
+    # ✅ HDMI/DP 音频输出（与 GPU 模块协同设置）
     "amdgpu.audio=1"
   ];
   
@@ -41,7 +41,7 @@
     "vm.transparent_hugepage_defrag" = lib.mkForce 0;
   };
   
-  # ✅ 新增：温度监控工具
+  # ✅ 温度监控工具（与 GPU 模块共享）
   environment.systemPackages = with pkgs; [
     lm_sensors  # 传感器读取工具
   ];

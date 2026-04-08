@@ -14,10 +14,10 @@
     # 如果遇到黑屏/花屏，请改回 dc=0
     "amdgpu.dc=1"
     
-    # ✅ 新增：HDMI/DP 音频输出
+    # ✅ HDMI/DP 音频输出（GPU 专属配置）
     "amdgpu.audio=1"
     
-    # ✅ 新增：PCIe ASPM 节能模式
+    # ✅ PCIe ASPM 节能模式
     "pcie_aspm=powersupersave"
     
     # Southern Islands 支持
@@ -55,6 +55,6 @@
 
   environment.systemPackages = with pkgs; [
     radeontop
-    lm_sensors
+    # lm_sensors 已在 CPU 模块中统一安装，避免重复
   ];
 }
