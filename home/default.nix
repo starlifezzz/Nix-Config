@@ -1,6 +1,12 @@
 # /etc/nixos/home/default.nix
 # Home Manager 主配置文件 - 统一管理所有应用配置
-{ config, pkgs, lib, pkgs-unstable, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  pkgs-unstable,
+  ...
+}:
 
 {
   # ═══════════════════════════════════════════════════════════
@@ -8,7 +14,7 @@
   # ═══════════════════════════════════════════════════════════
   home.username = "zhangchongjie";
   home.homeDirectory = "/home/zhangchongjie";
-  home.stateVersion = "26.05";  # ✅ 与 system.stateVersion 保持一致
+  home.stateVersion = "26.05"; # ✅ 与 system.stateVersion 保持一致
 
   # 禁用 Nixpkgs 版本检查（因为我们在用 unstable）
   home.enableNixpkgsReleaseCheck = false;
@@ -30,7 +36,7 @@
   # 这里只启用基础功能，不强制指定路径，避免中英文目录并存
   xdg.userDirs = {
     enable = true;
-    createDirectories = false;  # 让 KDE 根据 locale 自动管理
+    createDirectories = false; # 让 KDE 根据 locale 自动管理
     setSessionVariables = false;
   };
 
@@ -57,7 +63,7 @@
   # ═══════════════════════════════════════════════════════════
   # Home Manager 不会自动扫描 home.packages 创建快捷方式
   # 必须使用 xdg.dataFile 显式链接到 ~/.local/share/applications/
-  xdg.dataFile."applications/net.lutris.Lutris.desktop".source = 
+  xdg.dataFile."applications/net.lutris.Lutris.desktop".source =
     "${pkgs.lutris-free}/share/applications/net.lutris.Lutris.desktop";
 
   # ═══════════════════════════════════════════════════════════
@@ -68,43 +74,43 @@
   # 1. 桌面图标正常显示
   # 2. PATH 自动配置
   # 3. 避免 profile 链接问题导致应用丢失
-  # 
+  #
   # 如果未来遇到 "two different versions" 错误，
   # 需要从 home.packages 中移除对应的包。
   home.packages = with pkgs; [
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器
-    vscode        # vscode 编辑器
+    vscode # vscode 编辑器
     # ═══════════════════════════════════════════════════════════
     # 开发运行时（不支持 programs.x）
     # ═══════════════════════════════════════════════════════════
-    nodejs            # Node.js 运行时
-    python3           # Python 3 解释器
-    uv                # Python 包管理器
-    
+    nodejs # Node.js 运行时
+    python3 # Python 3 解释器
+    uv # Python 包管理器
+
     # ═══════════════════════════════════════════════════════════
     # 系统信息工具
     # ═══════════════════════════════════════════════════════════
     fastfetch
-    
+
     # ═══════════════════════════════════════════════════════════
     # GUI 应用（需要桌面快捷方式）
     # ═══════════════════════════════════════════════════════════
-    lutris-free       # 游戏管理器
-    
+    lutris-free # 游戏管理器
+
     # ═══════════════════════════════════════════════════════════
     # 🎵 音频播放器配置
     # ═══════════════════════════════════════════════════════════
     # cantata     # KDE 原生 MPD 客户端，支持 DSD
     # pavucontrol # PulseAudio 音量控制
     # playerctl   # 媒体控制器
-    
-   #下载相关
+
+    #下载相关
     parabolic
     yt-dlp
     motrix
-    
-   #浏览器
+
+    #浏览器
     floorp-bin
   ];
 
@@ -117,22 +123,22 @@
     # ═══════════════════════════════════════════════════════════
     # 启用 Firefox 的 Wayland 支持
     MOZ_ENABLE_WAYLAND = "1";
-    
+
     # Qt 应用优先使用 Wayland，回退到 XCB
     QT_QPA_PLATFORM = "wayland;xcb";
-    
+
     # ⚠️ 注意：不设置全局 GDK_BACKEND，让 GTK 应用自行选择后端
     # 避免旧版 Electron 和 Flatpak 应用因强制 Wayland 而黑屏
-    
+
     # 明确会话类型为 Wayland
     XDG_SESSION_TYPE = "wayland";
-    
+
     # Clutter 工具包使用 Wayland
     CLUTTER_BACKEND = "wayland";
-    
+
     # SDL 应用使用 Wayland
     SDL_VIDEODRIVER = "wayland";
-    
+
     # ⚠️ 注意：ELECTRON_OZONE_PLATFORM_HINT 在 Electron 38+ 已移除
     # 需要时应在启动命令中传递 --ozone-platform=x11 参数
   };
@@ -142,22 +148,22 @@
   # ═══════════════════════════════════════════════════════════
   imports = [
     # 基础 Shell 和版本控制
-    ./fish.nix          # Fish Shell 配置
-    ./git.nix           # Git 版本控制配置
-    
+    ./fish.nix # Fish Shell 配置
+    ./git.nix # Git 版本控制配置
+
     # 终端模拟器和 Multiplexer
-    ./alacritty.nix     # Alacritty 终端模拟器配置
-    ./zellij.nix        # Zellij Terminal Multiplexer 配置
-    
+    ./alacritty.nix # Alacritty 终端模拟器配置
+    ./zellij.nix # Zellij Terminal Multiplexer 配置
+
     # 开发环境工具
-    ./direnv.nix        # Direnv 开发环境配置
-    
+    ./direnv.nix # Direnv 开发环境配置
+
     # 代码编辑器
-    ./vim.nix           # Vim 文本编辑器配置
-    
+    ./vim.nix # Vim 文本编辑器配置
+
     # 桌面环境
-    ./kde.nix           # KDE Plasma 6 详细设置
-    
+    ./kde.nix # KDE Plasma 6 详细设置
+
     # ../configs/mpd-dsd.nix # MPD DSD 听歌配置
   ];
 }
