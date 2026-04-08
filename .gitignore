@@ -5,8 +5,9 @@
 result
 result-*
 
+
 # 编辑器
-# .vscode/
+.vscode/
 .idea/
 *.bak
 
