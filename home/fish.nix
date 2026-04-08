@@ -26,8 +26,6 @@
       
       # Home Manager
       hm-switch = "home-manager switch";
-      rebuild-flake = "rebuild-flake";
-      rebuild-offline = "rebuild-offline";
       
       # 垃圾回收与优化
       gc = "sudo nix-collect-garbage -d";
