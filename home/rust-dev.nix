@@ -143,4 +143,54 @@
   
   # 注释：Naive UI 通常通过 npm/yarn/pnpm 安装在项目中
   # 示例: npm install naive-ui vue
+
+  # ═══════════════════════════════════════════════════════════
+  # Cargo 配置文件（国内镜像源）
+  # ═══════════════════════════════════════════════════════════
+  home.file.".cargo/config.toml".text = ''
+    # Cargo 国内镜像源配置
+    # 来源：https://mirrors.tuna.tsinghua.edu.cn/help/crates.io-index/
+    
+    # [source.crates-io]
+    # replace-with = 'tuna'
+    
+    # [source.tuna]
+    # registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"
+    
+    # 备用镜像源（如果清华源不可用，可切换以下任一）
+    [source.ustc]
+    registry = "https://mirrors.ustc.edu.cn/crates.io-index"
+    
+    # [source.sjtu]
+    # registry = "https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index"
+    
+    # ═══════════════════════════════════════════════════════════
+    # 网络优化配置
+    # ═══════════════════════════════════════════════════════════
+    [net]
+    retry = 3                    # 失败重试次数
+    offline = false              # 离线模式（默认关闭）
+    
+    [http]
+    timeout = 60                 # HTTP 超时时间（秒）
+    low-speed-limit = 1024       # 低速限制（字节/秒）
+    check-revoke = true          # 检查证书吊销
+    
+    # ═══════════════════════════════════════════════════════════
+    # 构建优化
+    # ═══════════════════════════════════════════════════════════
+    [build]
+    rustflags = []               # 额外的 rustc 标志
+    
+    # 增量编译（加速重新编译）
+    incremental = true
+    
+    # ═══════════════════════════════════════════════════════════
+    # Target 特定配置（可选）
+    # ═══════════════════════════════════════════════════════════
+    # [target.x86_64-unknown-linux-gnu]
+    # linker = "clang"
+    # rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+  '';
+
 }

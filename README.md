@@ -455,17 +455,22 @@ sudo pkill -f verge-mihomo
 │   ├── rust-dev.nix              # 🆕 Rust + Tauri + Naive UI 开发环境
 │   └── RUST_DEV_GUIDE.md         # 🆕 Rust 开发环境使用指南
 │
-├── modules/hardware/              # 自定义硬件模块
-│   ├── cpu/                      # CPU 特定配置
-│   │   ├── ryzen-1600x.nix
-│   │   ├── ryzen-2600.nix        # ← 当前使用
-│   │   └── ryzen-3600.nix
-│   ├── gpu/                      # GPU 特定配置
-│   │   ├── r9-370.nix
-│   │   ├── rx-5500.nix           # ← 当前使用
-│   │   └── rx-6600xt.nix
-│   └── peripherals/              # 外设配置（手柄、键盘、鼠标等）
-│       └── gamepad.nix           # 游戏手柄通用配置 ⭐
+├── modules/                       # 自定义配置模块
+│   ├── hardware/                 # 硬件相关配置
+│   │   ├── cpu/                  # CPU 特定配置
+│   │   │   ├── ryzen-1600x.nix
+│   │   │   ├── ryzen-2600.nix    # ← 当前使用
+│   │   │   └── ryzen-3600.nix
+│   │   ├── gpu/                  # GPU 特定配置
+│   │   │   ├── r9-370.nix
+│   │   │   ├── rx-5500.nix       # ← 当前使用
+│   │   │   └── rx-6600xt.nix
+│   │   └── peripherals/          # 外设配置（手柄、键盘、鼠标等）
+│   │       └── gamepad.nix       # 游戏手柄通用配置 ⭐
+│   ├── network/                  # 🆕 网络配置模块
+│   │   └── default.nix           # 防火墙、DNS、Avahi 等网络设置
+│   └── fonts/                    # 🆕 字体配置模块
+│       └── default.nix           # 字体包、渲染优化、Flatpak 字体访问
 │
 ├── scripts/                       # 实用脚本
 │   ├── start-clash-tun.sh        # Clash TUN 模式启动

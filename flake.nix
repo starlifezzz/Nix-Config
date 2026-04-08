@@ -19,6 +19,9 @@
         config.allowUnfree = true;
         config.allowBroken = true;
       };
+      
+      # 引入 Nixpkgs lib（用于 mkForce 等函数）
+      lib = nixpkgs.lib;
     in
     {
       nixosConfigurations = {
@@ -32,13 +35,11 @@
           modules = [
             ./configuration.nix
             
-            # Home Manager 集成
+            # ═══════════════════════════════════════════════════════════
+            # Home Manager 集成（仅作为模块加载器）
+            # 具体配置在 configuration.nix 中定义
+            # ═══════════════════════════════════════════════════════════
             home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.extraSpecialArgs = { inherit self pkgs-unstable; };
-            }
           ];
         };
       };
