@@ -22,6 +22,7 @@
 - ✅ **职责分离**: 系统级配置与用户级配置严格区分
 - ✅ **简单直接**: 放弃动态检测,采用手动导入路径
 - ✅ **可重现**: Flakes 锁定依赖,确保构建一致性
+- ✅ **性能优化**: earlyoom OOM 防护, USB 稳定性优化, SSD TRIM
 
 ### 📊 配置分层
 
@@ -46,6 +47,9 @@
 | **GPU** | AMD Radeon RX 5500 |
 | **Shell** | Fish |
 | **输入法** | Fcitx5 + Rime |
+| **浏览器** | Floorp (Firefox Fork) |
+| **编辑器** | VSCode + Vim |
+| **终端** | Alacritty + Zellij |
 
 ### 首次部署
 
@@ -83,6 +87,8 @@ passwd zhangchongjie
 - 桌面环境安装 (KDE Plasma 6)
 - 网络配置 (防火墙、DNS)
 - 字体包安装
+- OOM 防护 (earlyoom)
+- Flatpak 集成
 
 #### 用户级配置 ([`home/`](home/))
 
@@ -92,6 +98,7 @@ passwd zhangchongjie
 - 编辑器配置 ([`home/vim.nix`](home/vim.nix), VSCode)
 - 开发工具 (Git, direnv, Zellij)
 - 环境变量和快捷键
+- 应用配置 (Alacritty, Floorp, Lutris)
 
 ### 模块化示例
 
@@ -190,8 +197,7 @@ hm-switch   # home-manager switch (单独使用)
 │   ├── alacritty.nix              # 终端模拟器
 │   ├── vim.nix                    # Vim编辑器
 │   ├── direnv.nix                 # 环境变量管理
-│   ├── zellij.nix                 # Terminal复用器
-│   └── rust-dev.nix               # Rust开发环境
+│   └── zellij.nix                 # Terminal复用器
 │
 ├── scripts/                       # 实用脚本
 │   ├── start-clash-tun.sh         # Clash TUN启动
@@ -227,6 +233,18 @@ hm-switch   # home-manager switch (单独使用)
 - 过度拆分会增加维护成本
 - 遵循"**能跑就别动**"原则
 
+### 4. 浏览器选择策略
+
+- **Floorp** (Firefox Fork): 作为默认浏览器,通过 `programs.firefox.enable = false` 禁用原生 Firefox
+- **MIME 关联**: 在 [`home/default.nix`](home/default.nix) 中声明式配置 Web 协议处理
+- **Wayland 支持**: 通过 `MOZ_ENABLE_WAYLAND=1` 启用原生 Wayland 渲染
+
+### 5. OOM 防护机制
+
+- **earlyoom**: 用户空间 OOM 守护进程,在内存低于 5% 时主动终止进程
+- **优势**: 避免系统完全死机,保留最后响应能力
+- **配置**: 在 [`configuration.nix`](configuration.nix) 中声明,针对 Nix 构建场景优化
+
 ---
 
 ## ⚠️ 注意事项
@@ -255,6 +273,13 @@ rebuild-flake
 - 其他配置文件可以安全提交
 - 多人协作时注意 `configuration.nix` 冲突
 
+### 性能优化
+
+- **USB 稳定性**: 禁用自动挂起,增加 USBFS 内存
+- **SSD 优化**: 每日 TRIM, Swappiness=1
+- **内存保护**: earlyoom 在 5% 阈值触发,防止 OOM 死机
+- **并行构建**: `max-jobs = "auto"` 自动利用所有 CPU 核心
+
 ---
 
 ## 📚 参考资料
@@ -264,6 +289,7 @@ rebuild-flake
 - [Nixpkgs 软件包搜索](https://search.nixos.org/packages)
 - [Home Manager 文档](https://github.com/nix-community/home-manager)
 - [NixOS Wiki - Fonts](https://wiki.nixos.org/wiki/Fonts)
+- [KDE Plasma 6 文档](https://docs.kde.org/stable5/en/plasma-desktop/plasma-desktop/)
 
 ---
 
