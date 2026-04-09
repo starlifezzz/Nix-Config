@@ -3,8 +3,6 @@
 {
   # KDE Plasma 桌面环境配置
   home.pointerCursor = {
-    gtk.enable = true;
-    
     # X11/Wayland 指针主题
     name = "Papirus";
     package = pkgs.papirus-icon-theme;
@@ -501,7 +499,7 @@
     force = true;
   };
 
-  # 设置 GTK 主题环境变量
+  # 设置输入法环境变量
   home.sessionVariables = {
     GTK_FONT_NAME = "LXGW WenKai Screen 10";
     # 保持输入法模块设置

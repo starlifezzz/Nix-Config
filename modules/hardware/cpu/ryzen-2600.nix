@@ -11,9 +11,6 @@
   boot.kernelParams = [
     "amd_pstate=active"  # Zen+ 支持 amd_pstate，启用主动模式
     
-    # ✅ HDMI/DP 音频输出（与 GPU 模块协同设置，确保音频功能启用）
-    "amdgpu.audio=1"
-    
     # 安全优化
     "init_on_alloc=1"
     

@@ -113,7 +113,7 @@
   };
 
   # KDE Plasma 6 桌面环境
-  services.xserver.enable = true; # 启用 X11 兼容层（Plasma 6 默认使用 Wayland）
+  # services.xserver.enable = true; # 移除X11兼容层，Plasma 6默认使用Wayland
   services.desktopManager.plasma6.enable = true;
 
   # 打印服务（默认禁用）
@@ -265,10 +265,12 @@
       # 🔥 关键：内存保护阈值（防止 OOM 死机的核心配置）
       # NixOS 官方推荐：预留总内存的 10-15% 作为安全线
       # 当可用内存低于此值时，Nix 会自动暂停新构建
-      min-free = 2147483648; # 2GB 空闲内存保护线（根据 16GB 内存设置）
+      # 使用 lib.mkDefault 允许硬件模块根据实际内存大小覆盖此值
+      min-free = lib.mkDefault 2147483648; # 2GB 空闲内存保护线（默认值，可根据硬件调整）
 
       # 磁盘空间管理
-      max-free = 4294967296; # 4GB 最大空闲空间
+      # 使用 lib.mkDefault 允许硬件模块覆盖此值
+      max-free = lib.mkDefault 4294967296; # 4GB 最大空闲空间（默认值，可根据硬件调整）
 
       # ✅ 启用内存限制 cgroup（NixOS 25.11+ 新特性）
       # 这会给每个构建任务设置内存上限，超过则失败而非撑爆系统
@@ -321,15 +323,8 @@
     extraPortals = [
       pkgs.kdePackages.xdg-desktop-portal-kde # KDE portal（完整实现）
     ];
-    # 修改配置，确保兼容性
     config = {
-      common = {
-        default = [ "kde" ]; # 更正配置格式
-      };
-      # 为兼容性添加额外配置
-      plasma = {
-        default = [ "kde" ];
-      };
+      common.default = [ "kde" ];
     };
   };
 
@@ -405,6 +400,16 @@
 
         # ✅ 全局强制覆盖 - 禁用所有文件冲突检查
         home.activation.checkLinkTargets = lib.mkForce "";
+
+        # 清理图标缓存激活脚本
+        home.activation.clearIconCache = lib.mkAfter ''
+          if [ "$USER" = "zhangchongjie" ]; then
+            echo "Clearing Plasma icon cache..."
+            rm -f ~/.cache/icon-cache.kcache
+            rm -f ~/.cache/plasma-svgelements-*
+            rm -rf ~/.cache/plasmashell*
+          fi
+        '';
       };
   };
 
