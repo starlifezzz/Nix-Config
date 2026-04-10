@@ -230,11 +230,11 @@
 
       # 二进制缓存镜像（优先级从高到低）
       substituters = [
-        # 主镜像源 - 中科大（最稳定，响应快）
-        "https://mirrors.ustc.edu.cn/nix-channels/store"
-
         # 备用镜像源 1 - 上海交通大学（稳定性优秀）
         "https://mirror.sjtu.edu.cn/nix-channels/store"
+
+        # 主镜像源 - 中科大（最稳定，响应快）
+        "https://mirrors.ustc.edu.cn/nix-channels/store"
 
         # 备用镜像源 2 - 清华大学
         "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
