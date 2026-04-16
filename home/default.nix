@@ -108,7 +108,7 @@
     #下载相关
     parabolic
     yt-dlp
-    motrix
+    motrix-next
 
     #浏览器
     floorp-bin
