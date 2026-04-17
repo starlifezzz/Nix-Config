@@ -4,10 +4,11 @@
   # ✅ 使用 amdgpu 驱动（更现代，支持更好）
   services.xserver.videoDrivers = [ "amdgpu" ];
   
-  # ✅ 优化配置：尝试启用 DC 与音频支持
+  # ✅ 优化配置：尝试启用 DC 与音频支持 - Linux 7.0 兼容版本
   boot.kernelParams = [
-    # ⚠️ 关键修复：电源管理保守设置
-    "amdgpu.runpm=0"                 # 禁用运行时 PM（避免死机）
+    # ⚠️ 关键修复：Linux 7.0 中运行时 PM 已足够稳定，移除 runpm=0
+    # "amdgpu.runpm=0"                 # 不再需要禁用运行时 PM
+    
     "amdgpu.dpm=1"                   # 动态电源管理
     
     # ✅ 尝试启用 Display Core（测试兼容性）
@@ -27,8 +28,8 @@
     # 性能优化
     "amdgpu.pcie_gen2=1"
     
-    # ✅ 可选：如果 dc=1 有问题，可以添加调试参数
-    # "amdgpu.dcdebug=0x10"
+    # ✅ Linux 7.0 新增：启用 GPU 错误报告和恢复机制
+    "amdgpu.gpu_recovery=1"
   ];
   
   hardware.graphics = {

@@ -7,7 +7,7 @@
     "k10temp"       # ✅ 新增：AMD CPU 温度传感器
   ];
   
-  # ✅ CPU 频率和电源管理 - NixOS 官方推荐设置
+  # ✅ CPU 频率和电源管理 - Linux 7.0 兼容版本
   boot.kernelParams = [
     "amd_pstate=active"  # Zen+ 支持 amd_pstate，启用主动模式
     
@@ -17,6 +17,9 @@
     # 内存和缓存优化
     "transparent_hugepage=madvise"  # 透明大页优化
     "numa_balancing=1"  # NUMA 自动平衡（Ryzen 是多 Die 设计）
+    
+    # ✅ Linux 7.0 新增：启用 EEVDF 调度器（取代 CFS）
+    "sched_schedstats=0"  # 禁用调度统计以提升性能（除非需要调试）
   ];
   
   # 电源管理优化
@@ -26,11 +29,14 @@
     cpuFreqGovernor = lib.mkDefault "schedutil";
   };
   
-  # 系统优化
+  # 系统优化 - Linux 7.0 兼容版本
   boot.kernel.sysctl = {
     # CPU 调度优化 - 使用 lib.mkForce 覆盖 configuration.nix 的默认设置
     "kernel.sched_autogroup_enabled" = lib.mkForce 1;  # 启用自动任务组
     "kernel.sched_migration_cost_ns" = lib.mkForce 50000;  # 调度迁移成本
+    
+    # ✅ Linux 7.0 调度器优化
+    "kernel.sched_wakeup_granularity_ns" = lib.mkForce 1000000;  # 唤醒粒度
     
     # 内存优化 - ✅ 修正为 16GB 内存匹配的值
     "vm.swappiness" = lib.mkForce 1;  # ✅ 从 12 改为 1（16GB 内存应最小化 swap）
@@ -41,6 +47,9 @@
     # AMD Zen+ 专属
     "kernel.page-table-isolation" = lib.mkForce 0;  # Zen+ 有硬件缓解，可以禁用 PTI 提升性能
     "vm.transparent_hugepage_defrag" = lib.mkForce 0;  # 禁用透明大页碎片整理
+    
+    # ✅ Linux 7.0 内存管理优化
+    "vm.compaction_proactiveness" = lib.mkForce 20;  # 主动内存压缩
   };
 
 

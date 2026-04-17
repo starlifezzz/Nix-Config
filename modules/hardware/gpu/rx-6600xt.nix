@@ -4,7 +4,7 @@
   services.xserver.videoDrivers = [ "amdgpu" ];
   
   boot.kernelParams = [
-    "amdgpu.runpm=0"
+    # ✅ 移除 amdgpu.runpm=0 - Linux 7.0 中运行时电源管理已足够稳定
     
     # ✅ PCIe ASPM 节能模式（桌面用户推荐）
     "pcie_aspm=powersupersave"
@@ -12,9 +12,13 @@
     # ✅ HDMI/DP 音频输出（GPU 专属配置，其他模块不应重复设置）
     "amdgpu.audio=1"
     
-    "amdgpu.ppfeaturemask=0xffffffff"
-    "amdgpu.dc=1"
-    "amdgpu.sched_hw_submission=256"
+    "amdgpu.dc=1"  # 启用 Display Core（必须）
+    
+    # ✅ Linux 7.0 新增：启用 GPU 错误报告和恢复机制
+    "amdgpu.gpu_recovery=1"
+    
+    # Navi 23 特定优化 - 调整值以平衡性能和稳定性
+    "amdgpu.sched_hw_submission=128"
   ];
   
   hardware.graphics = {

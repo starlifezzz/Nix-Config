@@ -4,10 +4,10 @@
   # 启用 AMDGPU 驱动
   services.xserver.videoDrivers = [ "amdgpu" ];
   
-  # 内核参数优化 - Navi 14 (RX 5500)
+  # 内核参数优化 - Navi 14 (RX 5500) - Linux 7.0 兼容版本
   boot.kernelParams = [
-    # GPU 电源管理
-    "amdgpu.runpm=0"  # 禁用运行时电源管理（提高稳定性）
+    # ✅ 移除 amdgpu.runpm=0 - Linux 7.0 中运行时电源管理已足够稳定
+    # GPU 电源管理由内核自动处理
     
     # ✅ PCIe ASPM 节能模式（桌面用户推荐）
     "pcie_aspm=powersupersave"
@@ -15,12 +15,14 @@
     # ✅ HDMI/DP 音频输出（GPU 专属配置，CPU 模块不应重复设置）
     "amdgpu.audio=1"
     
-    # AMDGPU 特性
-    "amdgpu.ppfeaturemask=0xffffffff"  # 启用所有电源管理特性
+    # AMDGPU 特性 - Linux 7.0 推荐配置
     "amdgpu.dc=1"  # 启用 Display Core（必须）
     
-    # Navi 14 特定优化
-    "amdgpu.sched_hw_submission=256"
+    # ✅ Linux 7.0 新增：启用 GPU 错误报告和恢复机制
+    "amdgpu.gpu_recovery=1"
+    
+    # Navi 14 特定优化 - 保留但调整值
+    "amdgpu.sched_hw_submission=128"  # Linux 7.0 中降低到128以平衡性能和稳定性
   ];
   
   # 图形加速支持

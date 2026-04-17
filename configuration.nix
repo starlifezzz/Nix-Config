@@ -83,6 +83,10 @@
 
       # AMDGPU优化
       "vm.page-cluster" = lib.mkDefault 0; # SSD 优化：禁用交换预读
+      
+      # ✅ Linux 7.0 XFS 自修复功能监控
+      "fs.xfs.error_level" = 3; # 启用详细的XFS错误报告
+      "fs.xfs.panic_mask" = 0;  # 不panic，只记录错误
     };
   };
 
