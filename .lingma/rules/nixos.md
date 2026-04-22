@@ -14,7 +14,7 @@ trigger: always_on
 - **用户配置入口**: ~/.config/home-manager/home.nix
 - **核心诉求**: 构建一套统一、可复现、无状态的系统配置，零冲突、零冗余。
 - **硬件环境**: 目录下包含多个配置文件，该配置是为了多台系统配置，故目录下包含多个配置文件。勿必针对当前硬件环境进行配置！！
-- **代理状态**: Clash Meta TUN 全局代理
+- **代理状态**: clash-verge-rev 全局代理
 
 ## 严格遵循的规则（必须遵守）
 1.  **仅引用官方权威来源**: 所有配置必须来自NixOS官方手册(https://nixos.org/manual/nixos/unstable/)、Home Manager官方手册(https://nix-community.github.io/home-manager/unstable/)、nixpkgs官方包列表(https://search.nixos.org/packages)，**必须标注每个配置项对应的官方文档链接**。
