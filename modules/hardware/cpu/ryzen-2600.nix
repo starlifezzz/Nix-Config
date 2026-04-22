@@ -5,7 +5,22 @@
   boot.kernelModules = [ 
     "acpi-cpufreq"  # CPU 频率调节模块
     "k10temp"       # ✅ 新增：AMD CPU 温度传感器
+    "iwlwifi"       # ✅ Intel WiFi 驱动模块（必需）
+    "iwlmvm"        # ✅ Intel WiFi 管理模块（必需）
   ];
+  
+  # ✅ Initrd 配置 - 确保 WiFi 驱动在启动早期可用
+  boot.initrd.availableKernelModules = [ "iwlwifi" "iwlmvm" ];
+  
+  # ✅ 固件配置 - 包含 Intel WiFi 固件
+  hardware.firmware = [ pkgs.linux-firmware ];
+  hardware.enableRedistributableFirmware = true;
+  
+  # ✅ 蓝牙支持 - Intel Wireless-AC 3168包含蓝牙功能
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;  # 开机时自动开启蓝牙
+  };
   
   # ✅ CPU 频率和电源管理 - Linux 7.0 兼容版本
   boot.kernelParams = [
@@ -51,8 +66,6 @@
     # ✅ Linux 7.0 内存管理优化
     "vm.compaction_proactiveness" = lib.mkForce 20;  # 主动内存压缩
   };
-
-
 
     # ═══════════════════════════════════════════════════════════
   # Zram 虚拟内存配置 - Ryzen 2600 专属启用
