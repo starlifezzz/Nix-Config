@@ -49,7 +49,7 @@
   xdg.mimeApps = {
     enable = true;
     # 只声明基础 Web 浏览器的 MIME 关联
-    # 其他应用（如 Lutris、VSCode）的 MIME 关联由 KDE 动态管理
+    # 其他应用（如 Lutris、VSCode）的 MIME 关聯由 KDE 动态管理
     defaultApplications = {
       "text/html" = [ "floorp.desktop" ];
       "x-scheme-handler/http" = [ "floorp.desktop" ];
@@ -57,6 +57,9 @@
       "x-scheme-handler/about" = [ "floorp.desktop" ];
     };
   };
+
+  # 强制覆盖现有的 mimeapps.list 文件，避免 Home Manager 启动失败
+  xdg.configFile."mimeapps.list".force = true;
 
   # ═══════════════════════════════════════════════════════════
   # 桌面快捷方式 - Lutris（lutris-free 版本）

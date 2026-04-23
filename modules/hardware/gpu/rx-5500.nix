@@ -21,8 +21,16 @@
     # ✅ Linux 7.0 新增：启用 GPU 错误报告和恢复机制
     "amdgpu.gpu_recovery=1"
     
-    # Navi 14 特定优化 - 保留但调整值
-    "amdgpu.sched_hw_submission=128"  # Linux 7.0 中降低到128以平衡性能和稳定性
+    # Navi 14 特定优化 - 调整值以提高稳定性
+    "amdgpu.sched_hw_submission=32"  # 进一步降低到32以减少Fence超时问题
+    
+    # ✅ 添加稳定性参数
+    "amdgpu.vm_update_mode=3"  # 使用同步更新模式提高稳定性
+    "amdgpu.sg_display=0"      # 禁用SG display以避免infoframe问题
+    
+    # ✅ 添加额外的稳定性参数
+    "amdgpu.lockup_timeout=10000"  # 增加GPU锁死超时时间
+    # 移除无效参数: amdgpu.gpu_sched_enable=1 (当前内核不支持)
   ];
   
   # 图形加速支持

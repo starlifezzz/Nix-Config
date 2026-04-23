@@ -31,27 +31,24 @@
     
     # 内存和缓存优化
     "transparent_hugepage=madvise"  # 透明大页优化
-    "numa_balancing=1"  # NUMA 自动平衡（Ryzen 是多 Die 设计）
+    # 移除 numa_balancing=1，改用 sysctl 方式
+    # "numa_balancing=1"  # NUMA 自动平衡（Ryzen 是多 Die 设计）
     
     # ✅ Linux 7.0 新增：启用 EEVDF 调度器（取代 CFS）
     "sched_schedstats=0"  # 禁用调度统计以提升性能（除非需要调试）
   ];
   
-  # 电源管理优化
-  powerManagement = {
-    powertop.enable = true;
-    # ✅ 统一使用 schedutil（现代内核推荐）
-    cpuFreqGovernor = lib.mkDefault "schedutil";
-  };
-  
+  # 电源管理优化 - 启用 powertop，不配置 CPU 频率调节器
+  # 现代内核会自动使用 schedutil，无需显式配置
+  powerManagement.powertop.enable = true;
+
   # 系统优化 - Linux 7.0 兼容版本
   boot.kernel.sysctl = {
     # CPU 调度优化 - 使用 lib.mkForce 覆盖 configuration.nix 的默认设置
     "kernel.sched_autogroup_enabled" = lib.mkForce 1;  # 启用自动任务组
-    "kernel.sched_migration_cost_ns" = lib.mkForce 50000;  # 调度迁移成本
     
-    # ✅ Linux 7.0 调度器优化
-    "kernel.sched_wakeup_granularity_ns" = lib.mkForce 1000000;  # 唤醒粒度
+    # NUMA 平衡 - 通过 sysctl 启用
+    "kernel.numa_balancing" = lib.mkForce 1;
     
     # 内存优化 - ✅ 修正为 16GB 内存匹配的值
     "vm.swappiness" = lib.mkForce 1;  # ✅ 从 12 改为 1（16GB 内存应最小化 swap）
@@ -59,15 +56,17 @@
     "vm.dirty_ratio" = lib.mkForce 20;  # 提高脏页比例
     "vm.dirty_background_ratio" = lib.mkForce 10;
     
-    # AMD Zen+ 专属
-    "kernel.page-table-isolation" = lib.mkForce 0;  # Zen+ 有硬件缓解，可以禁用 PTI 提升性能
-    "vm.transparent_hugepage_defrag" = lib.mkForce 0;  # 禁用透明大页碎片整理
-    
     # ✅ Linux 7.0 内存管理优化
     "vm.compaction_proactiveness" = lib.mkForce 20;  # 主动内存压缩
+    
+    # 移除已废弃或路径错误的参数：
+    # - kernel.page-table-isolation: 在较新内核中已移除
+    # - kernel.sched_migration_cost_ns: 参数名已更改或不再适用
+    # - kernel.sched_wakeup_granularity_ns: 在当前内核中不存在
+    # - vm.transparent_hugepage_defrag: 正确路径应为 transparent_hugepage/defrag
   };
-
-    # ═══════════════════════════════════════════════════════════
+  
+  # ═══════════════════════════════════════════════════════════
   # Zram 虚拟内存配置 - Ryzen 2600 专属启用
   # ═══════════════════════════════════════════════════════════
   # 适用于低内存场景 (如 16GB),提供额外的压缩交换空间

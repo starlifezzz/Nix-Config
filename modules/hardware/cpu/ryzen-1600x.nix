@@ -21,12 +21,8 @@ k
     "sched_schedstats=0"  # 禁用调度统计以提升性能
   ];
   
-  powerManagement = {
-    powertop.enable = true;
-    # ✅ 统一使用 schedutil（现代内核推荐）
-    cpuFreqGovernor = lib.mkDefault "schedutil";
-  };
-  
+  powerManagement.powertop.enable = true;
+
   boot.kernel.sysctl = {
     "kernel.sched_autogroup_enabled" = lib.mkForce 1;
     "kernel.sched_migration_cost_ns" = lib.mkForce 100000;

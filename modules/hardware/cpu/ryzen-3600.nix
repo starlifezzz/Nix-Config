@@ -22,11 +22,8 @@
     "sched_schedstats=0"  # 禁用调度统计以提升性能
   ];
   
-  powerManagement = {
-    powertop.enable = true;
-    # ✅ 统一使用 schedutil（现代内核推荐）
-    cpuFreqGovernor = lib.mkDefault "schedutil";
-  };
+  # ✅ 只启用 powertop 服务，不再通过 powerManagement 配置 CPU 调频器
+  powerManagement.powertop.enable = true;
   
   boot.kernel.sysctl = {
     # CPU 调度优化 - 使用 lib.mkForce 覆盖 configuration.nix 的默认设置
