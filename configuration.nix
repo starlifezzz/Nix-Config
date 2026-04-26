@@ -234,14 +234,11 @@
 
       # 二进制缓存镜像（优先级从高到低）
       substituters = [
-        # 备用镜像源 1 - 上海交通大学（稳定性优秀）
-        "https://mirror.sjtu.edu.cn/nix-channels/store"
-
         # 主镜像源 - 中科大（最稳定，响应快）
         "https://mirrors.ustc.edu.cn/nix-channels/store"
 
-        # 备用镜像源 2 - 清华大学
-        "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+        # 备用镜像源 1 - 上海交通大学（稳定性优秀）
+        "https://mirror.sjtu.edu.cn/nix-channels/store"
 
         # 官方源（最后的选择）
         "https://cache.nixos.org"
@@ -270,11 +267,11 @@
       # NixOS 官方推荐：预留总内存的 10-15% 作为安全线
       # 当可用内存低于此值时，Nix 会自动暂停新构建
       # 使用 lib.mkDefault 允许硬件模块根据实际内存大小覆盖此值
-      min-free = lib.mkDefault 2147483648; # 2GB 空闲内存保护线（默认值，可根据硬件调整）
+      min-free = lib.mkDefault 1073741824; # 1GB 空闲磁盘空间保护线（从2GB降低到1GB）
 
       # 磁盘空间管理
       # 使用 lib.mkDefault 允许硬件模块覆盖此值
-      max-free = lib.mkDefault 4294967296; # 4GB 最大空闲空间（默认值，可根据硬件调整）
+      max-free = lib.mkDefault 8589934592; # 8GB 最大空闲空间（从4GB增加到8GB，更好地清理空间）
 
       # ✅ 启用内存限制 cgroup（NixOS 25.11+ 新特性）
       # 这会给每个构建任务设置内存上限，超过则失败而非撑爆系统
@@ -357,9 +354,6 @@
   # SSD 优化 - 定期 TRIM
   services.fstrim.enable = true;
 
-  # ✅ CPU 频率调节器已由 CPU 模块设置（schedutil）
-  # powerManagement.cpuFreqGovernor = lib.mkForce "ondemand";  # ❌ 已移除：与 ryzen-2600.nix 冲突
-
   # SDDM 显示管理器配置
   services.displayManager.defaultSession = "plasma";
   services.displayManager.sddm = {
@@ -379,6 +373,13 @@
     "d /run/polkit-1/rules.d 0755 root root -"
   ];
 
+  # 彻底解决磁盘空余不足
+  boot.tmp = {
+    useTmpfs = true;
+    tmpfsSize = "12G";
+  };
+
+
   # ═══════════════════════════════════════════════════════════
   # Home Manager 全局配置（NixOS 集成模式）
   # ═══════════════════════════════════════════════════════════
@@ -390,20 +391,14 @@
 
     # ❌ 已移除 backupFileExtension - 不再备份
 
-    extraSpecialArgs = { inherit pkgs-unstable; };
-
     # ✅ 定义用户配置（在 nixos-rebuild 时自动应用）
     users.zhangchongjie =
-      { config, pkgs, ... }:
+      { config, pkgs,lib, ... }:
       {
         imports = [
           ./home/default.nix
         ];
 
-        # ✅ stateVersion 已在 home/default.nix 中定义，此处不再重复
-
-        # ✅ 全局强制覆盖 - 禁用所有文件冲突检查
-        home.activation.checkLinkTargets = lib.mkForce "";
 
         # 清理图标缓存激活脚本
         home.activation.clearIconCache = lib.mkAfter ''
