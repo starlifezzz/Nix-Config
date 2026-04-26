@@ -1,20 +1,26 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   # KDE Plasma 桌面环境配置
   home.pointerCursor = {
-    # X11/Wayland 指针主题
+    # Wayland 光标主题（移除X11特定配置）
     name = "Papirus";
     package = pkgs.papirus-icon-theme;
     size = 24;
-    x11.enable = true;
+    # x11.enable = true;
   };
 
   # 全局外观和主题
   qt = {
     enable = true;
     platformTheme.name = "kde";
-    style.name = "org.kde.breezetwilight.desktop";
+    style.package = pkgs.kdePackages.breeze; # ✅ 使用正确的包路径
+    style.name = "breeze"; # ✅ 不带.desktop后缀
   };
 
   # ═══════════════════════════════════════════════════════════
@@ -30,7 +36,7 @@
       ContrastAmount=0.65
       ContrastEffect=1
       Enable=
-      IntensityAmount=0.1
+      IntensityAmount=0
       IntensityEffect=2
 
       [ColorEffects:Inactive]
@@ -161,10 +167,10 @@
       XftHintStyle=hintslight
       XftSubPixel=none
       accentColorFromWallpaper=true
-      font=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-      menuFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-      smallestReadableFont=LXGW WenKai Screen,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-      toolBarFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+      # font=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+      # menuFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+      # smallestReadableFont=LXGW WenKai Screen,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+      # toolBarFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
 
       [Icons]
       Theme=Papirus
@@ -194,7 +200,7 @@
       [WM]
       activeBackground=227,229,231
       activeBlend=227,229,231
-      activeFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+      # activeFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
       activeForeground=35,38,41
       inactiveBackground=239,240,241
       inactiveBlend=239,240,241
@@ -223,7 +229,7 @@
     force = true;
   };
 
-    # ═══════════════════════════════════════════════════════════
+  # ═══════════════════════════════════════════════════════════
   # 全局快捷键配置 - kglobalshortcutsrc
   # ═══════════════════════════════════════════════════════════
   xdg.configFile."kglobalshortcutsrc" = {
@@ -501,14 +507,13 @@
 
   # 设置输入法环境变量
   home.sessionVariables = {
-    GTK_FONT_NAME = "LXGW WenKai Screen 10";
+    # GTK_FONT_NAME = "LXGW WenKai Screen 10";
     # 保持输入法模块设置
     GTK_IM_MODULE = "";
     QT_IM_MODULE = "";
     XMODIFIERS = "@im=fcitx";
     SDL_IM_MODULE = "fcitx";
   };
-  
 
   # 启用 dconf 以确保 KDE 配置正确应用
   dconf = {

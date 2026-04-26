@@ -74,8 +74,8 @@
   # ═══════════════════════════════════════════════════════════
   # Home Manager 不会自动扫描 home.packages 创建快捷方式
   # 必须使用 xdg.dataFile 显式链接到 ~/.local/share/applications/
-  xdg.dataFile."applications/net.lutris.Lutris.desktop".source =
-    "${pkgs.lutris-free}/share/applications/net.lutris.Lutris.desktop";
+  # xdg.dataFile."applications/net.lutris.Lutris.desktop".source =
+  #   "${pkgs.lutris-free}/share/applications/net.lutris.Lutris.desktop";
 
   # ═══════════════════════════════════════════════════════════
   # 用户软件包 - 包含所有需要通过 Home Manager 安装的包
@@ -107,7 +107,7 @@
     # ═══════════════════════════════════════════════════════════
     # GUI 应用（需要桌面快捷方式）
     # ═══════════════════════════════════════════════════════════
-    lutris-free # 游戏管理器
+    # lutris-free # 游戏管理器
 
     # ═══════════════════════════════════════════════════════════
     # 🎵 音频播放器配置
@@ -123,7 +123,16 @@
 
     #浏览器
     floorp-bin
+
+    # Flatpak 用户级管理
+    flatpak # Flatpak 包管理器（用户级）
   ];
+
+  # Shell 别名 - 强制 Flatpak 使用用户模式
+  home.shellAliases = {
+    # 强制 Flatpak 默认使用 --user 参数，避免占用系统根分区
+    flatpak = "flatpak --user";
+  };
 
   # ═══════════════════════════════════════════════════════════
   # 环境变量 - 简洁配置
