@@ -127,8 +127,7 @@
     # playerctl   # 媒体控制器
 
     #下载相关
-    parabolic
-    yt-dlp
+    # parabolic
     motrix-next
 
     #浏览器
