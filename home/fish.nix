@@ -1,13 +1,17 @@
 # /etc/nixos/home/fish.nix
 # Fish Shell 配置
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   programs.fish = {
     enable = true;
 
-    shellInit = ''
-    '';
+    shellInit = "";
 
     shellAliases = {
       # 基础命令
@@ -23,17 +27,19 @@
       update = "sudo nixos-rebuild switch";
       nrs = "sudo nixos-rebuild switch";
       nrt = "sudo nixos-rebuild test";
-      
+
       # Home Manager
       hm-switch = "home-manager switch";
-      
+
       # 垃圾回收与优化
       gc = "sudo nix-collect-garbage -d";
       optimise = "sudo nix-store --optimise";
-      
+
       # Nix 工具
       ns = "nix-shell";
       generations = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
+      # clash快速启动
+      start-clash = "cd /etc/nixos/scripts/ && sudo ./start-clash-tun.sh";
     };
 
     functions = {

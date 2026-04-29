@@ -6,31 +6,18 @@
   
   # 内核参数优化 - Navi 14 (RX 5500) - Linux 7.0 兼容版本
   boot.kernelParams = [
-    # ✅ 移除 amdgpu.runpm=0 - Linux 7.0 中运行时电源管理已足够稳定
-    # GPU 电源管理由内核自动处理
-    
-    # ✅ PCIe ASPM 节能模式（桌面用户推荐）
-    "pcie_aspm=powersupersave"
-    
-    # ✅ HDMI/DP 音频输出（GPU 专属配置，CPU 模块不应重复设置）
-    "amdgpu.audio=1"
-    
     # AMDGPU 特性 - Linux 7.0 推荐配置
     "amdgpu.dc=1"  # 启用 Display Core（必须）
-    
-    # ✅ Linux 7.0 新增：启用 GPU 错误报告和恢复机制
+
+    # Linux 7.0 新增：启用 GPU 错误报告和恢复机制
     "amdgpu.gpu_recovery=1"
-    
-    # Navi 14 特定优化 - 降低硬件提交数量至16，作为8和默认值32之间的折中方案
-    "amdgpu.sched_hw_submission=16"
-    
-    # ✅ 添加稳定性参数
-    "amdgpu.vm_update_mode=3"  # 使用同步更新模式提高稳定性
+
+    # 添加稳定性参数（infoframe问题必需）
     "amdgpu.sg_display=0"      # 禁用SG display以避免infoframe问题
-    
-    # ✅ 添加额外的稳定性参数
-    "amdgpu.lockup_timeout=10000"  # 增加GPU锁死超时时间
-    # 移除无效参数: amdgpu.gpu_sched_enable=1 (当前内核不支持)
+
+    # 可选优化参数（对性能无负面影响）
+    "amdgpu.sched_hw_submission=16"  # 提高硬件提交队列数量
+    "amdgpu.lockup_timeout=10000"    # 增加GPU锁死超时时间
   ];
   
   # 图形加速支持
@@ -59,10 +46,6 @@
       # OBS 会自动使用 VAAPI/VDPAU 进行硬件编码
     ];
   };
-  
-  # 固件加载
-  hardware.firmware = [ pkgs.linux-firmware ];
-  hardware.enableRedistributableFirmware = true;
   
   # 在 initrd 阶段加载 AMDGPU
   boot.initrd.kernelModules = [ "amdgpu" ];

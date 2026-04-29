@@ -12,10 +12,6 @@
   # ✅ Initrd 配置 - 确保 WiFi 驱动在启动早期可用
   boot.initrd.availableKernelModules = [ "iwlwifi" "iwlmvm" ];
   
-  # ✅ 固件配置 - 包含 Intel WiFi 固件
-  hardware.firmware = [ pkgs.linux-firmware ];
-  hardware.enableRedistributableFirmware = true;
-  
   # ✅ 蓝牙支持 - Intel Wireless-AC 3168包含蓝牙功能
   hardware.bluetooth = {
     enable = true;
