@@ -265,7 +265,7 @@
         "https://mirrors.ustc.edu.cn/nix-channels/store"
 
         # 备用镜像源 1 - 上海交通大学（稳定性优秀）
-        "https://mirror.sjtu.edu.cn/nix-channels/store"
+        # "https://mirror.sjtu.edu.cn/nix-channels/store"
 
         # 官方源（最后的选择）
         "https://cache.nixos.org"
