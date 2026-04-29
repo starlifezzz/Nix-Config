@@ -29,7 +29,6 @@
     # ═══════════════════════════════════════════════════════════
     ./modules/network/default.nix
     ./modules/fonts/default.nix
-
   ];
 
   # 启动配置
@@ -45,12 +44,35 @@
 
     # 内核配置 - 使用最新稳定版内核
     kernelPackages = pkgs.linuxPackages_latest;
+    # 启用可重新分发的固件
+    hardware.enableRedistributableFirmware = true;
+    # 统一的固件配置 - 包含所有必需的固件
+    hardware.firmware = [ pkgs.linux-firmware ];
+
     kernelParams = [
       # ═══════════════════════════════════════════════════════════
       # USB 设备稳定性优化 - NixOS 官方推荐设置
       # ═══════════════════════════════════════════════════════════
       "usbcore.autosuspend=-1" # 禁用 USB 自动挂起
       "usbcore.usbfs_memory_mb=1024" # USBFS 内存
+
+      # ═══════════════════════════════════════════════════════════
+      # NVMe SSD 优化 - 解决 SUBNQN 警告（最小化性能影响）
+      # ═══════════════════════════════════════════════════════════
+      "nvme_core.io_timeout=4294967295" # 最大IO超时值（无性能影响）
+      "nvme_core.max_retries=10" # 增加重试次数（仅在错误时生效）
+
+      # ═══════════════════════════════════════════════════════════
+      # 安全防护 - 移除性能影响大的参数
+      # ═══════════════════════════════════════════════════════════
+      # 移除 mds=full,nosmt (禁用SMT会影响多线程性能)
+      # 保留基本防护但不影响性能
+      "spectre_v2=on" # 启用 Spectre V2 防护（现代CPU硬件支持，性能影响极小）
+
+      # ═══════════════════════════════════════════════════════════
+      # ACPI 兼容性 - 减少 DSM 警告
+      # ═══════════════════════════════════════════════════════════
+      "acpi_enforce_resources=lax" # 宽松的 ACPI 资源管理
 
       # ═══════════════════════════════════════════════════════════
       # 显示器分辨率策略：自动检测 EDID 并适配最大分辨率
@@ -87,6 +109,11 @@
       # ✅ Linux 7.0 XFS 自修复功能监控
       "fs.xfs.error_level" = 3; # 启用详细的XFS错误报告
       "fs.xfs.panic_mask" = 0;  # 不panic，只记录错误
+
+      # ═══════════════════════════════════════════════════════════
+      # ✅ 性能计数器权限 - 解决 "Could not retrieve perf counters (-19)" 问题
+      # ═══════════════════════════════════════════════════════════
+      "kernel.perf_event_paranoid" = 0; # 允许所有用户访问perf事件
     };
   };
 
@@ -275,8 +302,6 @@
 
       # ✅ 启用内存限制 cgroup（NixOS 25.11+ 新特性）
       # 这会给每个构建任务设置内存上限，超过则失败而非撑爆系统
-      # 注意：当前未配置具体平台，如需指定构建架构可在此添加
-      extra-platforms = [ ];
 
       # 沙箱配置
       sandbox = true;
@@ -305,18 +330,6 @@
 
   # Flatpak 配置
   services.flatpak.enable = true;
-
-  # 配置 Flatpak 镜像源 - 系统级
-  systemd.services.flatpak-repo = {
-    wantedBy = [ "multi-user.target" ];
-    path = [ pkgs.flatpak ];
-    script = ''
-      # 添加 Flathub 官方仓库（如果不存在）
-      flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-      # 修改为国内镜像源（上海交通大学）以加速下载
-      flatpak remote-modify flathub --url=https://mirror.sjtu.edu.cn/flathub
-    '';
-  };
 
   # XDG Portal 配置 - KDE Plasma 环境
   xdg.portal = {

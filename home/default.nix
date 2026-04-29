@@ -69,6 +69,9 @@
   # 强制覆盖现有的 mimeapps.list 文件，避免 Home Manager 启动失败
   xdg.configFile."mimeapps.list".force = true;
 
+  # 强制覆盖现有的字体配置文件，避免 Home Manager 启动失败
+  xdg.configFile."fontconfig/conf.d/10-hm-fonts.conf".force = true;
+
   # ═══════════════════════════════════════════════════════════
   # 桌面快捷方式 - Lutris（lutris-free 版本）
   # ═══════════════════════════════════════════════════════════
@@ -89,6 +92,13 @@
   # 如果未来遇到 "two different versions" 错误，
   # 需要从 home.packages 中移除对应的包。
   home.packages = with pkgs; [
+    # ═══════════════════════════════════════════════════════════
+    #系统工具
+    # ════
+    pkgs.bleachbit
+    kdePackages.filelight
+    haruna
+    ente-auth
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器
     vscode # vscode 编辑器
