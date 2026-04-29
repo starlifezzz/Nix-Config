@@ -31,6 +31,11 @@
     ./modules/fonts/default.nix
   ];
 
+  # 启用可重新分发的固件
+  hardware.enableRedistributableFirmware = true;
+  # 统一的固件配置 - 包含所有必需的固件
+  hardware.firmware = [ pkgs.linux-firmware ];
+
   # 启动配置
   boot = {
     loader = {
@@ -44,11 +49,6 @@
 
     # 内核配置 - 使用最新稳定版内核
     kernelPackages = pkgs.linuxPackages_latest;
-    # 启用可重新分发的固件
-    hardware.enableRedistributableFirmware = true;
-    # 统一的固件配置 - 包含所有必需的固件
-    hardware.firmware = [ pkgs.linux-firmware ];
-
     kernelParams = [
       # ═══════════════════════════════════════════════════════════
       # USB 设备稳定性优化 - NixOS 官方推荐设置
