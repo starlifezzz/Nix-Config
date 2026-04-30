@@ -261,8 +261,6 @@
 
       # 二进制缓存镜像（优先级从高到低）
       substituters = [
-        # 清华源 
-       "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store" 
 
         # 主镜像源 - 中科大（最稳定，响应快）
         "https://mirrors.ustc.edu.cn/nix-channels/store"
@@ -304,7 +302,7 @@
 
       # ✅ 启用内存限制（如果支持）
       # 这会给每个构建任务设置内存上限，超过则失败而非撑爆系统
-      build-memory-limit = 2147483648; # 每个构建任务限制2GB内存（可选）
+      # build-memory-limit = 2147483648; # 每个构建任务限制2GB内存（可选）
 
       # 沙箱配置
       sandbox = true;
@@ -318,6 +316,9 @@
 
       # ✅ 构建超时保护 - 防止单个 derivations 卡死超过 1 小时
       build-timeout = 3600;
+
+      # 不保留构建日志
+      keep-build-log = false;
     };
 
     # 垃圾回收
