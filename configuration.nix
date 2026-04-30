@@ -36,12 +36,6 @@
   # 统一的固件配置 - 包含所有必需的固件
   hardware.firmware = [ pkgs.linux-firmware ];
 
-  # 启用 binfmt 以支持 32 位应用程序（Lutris/Wine 必需）
-  boot.binfmt.emulatedSystems = [ "i686-linux" ];
-
-  # Nix 设置 - 启用多平台支持
-  nix.settings.extra-platforms = [ "i686-linux" ];
-
   # 启动配置
   boot = {
     loader = {
@@ -203,12 +197,6 @@
   # 允许 unfree 和 broken 包
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowBroken = true;
-  # Skip tests for openldap to avoid build failures due to timing issues in test environment
-  nixpkgs.config.packageOverrides = pkgs: {
-    openldap = pkgs.openldap.overrideAttrs (oldAttrs: {
-      doCheck = false;
-    });
-  };
 
   # ═══════════════════════════════════════════════════════════
   # ✅ 覆盖 KDE 包集 - 阻止不需要的应用被安装
@@ -301,9 +289,9 @@
 
       # 并行构建配置 - 限制并行作业数量防止内存溢出
       # ═══════════════════════════════════════════════════════════
-      # 根据你的16GB内存，建议将并行作业限制为4-6个
-      # 这样可以避免同时构建多个大型包时内存不足
-      max-jobs = 6; # 限制为6个并行作业（原来是"auto"）
+      # max-jobs = "auto" 会根据 CPU 核心数自动调整
+      # 配合下面的内存保护机制，实现"安全地榨干性能"
+      max-jobs = "auto"; # ✅ 自动检测 CPU 核心数
       cores = 0; # 使用所有核心（单个构建任务内部并行）
 
       # 🔥 关键：增加内存保护阈值
@@ -442,5 +430,4 @@
 
   # 系统版本
   system.stateVersion = "26.05";
-
 }
