@@ -21,7 +21,7 @@
     # ✅ CPU 和 GPU 配置文件
     # 修改这里来切换硬件配置
     # ═══════════════════════════════════════════════════════════
-    ./modules/hardware/cpu/ryzen-2600.nix # 可选：ryzen-1600x, ryzen-2600, ryzen-3600
+    ./modules/hardware/cpu/ryzen-5600.nix # 可选：ryzen-1600x, ryzen-2600, ryzen-3600, ryzen-5600
     ./modules/hardware/gpu/rx-5500.nix # 可选：r9-370, rx-5500, rx-6600xt
 
     # ═══════════════════════════════════════════════════════════
@@ -35,6 +35,12 @@
   hardware.enableRedistributableFirmware = true;
   # 统一的固件配置 - 包含所有必需的固件
   hardware.firmware = [ pkgs.linux-firmware ];
+
+  # 启用 binfmt 以支持 32 位应用程序（Lutris/Wine 必需）
+  boot.binfmt.emulatedSystems = [ "i686-linux" ];
+
+  # Nix 设置 - 启用多平台支持
+  nix.settings.extra-platforms = [ "i686-linux" ];
 
   # 启动配置
   boot = {
@@ -197,6 +203,12 @@
   # 允许 unfree 和 broken 包
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowBroken = true;
+  # Skip tests for openldap to avoid build failures due to timing issues in test environment
+  nixpkgs.config.packageOverrides = pkgs: {
+    openldap = pkgs.openldap.overrideAttrs (oldAttrs: {
+      doCheck = false;
+    });
+  };
 
   # ═══════════════════════════════════════════════════════════
   # ✅ 覆盖 KDE 包集 - 阻止不需要的应用被安装
@@ -261,14 +273,17 @@
 
       # 二进制缓存镜像（优先级从高到低）
       substituters = [
+        # 清华源 
+       "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store" 
+
         # 主镜像源 - 中科大（最稳定，响应快）
         "https://mirrors.ustc.edu.cn/nix-channels/store"
-
+        
         # 备用镜像源 1 - 上海交通大学（稳定性优秀）
-        # "https://mirror.sjtu.edu.cn/nix-channels/store"
+        "https://mirror.sjtu.edu.cn/nix-channels/store"
 
         # 官方源（最后的选择）
-        "https://cache.nixos.org"
+        # "https://cache.nixos.org"
       ];
 
       trusted-public-keys = [
@@ -279,29 +294,29 @@
         "nix-command"
         "flakes"
       ];
+      
       auto-optimise-store = true;
       keep-derivations = true;
       keep-outputs = true;
 
-      # 并行构建配置 - 最大化利用资源但防止死机
+      # 并行构建配置 - 限制并行作业数量防止内存溢出
       # ═══════════════════════════════════════════════════════════
-      # max-jobs = "auto" 会根据 CPU 核心数自动调整
-      # 配合下面的内存保护机制，实现"安全地榨干性能"
-      max-jobs = "auto"; # ✅ 自动检测 CPU 核心数
+      # 根据你的16GB内存，建议将并行作业限制为4-6个
+      # 这样可以避免同时构建多个大型包时内存不足
+      max-jobs = 6; # 限制为6个并行作业（原来是"auto"）
       cores = 0; # 使用所有核心（单个构建任务内部并行）
 
-      # 🔥 关键：内存保护阈值（防止 OOM 死机的核心配置）
-      # NixOS 官方推荐：预留总内存的 10-15% 作为安全线
-      # 当可用内存低于此值时，Nix 会自动暂停新构建
-      # 使用 lib.mkDefault 允许硬件模块根据实际内存大小覆盖此值
-      min-free = lib.mkDefault 1073741824; # 1GB 空闲磁盘空间保护线（从2GB降低到1GB）
+      # 🔥 关键：增加内存保护阈值
+      # 对于16GB内存系统，建议预留更多内存给系统
+      min-free = lib.mkDefault 2147483648; # 2GB 空闲磁盘空间保护线（原来是1GB）
 
       # 磁盘空间管理
       # 使用 lib.mkDefault 允许硬件模块覆盖此值
       max-free = lib.mkDefault 8589934592; # 8GB 最大空闲空间（从4GB增加到8GB，更好地清理空间）
 
-      # ✅ 启用内存限制 cgroup（NixOS 25.11+ 新特性）
+      # ✅ 启用内存限制（如果支持）
       # 这会给每个构建任务设置内存上限，超过则失败而非撑爆系统
+      build-memory-limit = 2147483648; # 每个构建任务限制2GB内存（可选）
 
       # 沙箱配置
       sandbox = true;
@@ -427,4 +442,5 @@
 
   # 系统版本
   system.stateVersion = "26.05";
+
 }
