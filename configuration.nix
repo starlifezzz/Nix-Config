@@ -70,6 +70,12 @@
       "spectre_v2=on" # 启用 Spectre V2 防护（现代CPU硬件支持，性能影响极小）
 
       # ═══════════════════════════════════════════════════════════
+      # ✅ GPU 稳定性增强 - 解决 AMD RX 5500 图形环超时问题
+      # ═══════════════════════════════════════════════════════════
+      "drm.gpu_recovery=1" # 启用DRM GPU恢复机制
+      "drm.debug=0" # 禁用DRM调试（减少日志开销）
+
+      # ═══════════════════════════════════════════════════════════
       # ACPI 兼容性 - 减少 DSM 警告
       # ═══════════════════════════════════════════════════════════
       "acpi_enforce_resources=lax" # 宽松的 ACPI 资源管理
@@ -105,10 +111,10 @@
 
       # AMDGPU优化
       "vm.page-cluster" = lib.mkDefault 0; # SSD 优化：禁用交换预读
-      
+
       # ✅ Linux 7.0 XFS 自修复功能监控
       "fs.xfs.error_level" = 3; # 启用详细的XFS错误报告
-      "fs.xfs.panic_mask" = 0;  # 不panic，只记录错误
+      "fs.xfs.panic_mask" = 0; # 不panic，只记录错误
 
       # ═══════════════════════════════════════════════════════════
       # ✅ 性能计数器权限 - 解决 "Could not retrieve perf counters (-19)" 问题
@@ -264,7 +270,7 @@
 
         # 主镜像源 - 中科大（最稳定，响应快）
         "https://mirrors.ustc.edu.cn/nix-channels/store"
-        
+
         # 备用镜像源 1 - 上海交通大学（稳定性优秀）
         "https://mirror.sjtu.edu.cn/nix-channels/store"
 
@@ -280,7 +286,7 @@
         "nix-command"
         "flakes"
       ];
-      
+
       auto-optimise-store = true;
       keep-derivations = true;
       keep-outputs = true;
@@ -334,6 +340,10 @@
 
   # Flatpak 配置
   services.flatpak.enable = true;
+
+  # fwupd 固件更新服务配置
+  # 参考官方文档: https://nixos.org/manual/nixos/unstable/options.html#opt-services.fwupd.enable
+  services.fwupd.enable = true;
 
   # XDG Portal 配置 - KDE Plasma 环境
   xdg.portal = {
@@ -396,7 +406,6 @@
     tmpfsSize = "12G";
   };
 
-
   # ═══════════════════════════════════════════════════════════
   # Home Manager 全局配置（NixOS 集成模式）
   # ═══════════════════════════════════════════════════════════
@@ -410,12 +419,16 @@
 
     # ✅ 定义用户配置（在 nixos-rebuild 时自动应用）
     users.zhangchongjie =
-      { config, pkgs,lib, ... }:
+      {
+        config,
+        pkgs,
+        lib,
+        ...
+      }:
       {
         imports = [
           ./home/default.nix
         ];
-
 
         # 清理图标缓存激活脚本
         home.activation.clearIconCache = lib.mkAfter ''
