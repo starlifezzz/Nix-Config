@@ -27,7 +27,7 @@
     
     # 内存和缓存优化 - Zen 3 架构优化
     "transparent_hugepage=madvise"  # 透明大页优化
-    "numa_balancing=1"  # NUMA 自动平衡（Ryzen 是多 CCX 设计）
+    # ✅ 移除 numa_balancing=1 内核参数，该参数应通过 sysctl 设置，避免 mempolicy 解析错误
     
     # ✅ Linux 7.0+ 新增：启用 EEVDF 调度器相关优化
     "sched_schedstats=0"  # 禁用调度统计以提升性能
@@ -54,9 +54,8 @@
     # ✅ Linux 7.0+ 内存管理优化
     "vm.compaction_proactiveness" = lib.mkForce 20;  # 主动内存压缩
     
-    # Zen 3 特定优化
-    "kernel.sched_migration_cost_ns" = lib.mkForce 5000000;  # 任务迁移成本调整
-    "kernel.sched_wakeup_granularity_ns" = lib.mkForce 1000000;  # 唤醒粒度优化
+    # ✅ 移除：kernel.sched_migration_cost_ns 和 kernel.sched_wakeup_granularity_ns 
+    # 在Linux 7.0中已重命名或移除，保留会导致systemd-sysctl警告
   };
   
   # ═══════════════════════════════════════════════════════════
