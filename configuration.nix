@@ -57,11 +57,12 @@
       "usbcore.usbfs_memory_mb=1024" # USBFS 内存
 
       # ═══════════════════════════════════════════════════════════
-      # NVMe SSD 优化 - 解决 SUBNQN 警告（最小化性能影响）
+      # NVMe SSD 优化 - 解决 SUBNQN 字段问题和提高稳定性
       # ═══════════════════════════════════════════════════════════
       "nvme_core.io_timeout=4294967295" # 最大IO超时值（无性能影响）
       "nvme_core.max_retries=10" # 增加重试次数（仅在错误时生效）
-      "nvme_core.default_ps_max_latency_us=0" # 禁用电源管理以避免SUBNQN问题
+      # 移除 nvme_core.default_ps_max_latency_us=0，因为SUBNQN警告不影响功能，
+      # 且禁用电源管理可能增加SSD功耗
 
       # ═══════════════════════════════════════════════════════════
       # 安全防护 - 移除性能影响大的参数
