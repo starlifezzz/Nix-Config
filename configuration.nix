@@ -61,6 +61,7 @@
       # ═══════════════════════════════════════════════════════════
       "nvme_core.io_timeout=4294967295" # 最大IO超时值（无性能影响）
       "nvme_core.max_retries=10" # 增加重试次数（仅在错误时生效）
+      "nvme_core.default_ps_max_latency_us=0" # 禁用电源管理以避免SUBNQN问题
 
       # ═══════════════════════════════════════════════════════════
       # 安全防护 - 移除性能影响大的参数
@@ -186,6 +187,17 @@
     ];
     # 设置默认 shell 为 fish
     shell = pkgs.fish;
+  };
+
+  # 环境变量配置 - 支持桌面集成
+  # ✅ 修正 XDG 变量以解决 Portal 注册问题并适配 Plasma 6 Wayland
+  environment.sessionVariables = {
+    XDG_CURRENT_DESKTOP = "KDE"; # 标准大写格式，确保 Portal 和应用正确识别桌面环境
+    XDG_MENU_PREFIX = "kde-";    # 确保菜单集成正确
+    XDG_SESSION_DESKTOP = "KDE"; # 添加会话桌面变量
+    DESKTOP_SESSION = "plasma";  # 根据项目规范添加
+    KDE_FULL_SESSION = "true";   # 根据项目规范添加
+    # 移除可能干扰 Portal 发现的废弃变量
   };
 
   # Fish Shell（系统级）

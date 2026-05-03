@@ -52,6 +52,8 @@
         # ✅ Fallback DNS: 国际 DNS (当国内 DNS 失败时使用)
         FallbackDNS = "1.1.1.1 8.8.8.8";
         DNSSEC = "false";
+        # ✅ 禁用 mDNS 以避免与 Avahi 冲突
+        MulticastDNS = "no";
       };
     };
   };
@@ -62,6 +64,26 @@
     nssmdns4 = true;
     publish = {
       enable = true;
+      # 允许用户服务发布
+      userServices = true;
+      addresses = true;
+      domain = true;
     };
+    # 增加权限以支持 KDE Connect
+    openFirewall = true;
+    # 允许所有接口进行服务发现
+    allowInterfaces = [ "lo" "*" ];
   };
+
+  # XDG Desktop Portal 配置文件
+  environment.etc."xdg/portals/portals.conf".text = ''
+    # XDG Desktop Portal 配置文件
+    # 参考官方文档: https://man.archlinux.org/man/portals.conf.5
+
+    [kde]
+    default=true
+    
+    [gtk]
+    default=false
+  '';
 }

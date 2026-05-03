@@ -19,10 +19,9 @@
     "amdgpu.sched_hw_submission=16"  # 提高硬件提交队列数量
     "amdgpu.lockup_timeout=10000"    # 增加GPU锁死超时时间
     
-    # ✅ 新增：解决GPU环超时问题的关键参数
-    # 注意: amdgpu.gpu_reset 已在 Linux 7.0 中移除，由 gpu_recovery 替代
+    # ✅ 移除 amdgpu.gpu_reset 参数（Linux 7.0+ 已废弃，由 gpu_recovery 替代）
     "amdgpu.aspm=0"                  # 禁用PCIe ASPM节能模式（提高稳定性）
-    "amdgpu.dpm=1"                   # 启用动态电源管理
+    "amdgpu.dpm=1"                   # 启用动态电源管理（保持启用以平衡性能和功耗）
     "amdgpu.deep_color=0"            # 禁用深色模式（减少HDMI兼容性问题）
   ];
   
