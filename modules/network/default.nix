@@ -37,6 +37,15 @@
     };
   };
 
+  # Linux 7.0 网络性能优化
+  boot.kernel.sysctl = {
+    "net.core.rmem_max" = 134217728; # 增加接收缓冲区最大值到128MB
+    "net.core.wmem_max" = 134217728; # 增加发送缓冲区最大值到128MB
+    "net.ipv4.tcp_rmem" = "4096 262144 134217728"; # TCP接收内存：min default max
+    "net.ipv4.tcp_wmem" = "4096 65536 134217728"; # TCP发送内存：min default max
+    "net.core.netdev_max_backlog" = 5000; # 增加网络设备输入队列长度
+  };
+
   # DNS 配置说明
   # ⚠️ 当前同时启用了 NetworkManager 和 systemd-resolved
   # - NetworkManager: 管理网络连接和基础 DNS
