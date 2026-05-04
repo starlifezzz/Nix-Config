@@ -22,13 +22,18 @@
     # 修改这里来切换硬件配置
     # ═══════════════════════════════════════════════════════════
     ./modules/hardware/cpu/ryzen-5600.nix # 可选：ryzen-1600x, ryzen-2600, ryzen-3600, ryzen-5600
-    ./modules/hardware/gpu/rx-5500.nix # 可选：r9-370, rx-5500, rx-6600xt
+    ./modules/hardware/gpu/rx-6600xt.nix # 可选：r9-370, rx-5500xt, rx-6600xt
 
     # ═══════════════════════════════════════════════════════════
     # ✅ 网络和字体配置模块
     # ═══════════════════════════════════════════════════════════
     ./modules/network/default.nix
     ./modules/fonts/default.nix
+
+    # ═══════════════════════════════════════════════════════════
+    # ✅ SSD 存储优化模块
+    # ═══════════════════════════════════════════════════════════
+    ./modules/storage/ssd.nix
   ];
 
   # 启用可重新分发的固件
@@ -57,14 +62,6 @@
       "usbcore.usbfs_memory_mb=1024" # USBFS 内存
 
       # ═══════════════════════════════════════════════════════════
-      # NVMe SSD 优化 - 解决 SUBNQN 字段问题和提高稳定性
-      # ═══════════════════════════════════════════════════════════
-      "nvme_core.io_timeout=4294967295" # 最大IO超时值（无性能影响）
-      "nvme_core.max_retries=10" # 增加重试次数（仅在错误时生效）
-      # 移除 nvme_core.default_ps_max_latency_us=0，因为SUBNQN警告不影响功能，
-      # 且禁用电源管理可能增加SSD功耗
-
-      # ═══════════════════════════════════════════════════════════
       # 安全防护 - 移除性能影响大的参数
       # ═══════════════════════════════════════════════════════════
       # 移除 mds=full,nosmt (禁用SMT会影响多线程性能)
@@ -83,17 +80,23 @@
       "acpi_enforce_resources=lax" # 宽松的 ACPI 资源管理
 
       # ═══════════════════════════════════════════════════════════
-      # 显示器分辨率策略：自动检测 EDID 并适配最大分辨率
+      # ✅ Linux 7.0 性能优化 - ZSwap压缩交换缓存
       # ═══════════════════════════════════════════════════════════
-      # 已移除硬编码的 video=2560x1440@75 参数
-      # KDE Plasma Wayland + KScreen 会自动检测显示器 EDID 信息
-      # 并应用显示器支持的最大分辨率和刷新率
-      # 支持热插拔自动切换（如更换 4K 显示器自动适配 4K）
+      "zswap.enabled=1" # 启用ZSwap压缩交换缓存
+      "zswap.compressor=zstd" # 使用zstd压缩算法（高效且快速）
+      "zswap.max_pool_percent=20" # 最大使用20%内存作为压缩池
+
+      # ═══════════════════════════════════════════════════════════
+      # ✅ 透明大页优化 - 提升大内存应用性能
+      # ═══════════════════════════════════════════════════════════
+      "transparent_hugepage=always" # 启用透明大页（always模式提供最佳性能）
     ];
 
     # 内核模块
     kernelModules = [
       "xpad" # Xbox 手柄驱动
+      "ntsync" # NTSYNC内核驱动 - 提升Windows应用程序多线程同步性能
+      "zswap" # ZSwap压缩交换缓存 - 减少SSD写入并提高交换性能
     ];
 
     # 黑名单模块 - 防止与手柄冲突
@@ -111,9 +114,6 @@
       "fs.inotify.max_user_watches" = 524288;
       "fs.file-max" = 2097152;
 
-      # AMDGPU优化
-      "vm.page-cluster" = lib.mkDefault 0; # SSD 优化：禁用交换预读
-
       # ✅ Linux 7.0 XFS 自修复功能监控
       "fs.xfs.error_level" = 3; # 启用详细的XFS错误报告
       "fs.xfs.panic_mask" = 0; # 不panic，只记录错误
@@ -122,6 +122,12 @@
       # ✅ 性能计数器权限 - 解决 "Could not retrieve perf counters (-19)" 问题
       # ═══════════════════════════════════════════════════════════
       "kernel.perf_event_paranoid" = 0; # 允许所有用户访问perf事件
+
+      # ═══════════════════════════════════════════════════════════
+      # ✅ Linux 7.0 容器和虚拟化性能优化
+      # ═══════════════════════════════════════════════════════════
+      "kernel.keys.root_maxbytes" = 25000000; # 增加root密钥环大小限制
+      "kernel.keys.root_maxkeys" = 1000000; # 增加root密钥数量限制
     };
   };
 
@@ -166,7 +172,7 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    jack.enable = true;
+    jack.enable = true; # 注释掉jack支持以避免LD_LIBRARY_PATH冲突
   };
 
   # ✅ UPower 服务 - 修复 WirePlumber 电池百分比错误
@@ -194,10 +200,10 @@
   # ✅ 修正 XDG 变量以解决 Portal 注册问题并适配 Plasma 6 Wayland
   environment.sessionVariables = {
     XDG_CURRENT_DESKTOP = "KDE"; # 标准大写格式，确保 Portal 和应用正确识别桌面环境
-    XDG_MENU_PREFIX = "kde-";    # 确保菜单集成正确
+    XDG_MENU_PREFIX = "kde-"; # 确保菜单集成正确
     XDG_SESSION_DESKTOP = "KDE"; # 添加会话桌面变量
-    DESKTOP_SESSION = "plasma";  # 根据项目规范添加
-    KDE_FULL_SESSION = "true";   # 根据项目规范添加
+    DESKTOP_SESSION = "plasma"; # 根据项目规范添加
+    KDE_FULL_SESSION = "true"; # 根据项目规范添加
     # 移除可能干扰 Portal 发现的废弃变量
   };
 
@@ -380,6 +386,7 @@
   # 优势：避免系统完全死机，保留最后响应能力
   services.earlyoom = {
     enable = true;
+    enableNotifications = true;
     # ✅ 针对 Nix 构建场景优化阈值
     # 默认 10% 对于构建来说太激进，降低到 5% 给构建更多缓冲空间
     freeMemThreshold = 5; # 内存低于 5% 时触发 SIGTERM
@@ -390,9 +397,6 @@
     # 让 earlyoom 使用默认策略（根据 RSS 内存占用选择进程）
     # 如需自定义，可通过配置文件方式实现
   };
-
-  # SSD 优化 - 定期 TRIM
-  services.fstrim.enable = true;
 
   # SDDM 显示管理器配置
   services.displayManager.defaultSession = "plasma";
@@ -454,6 +458,9 @@
         '';
       };
   };
+
+  # 安全强化 - 锁定内核模块加载
+  security.lockKernelModules = true;
 
   # 系统版本
   system.stateVersion = "26.05";
