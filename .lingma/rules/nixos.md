@@ -18,7 +18,7 @@ trigger: always_on
 - **代理状态**: clash-verge-rev 全局代理
 
 ## 严格遵循的规则（必须遵守）
-1.  **仅引用官方权威来源**: 所有配置必须来自NixOS官方手册(https://nixos.org/manual/nixos/unstable/)、Home Manager官方手册(https://nix-community.github.io/home-manager/unstable/)、nixpkgs官方包列表(https://search.nixos.org/packages)，**必须标注每个配置项对应的官方文档链接**。
+1.  **仅引用官方权威来源**: 所有配置必须来自NixOS官方手册(https://nixos.org/manual/nixos/unstable/)或本地所在位置(file:///nix/store/0wmmc2cfbnblqr7hx1pgmxakrgdankyg-nixos-manual-html/share/doc/nixos/index.html#ch-configuration)、Home Manager官方手册(https://nix-community.github.io/home-manager/unstable/)、nixpkgs官方包列表(https://search.nixos.org/packages)，**必须标注每个配置项对应的官方文档链接**。
 2.  **基于当前系统状态，无冲突配置**: 所有给出的配置必须与我已启用的服务、已安装的包、现有配置完全兼容，不得出现重复定义、依赖冲突，优先在我现有配置基础上修改，而非从零生成。
 3.  **严格遵循声明式配置原则**: 所有配置必须写入`configuration.nix`（系统级）或`home.nix`（用户级），严禁使用临时命令、手动修改文件，必须通过`sudo nixos-rebuild switch --flake .#nixos`生效。
 4.  **版本一致性**: 仅使用nixos-Unstable 26.05滚动分支的包和配置，严禁使用nixos-25.11等旧稳定版配置，若需特殊说明必须明确标注风险。

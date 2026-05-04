@@ -18,6 +18,8 @@
       enable = true;
       allowPing = true;
       checkReversePath = true;
+      # ✅ 启用连接拒绝日志记录 - 便于安全审计
+      logRefusedConnections = true;
       
       # 允许 Clash TUN 模式的虚拟网卡流量
       trustedInterfaces = [
