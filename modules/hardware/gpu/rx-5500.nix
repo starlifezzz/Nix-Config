@@ -18,6 +18,7 @@
     # 可选优化参数（对性能无负面影响）
     "amdgpu.sched_hw_submission=16"  # 提高硬件提交队列数量
     "amdgpu.lockup_timeout=10000"    # 增加GPU锁死超时时间
+    "amdgpu.sdma_timeout=60000"      # 增加SDMA引擎超时时间，解决Fence超时警告
     
     # ✅ 移除 amdgpu.gpu_reset 参数（Linux 7.0+ 已废弃，由 gpu_recovery 替代）
     "amdgpu.aspm=0"                  # 禁用PCIe ASPM节能模式（提高稳定性）
