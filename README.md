@@ -44,7 +44,7 @@
 | **系统版本** | NixOS 26.05 (Unstable) |
 | **桌面环境** | KDE Plasma 6 (Wayland) |
 | **CPU** | AMD Ryzen 5 2600 |
-| **GPU** | AMD Radeon RX 5500 |
+| **GPU** | AMD Radeon RX 5500 XT |
 | **Shell** | Fish |
 | **输入法** | Fcitx5 + Rime |
 | **浏览器** | Floorp (Firefox Fork) |
@@ -102,12 +102,12 @@ passwd zhangchongjie
 
 ### 模块化示例
 
-```nix
+```
 # configuration.nix - 系统级
 imports = [
   ./hardware-configuration.nix       # 设备特定(不提交Git)
   ./modules/hardware/cpu/ryzen-2600.nix   # CPU优化
-  ./modules/hardware/gpu/rx-5500.nix      # GPU驱动
+  ./modules/hardware/gpu/rx-5500xt.nix      # GPU驱动
   ./modules/network/default.nix           # 网络配置
   ./modules/fonts/default.nix             # 字体配置
 ];
@@ -123,7 +123,7 @@ home.sessionVariables = { ... };         # 环境变量
 
 ### 系统重建
 
-```fish
+``fish
 # 推荐: 使用 Fish 别名(已配置国内镜像源)
 rebuild-flake
 
@@ -146,14 +146,14 @@ gc  # sudo nix-collect-garbage -d
 
 ### 离线重建
 
-```fish
+``fish
 # 无网络时使用已缓存的包
 rebuild-offline
 ```
 
 ### 其他实用命令
 
-```fish
+``fish
 ll          # ls -la
 c           # clear
 s           # sudo
@@ -180,7 +180,7 @@ hm-switch   # home-manager switch (单独使用)
 │   │   │   └── ryzen-3600.nix
 │   │   ├── gpu/                   # GPU配置
 │   │   │   ├── r9-370.nix
-│   │   │   ├── rx-5500.nix       # ← 当前使用
+│   │   │   ├── rx-5500xt.nix       # ← 当前使用
 │   │   │   └── rx-6600xt.nix
 │   │   └── peripherals/           # 外设配置
 │   │       └── gamepad.nix        # 游戏手柄优化
@@ -258,7 +258,7 @@ hm-switch   # home-manager switch (单独使用)
 ### 网络问题
 
 若遇到 GitHub 连接失败:
-```bash
+```
 # 启动 Clash TUN 模式
 sudo clash-tun
 sleep 5
