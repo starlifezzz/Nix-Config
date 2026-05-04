@@ -49,8 +49,6 @@
     # 内存优化 - ✅ 修正为 16GB 内存匹配的值
     "vm.swappiness" = lib.mkForce 1;  # ✅ 从 12 改为 1（16GB 内存应最小化 swap）
     "vm.vfs_cache_pressure" = lib.mkForce 50;  # 降低 VFS 缓存压力
-    "vm.dirty_ratio" = lib.mkForce 20;  # 提高脏页比例
-    "vm.dirty_background_ratio" = lib.mkForce 10;
     
     # ✅ Linux 7.0 内存管理优化
     "vm.compaction_proactiveness" = lib.mkForce 20;  # 主动内存压缩

@@ -18,7 +18,7 @@
 
 ### ⚡ 设计理念
 
-- ✅ **模块化清晰**: 硬件、网络、字体等功能独立成模块
+- ✅ **模块化清晰**: 硬件、网络、字体、存储等功能独立成模块
 - ✅ **职责分离**: 系统级配置与用户级配置严格区分
 - ✅ **简单直接**: 放弃动态检测,采用手动导入路径
 - ✅ **可重现**: Flakes 锁定依赖,确保构建一致性
@@ -31,7 +31,7 @@
 | **系统级** | [`configuration.nix`](configuration.nix) | 硬件驱动、系统服务、桌面环境安装 |
 | **用户级** | [`home/`](home/) | 主题、字体、快捷键、应用配置 |
 | **硬件模块** | [`modules/hardware/`](modules/hardware/) | CPU/GPU 特定优化 |
-| **功能模块** | [`modules/network/`](modules/network/), [`modules/fonts/`](modules/fonts/) | 网络、字体等通用功能 |
+| **功能模块** | [`modules/network/`](modules/network/), [`modules/fonts/`](modules/fonts/), [`modules/storage/`](modules/storage/) | 网络、字体、存储等通用功能 |
 | **特殊配置** | [`configs/`](configs/) | 可选的特殊应用场景配置 |
 
 ---
@@ -88,6 +88,7 @@ passwd zhangchongjie
 - 桌面环境安装 (KDE Plasma 6)
 - 网络配置 (防火墙、DNS)
 - 字体包安装
+- 存储优化 (SSD TRIM、内核参数)
 - OOM 防护 (earlyoom)
 - Flatpak 集成
 
@@ -116,6 +117,7 @@ imports = [
   ./modules/hardware/gpu/rx-6600xt.nix      # GPU驱动
   ./modules/network/default.nix           # 网络配置
   ./modules/fonts/default.nix             # 字体配置
+  ./modules/storage/ssd.nix               # SSD存储优化
 ];
 
 # home/kde.nix - 用户级
@@ -192,8 +194,10 @@ hm-switch   # home-manager switch (单独使用)
 │   │       └── rx-6600xt.nix      # ← 当前使用
 │   ├── network/                   # 🌐 网络配置
 │   │   └── default.nix            # 防火墙/DNS/Avahi
-│   └── fonts/                     # 🔤 字体配置
-│       └── default.nix            # 字体包/渲染优化
+│   ├── fonts/                     # 🔤 字体配置
+│   │   └── default.nix            # 字体包/渲染优化
+│   └── storage/                   # 💾 存储优化
+│       └── ssd.nix                # SSD TRIM/内核参数优化
 │
 ├── home/                          # Home Manager用户配置
 │   ├── default.nix                # HM入口
@@ -254,7 +258,13 @@ hm-switch   # home-manager switch (单独使用)
 - **优势**: 避免系统完全死机,保留最后响应能力
 - **配置**: 在 [`configuration.nix`](configuration.nix) 中声明,针对 Nix 构建场景优化
 
-### 6. 特殊配置管理
+### 6. 存储优化模块
+
+- **SSD 专用**: 将所有 SSD 相关配置（TRIM、内核参数）统一到 [`modules/storage/ssd.nix`](modules/storage/ssd.nix)
+- **避免重复**: 从 CPU 模块和主配置中移除重复的存储相关参数
+- **职责单一**: storage 模块只负责存储优化，CPU 模块只负责 CPU 相关优化
+
+### 7. 特殊配置管理
 
 - **configs目录**: 存放可选的特殊应用场景配置（如MPD DSD音频配置）
 - **按需导入**: 这些配置不会自动启用，需要在主配置文件中显式导入
@@ -291,7 +301,7 @@ rebuild-flake
 ### 性能优化
 
 - **USB 稳定性**: 禁用自动挂起,增加 USBFS 内存
-- **SSD 优化**: 每日 TRIM, Swappiness=1
+- **SSD 优化**: 每周 TRIM, Swappiness=1, 专用存储内核参数
 - **内存保护**: earlyoom 在 5% 阈值触发,防止 OOM 死机
 - **并行构建**: `max-jobs = "auto"` 自动利用所有 CPU 核心
 

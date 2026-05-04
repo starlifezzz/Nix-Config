@@ -46,6 +46,7 @@
     "kernel.numa_balancing" = lib.mkForce 1;
     
     # 内存优化 - 针对现代系统优化
+    "vm.swappiness" = lib.mkForce 1;  # 最小化 swap 使用
     "vm.vfs_cache_pressure" = lib.mkForce 50;  # 降低 VFS 缓存压力
     
     # ✅ Linux 7.0+ 内存管理优化

@@ -34,8 +34,6 @@
     # 内存优化 - Ryzen 3000 系列优化的值
     "vm.swappiness" = lib.mkForce 10;
     "vm.vfs_cache_pressure" = lib.mkForce 50;
-    "vm.dirty_ratio" = lib.mkForce 20;
-    "vm.dirty_background_ratio" = lib.mkForce 10;
     
     # Zen 2 架构可以禁用 PTI
     "kernel.page-table-isolation" = lib.mkForce 0;
