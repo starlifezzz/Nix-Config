@@ -17,7 +17,6 @@
   home.stateVersion = "26.05"; # ✅ 与 system.stateVersion 保持一致
 
   # 启用 DConf 支持 - 更好地管理 GTK 应用设置
-  programs.dconf.enable = true;
 
   # 禁用 Nixpkgs 版本检查（因为我们在用 unstable）
   home.enableNixpkgsReleaseCheck = false;
