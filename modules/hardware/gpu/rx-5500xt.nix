@@ -1,10 +1,10 @@
 { config, lib, pkgs, ... }:
 
 {
-  # 启用 AMDGPU 驱动
+  # 启用 AMDGPU 驱动 - RX 5500 XT (Navi 14 XT)
   services.xserver.videoDrivers = [ "amdgpu" ];
   
-  # 内核参数优化 - Navi 14 (RX 5500) - Linux 7.0 兼容版本
+  # 内核参数优化 - Navi 14 XT (RX 5500 XT) - Linux 7.0 兼容版本
   boot.kernelParams = [
     # AMDGPU 特性 - Linux 7.0 推荐配置
     "amdgpu.dc=1"  # 启用 Display Core（必须）
@@ -15,18 +15,21 @@
     # 添加稳定性参数（infoframe问题必需）
     "amdgpu.sg_display=0"      # 禁用SG display以避免infoframe问题
 
-    # 可选优化参数（对性能无负面影响）
-    "amdgpu.sched_hw_submission=16"  # 提高硬件提交队列数量
-    "amdgpu.lockup_timeout=10000"    # 增加GPU锁死超时时间
-    "amdgpu.sdma_timeout=60000"      # 增加SDMA引擎超时时间，解决Fence超时警告
+    # ✅ XT版本优化参数（对性能无负面影响）
+    "amdgpu.sched_hw_submission=32"  # 提高硬件提交队列数量（XT版本支持更高并发）
+    "amdgpu.lockup_timeout=15000"    # 增加GPU锁死超时时间（XT更高频率需要更宽松阈值）
+    "amdgpu.sdma_timeout=90000"      # 增加SDMA引擎超时时间，解决Fence超时警告
     
     # ✅ 移除 amdgpu.gpu_reset 参数（Linux 7.0+ 已废弃，由 gpu_recovery 替代）
     "amdgpu.aspm=0"                  # 禁用PCIe ASPM节能模式（提高稳定性）
     "amdgpu.dpm=1"                   # 启用动态电源管理（保持启用以平衡性能和功耗）
     "amdgpu.deep_color=0"            # 禁用深色模式（减少HDMI兼容性问题）
+    
+    # ✅ XT版本额外稳定性参数
+    "amdgpu.ppfeaturemask=0xffffffff" # 启用所有电源管理功能（适用于XT版本）
   ];
   
-  # 图形加速支持
+  # 图形加速支持 - RX 5500 XT 完整规格
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
@@ -39,10 +42,10 @@
       # ✅ OpenCL ICD loader（必需）
       ocl-icd
       
-      # OpenCL 支持
+      # OpenCL 支持 - ROCm 完整支持
       rocmPackages.clr.icd
       
-      # ✅ 视频编解码加速
+      # ✅ 视频编解码加速 - 完整 VAAPI/VDPAU 支持
       mesa
       libva
       libvdpau-va-gl
@@ -56,7 +59,7 @@
   # 在 initrd 阶段加载 AMDGPU
   boot.initrd.kernelModules = [ "amdgpu" ];
   
-  # ✅ GPU 监控工具
+  # ✅ GPU 监控工具 - 包含完整监控支持
   environment.systemPackages = with pkgs; [
     radeontop
     # lm_sensors 已在 CPU 模块中安装，此处不再重复

@@ -32,6 +32,7 @@
 | **用户级** | [`home/`](home/) | 主题、字体、快捷键、应用配置 |
 | **硬件模块** | [`modules/hardware/`](modules/hardware/) | CPU/GPU 特定优化 |
 | **功能模块** | [`modules/network/`](modules/network/), [`modules/fonts/`](modules/fonts/) | 网络、字体等通用功能 |
+| **特殊配置** | [`configs/`](configs/) | 可选的特殊应用场景配置 |
 
 ---
 
@@ -43,8 +44,8 @@
 |------|-----|
 | **系统版本** | NixOS 26.05 (Unstable) |
 | **桌面环境** | KDE Plasma 6 (Wayland) |
-| **CPU** | AMD Ryzen 5 2600 |
-| **GPU** | AMD Radeon RX 5500 XT |
+| **CPU** | AMD Ryzen 5 5600 |
+| **GPU** | AMD Radeon RX 6600 XT |
 | **Shell** | Fish |
 | **输入法** | Fcitx5 + Rime |
 | **浏览器** | Floorp (Firefox Fork) |
@@ -100,14 +101,19 @@ passwd zhangchongjie
 - 环境变量和快捷键
 - 应用配置 (Alacritty, Floorp, Lutris)
 
+#### 特殊配置 ([`configs/`](configs/))
+
+包含**可选的特殊应用场景配置**:
+- MPD DSD音频播放配置 ([`configs/mpd-dsd.nix`](configs/mpd-dsd.nix))
+
 ### 模块化示例
 
 ```
 # configuration.nix - 系统级
 imports = [
   ./hardware-configuration.nix       # 设备特定(不提交Git)
-  ./modules/hardware/cpu/ryzen-2600.nix   # CPU优化
-  ./modules/hardware/gpu/rx-5500xt.nix      # GPU驱动
+  ./modules/hardware/cpu/ryzen-5600.nix   # CPU优化
+  ./modules/hardware/gpu/rx-6600xt.nix      # GPU驱动
   ./modules/network/default.nix           # 网络配置
   ./modules/fonts/default.nix             # 字体配置
 ];
@@ -176,14 +182,14 @@ hm-switch   # home-manager switch (单独使用)
 │   ├── hardware/                  # 硬件相关
 │   │   ├── cpu/                   # CPU配置
 │   │   │   ├── ryzen-1600x.nix
-│   │   │   ├── ryzen-2600.nix    # ← 当前使用
-│   │   │   └── ryzen-3600.nix
-│   │   ├── gpu/                   # GPU配置
-│   │   │   ├── r9-370.nix
-│   │   │   ├── rx-5500xt.nix       # ← 当前使用
-│   │   │   └── rx-6600xt.nix
-│   │   └── peripherals/           # 外设配置
-│   │       └── gamepad.nix        # 游戏手柄优化
+│   │   │   ├── ryzen-2600.nix
+│   │   │   ├── ryzen-3600.nix
+│   │   │   └── ryzen-5600.nix     # ← 当前使用
+│   │   └── gpu/                   # GPU配置
+│   │       ├── r9-370.nix
+│   │       ├── rx-5500.nix
+│   │       ├── rx-5500xt.nix
+│   │       └── rx-6600xt.nix      # ← 当前使用
 │   ├── network/                   # 🌐 网络配置
 │   │   └── default.nix            # 防火墙/DNS/Avahi
 │   └── fonts/                     # 🔤 字体配置
@@ -198,6 +204,9 @@ hm-switch   # home-manager switch (单独使用)
 │   ├── vim.nix                    # Vim编辑器
 │   ├── direnv.nix                 # 环境变量管理
 │   └── zellij.nix                 # Terminal复用器
+│
+├── configs/                       # 特殊场景配置
+│   └── mpd-dsd.nix                # MPD DSD音频播放配置
 │
 ├── scripts/                       # 实用脚本
 │   ├── start-clash-tun.sh         # Clash TUN启动
@@ -244,6 +253,12 @@ hm-switch   # home-manager switch (单独使用)
 - **earlyoom**: 用户空间 OOM 守护进程,在内存低于 5% 时主动终止进程
 - **优势**: 避免系统完全死机,保留最后响应能力
 - **配置**: 在 [`configuration.nix`](configuration.nix) 中声明,针对 Nix 构建场景优化
+
+### 6. 特殊配置管理
+
+- **configs目录**: 存放可选的特殊应用场景配置（如MPD DSD音频配置）
+- **按需导入**: 这些配置不会自动启用，需要在主配置文件中显式导入
+- **灵活性**: 支持不同使用场景的快速切换
 
 ---
 
