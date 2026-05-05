@@ -33,7 +33,7 @@
     # ═══════════════════════════════════════════════════════════
     # ✅ SSD 存储优化模块
     # ═══════════════════════════════════════════════════════════
-    ./modules/storage/ssd.nix
+    # ./modules/storage/ssd.nix
   ];
 
   # 启用可重新分发的固件
@@ -459,8 +459,8 @@
       };
   };
 
-  # 安全强化 - 锁定内核模块加载
-  security.lockKernelModules = true;
+  # 安全强化 - 锁定内核模块加载 正常情况下，严禁使用
+  # security.lockKernelModules = true;
 
   # 系统版本
   system.stateVersion = "26.05";
