@@ -57,10 +57,8 @@
   # ═══════════════════════════════════════════════════════════
   services.blueman = {
     enable = true;
-    # 启用托盘图标
-    enableTray = true;
-    # 启用通知
-    enableNotifications = true;
+    # 注意：NixOS blueman 模块只支持 enable 选项
+    # 托盘图标和通知由 blueman 自身处理
   };
 
   # ═══════════════════════════════════════════════════════════
