@@ -81,7 +81,7 @@
     blueman # 蓝牙管理器 GUI
     # WiFi相关工具
     iw
-    wireless-tools
+    wirelesstools
   ];
 
   # ═══════════════════════════════════════════════════════════
