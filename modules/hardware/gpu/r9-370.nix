@@ -50,9 +50,6 @@
   
   # 在 initrd 阶段加载 amdgpu
   boot.initrd.kernelModules = [ "amdgpu" ];
-  
-  hardware.firmware = [ pkgs.linux-firmware ];
-  hardware.enableRedistributableFirmware = true;
 
   environment.systemPackages = with pkgs; [
     radeontop
