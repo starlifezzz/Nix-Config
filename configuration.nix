@@ -25,10 +25,9 @@
     ./modules/hardware/gpu/rx-6600xt.nix # 可选：r9-370, rx-5500xt, rx-6600xt
 
     # ═══════════════════════════════════════════════════════════
-    # ✅ 网络、蓝牙和字体配置模块
+    # ✅ 无线网络配置模块 - WiFi和蓝牙合并
     # ═══════════════════════════════════════════════════════════
-    ./modules/network/default.nix
-    ./modules/network/bluetooth.nix
+    ./modules/network/wireless.nix
     ./modules/fonts/default.nix
 
     # ═══════════════════════════════════════════════════════════

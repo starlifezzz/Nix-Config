@@ -1,12 +1,27 @@
 # ═══════════════════════════════════════════════════════════
-# 蓝牙配置模块 - KDE Plasma 6 完整支持
-# 参考官方文档: https://nixos.org/manual/nixos/unstable/options.html#opt-hardware.bluetooth.enable
+# 无线网络配置模块 - WiFi和蓝牙完整支持
+# 参考官方文档: 
+# - https://nixos.org/manual/nixos/unstable/options.html#opt-hardware.bluetooth.enable
+# - https://nixos.org/manual/nixos/unstable/options.html#opt-networking.networkmanager.enable
 # ═══════════════════════════════════════════════════════════
 { config, lib, pkgs, ... }:
 
 {
   # ═══════════════════════════════════════════════════════════
-  # 启用蓝牙硬件支持
+  # WiFi配置 - NetworkManager管理
+  # ═══════════════════════════════════════════════════════════
+  networking.networkmanager = {
+    enable = true;
+    # 启用WiFi设备管理
+    wifi = {
+      backend = "iwd"; # 使用iwd作为WiFi后端（可选，也可使用wpa_supplicant）
+      # 如果需要使用wpa_supplicant，可以注释上面一行并取消下面的注释
+      # backend = "wpa_supplicant";
+    };
+  };
+
+  # ═══════════════════════════════════════════════════════════
+  # 蓝牙配置
   # ═══════════════════════════════════════════════════════════
   hardware.bluetooth = {
     enable = true;
@@ -52,29 +67,27 @@
   };
 
   # ═══════════════════════════════════════════════════════════
-  # 启用 Blueman 蓝牙管理器 - KDE Plasma 6 兼容
-  # 参考官方文档: https://nixos.org/manual/nixos/unstable/options.html#opt-services.blueman.enable
+  # 蓝牙管理器 - Blueman
   # ═══════════════════════════════════════════════════════════
   services.blueman = {
     enable = true;
-    # 注意：NixOS blueman 模块只支持 enable 选项
-    # 托盘图标和通知由 blueman 自身处理
   };
 
   # ═══════════════════════════════════════════════════════════
-  # 确保必要的蓝牙相关包可用
+  # 必要的系统包
   # ═══════════════════════════════════════════════════════════
   environment.systemPackages = with pkgs; [
     bluez # 蓝牙协议栈
     blueman # 蓝牙管理器 GUI
+    # WiFi相关工具
+    iw
+    wireless-tools
   ];
 
   # ═══════════════════════════════════════════════════════════
-  # KDE Plasma 6 蓝牙集成
+  # KDE Plasma 6 集成
   # ═══════════════════════════════════════════════════════════
-  # 确保 KDE Connect 能够正常工作
   environment.sessionVariables = {
-    # 确保蓝牙设备能够被正确识别
     XDG_CURRENT_DESKTOP = "KDE";
   };
 }
