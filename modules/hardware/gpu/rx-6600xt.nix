@@ -22,6 +22,12 @@
     
     # ✅ AMD GPU SDMA超时优化 - 解决 Fence fallback timer expired 警告
     "amdgpu.sdma_timeout=60000" # 将SDMA超时设置为60秒，避免短暂负载波动导致的误报
+    
+    # ═══════════════════════════════════════════════════════════
+    # ✅ GPU 稳定性增强 - 解决 AMD RX 5500 图形环超时问题
+    # ═══════════════════════════════════════════════════════════
+    "drm.gpu_recovery=1" # 启用DRM GPU恢复机制
+    "drm.debug=0" # 禁用DRM调试（减少日志开销）
   ];
   
   hardware.graphics = {
@@ -48,9 +54,6 @@
       # OBS 等应用会自动使用 VAAPI/VDPAU 进行硬件编码
     ];
   };
-  
-  hardware.firmware = [ pkgs.linux-firmware ];
-  hardware.enableRedistributableFirmware = true;
   
   boot.initrd.kernelModules = [ "amdgpu" ];
   

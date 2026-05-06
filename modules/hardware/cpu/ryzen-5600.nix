@@ -13,11 +13,6 @@
   # ✅ Initrd 配置 - 确保 WiFi 驱动在启动早期可用
   boot.initrd.availableKernelModules = [ "iwlwifi" "iwlmvm" ];
   
-  # ✅ 蓝牙支持 - Intel Wireless-AC 3168包含蓝牙功能
-  hardware.bluetooth = {
-    enable = true;
-    powerOnBoot = true;  # 开机时自动开启蓝牙
-  };
   # ✅ CPU 频率和电源管理 - Linux 7.0+ 兼容版本，针对 Zen 3 优化
   boot.kernelParams = [
     "amd_pstate=active"  # Zen 3 完全支持 amd_pstate，启用主动模式
