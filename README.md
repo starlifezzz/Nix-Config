@@ -20,6 +20,7 @@
 
 - ✅ **模块化清晰**: 硬件、网络、字体、存储等功能独立成模块
 - ✅ **职责分离**: 系统级配置与用户级配置严格区分
+- ✅ **无重复配置**: 所有配置项只在单一模块中定义，避免冲突
 - ✅ **简单直接**: 放弃动态检测,采用手动导入路径
 - ✅ **可重现**: Flakes 锁定依赖,确保构建一致性
 - ✅ **性能优化**: earlyoom OOM 防护, USB 稳定性优化, SSD TRIM
@@ -32,6 +33,7 @@
 | **用户级** | [`home/`](home/) | 主题、字体、快捷键、应用配置 |
 | **硬件模块** | [`modules/hardware/`](modules/hardware/) | CPU/GPU 特定优化 |
 | **功能模块** | [`modules/network/`](modules/network/), [`modules/fonts/`](modules/fonts/), [`modules/storage/`](modules/storage/) | 网络、字体、存储等通用功能 |
+| **固件模块** | [`modules/hardware/firmware.nix`](modules/hardware/firmware.nix) | 统一固件管理 |
 | **特殊配置** | [`configs/`](configs/) | 可选的特殊应用场景配置 |
 
 ---
@@ -54,7 +56,7 @@
 
 ### 首次部署
 
-```bash
+```
 # 1. 克隆配置
 sudo su
 cd /etc
@@ -180,24 +182,30 @@ hm-switch   # home-manager switch (单独使用)
 ├── flake.nix                      # Flakes入口(简化版)
 ├── flake.lock                     # 依赖锁定文件
 │
-├── modules/                       # 自定义配置模块
-│   ├── hardware/                  # 硬件相关
-│   │   ├── cpu/                   # CPU配置
-│   │   │   ├── ryzen-1600x.nix
-│   │   │   ├── ryzen-2600.nix
-│   │   │   ├── ryzen-3600.nix
-│   │   │   └── ryzen-5600.nix     # ← 当前使用
-│   │   └── gpu/                   # GPU配置
-│   │       ├── r9-370.nix
-│   │       ├── rx-5500.nix
-│   │       ├── rx-5500xt.nix
-│   │       └── rx-6600xt.nix      # ← 当前使用
-│   ├── network/                   # 🌐 网络配置
-│   │   └── default.nix            # 防火墙/DNS/Avahi
-│   ├── fonts/                     # 🔤 字体配置
-│   │   └── default.nix            # 字体包/渲染优化
-│   └── storage/                   # 💾 存储优化
-│       └── ssd.nix                # SSD TRIM/内核参数优化
+├── modules/
+│   ├── fonts/                     # 字体配置模块
+│   │   └── default.nix            # 字体包和渲染优化
+│   │
+│   ├── hardware/                  # 硬件相关模块
+│   │   ├── cpu/                   # CPU特定优化
+│   │   │   ├── ryzen-1600x.nix    # Ryzen 1600X配置
+│   │   │   ├── ryzen-2600.nix     # Ryzen 2600配置  
+│   │   │   ├── ryzen-3600.nix     # Ryzen 3600配置
+│   │   │   └── ryzen-5600.nix     # Ryzen 5600配置
+│   │   │
+│   │   ├── gpu/                   # GPU特定优化
+│   │   │   ├── r9-370.nix         # R9 370配置
+│   │   │   ├── rx-5500xt.nix      # RX 5500 XT配置
+│   │   │   └── rx-6600xt.nix      # RX 6600 XT配置
+│   │   │
+│   │   └── firmware.nix           # 统一固件管理模块
+│   │
+│   ├── network/                   # 网络功能模块
+│   │   └── wireless.nix           # WiFi和蓝牙合并配置
+│   │
+│   └── storage/                   # 存储优化模块
+│       └── ssd.nix                # SSD专用优化配置
+
 │
 ├── home/                          # Home Manager用户配置
 │   ├── default.nix                # HM入口
@@ -258,17 +266,19 @@ hm-switch   # home-manager switch (单独使用)
 - **优势**: 避免系统完全死机,保留最后响应能力
 - **配置**: 在 [`configuration.nix`](configuration.nix) 中声明,针对 Nix 构建场景优化
 
-### 6. 存储优化模块
+### 6. 固件统一管理
 
-- **SSD 专用**: 将所有 SSD 相关配置（TRIM、内核参数）统一到 [`modules/storage/ssd.nix`](modules/storage/ssd.nix)
-- **避免重复**: 从 CPU 模块和主配置中移除重复的存储相关参数
-- **职责单一**: storage 模块只负责存储优化，CPU 模块只负责 CPU 相关优化
+- **集中管理**: 创建专门的 [`modules/hardware/firmware.nix`](modules/hardware/firmware.nix) 模块
+- **避免重复**: 从GPU模块和其他地方移除重复的固件配置
+- **单一来源**: 所有固件相关配置只在固件模块中定义
+- **易于维护**: 固件更新只需修改一个文件
 
-### 7. 特殊配置管理
+### 7. 配置去重原则
 
-- **configs目录**: 存放可选的特殊应用场景配置（如MPD DSD音频配置）
-- **按需导入**: 这些配置不会自动启用，需要在主配置文件中显式导入
-- **灵活性**: 支持不同使用场景的快速切换
+- **内核参数**: USB稳定性参数移到CPU模块，GPU稳定性参数移到GPU模块，内存优化参数移到存储模块
+- **蓝牙配置**: 从CPU模块移除，统一在无线模块中管理
+- **主配置精简**: `configuration.nix` 只负责模块导入，不包含具体配置细节
+- **职责明确**: 每个模块只负责其特定领域的配置
 
 ---
 
