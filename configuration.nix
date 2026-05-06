@@ -96,7 +96,6 @@
     kernelModules = [
       "xpad" # Xbox 手柄驱动
       "ntsync" # NTSYNC内核驱动 - 提升Windows应用程序多线程同步性能
-      "zswap" # ZSwap压缩交换缓存 - 减少SSD写入并提高交换性能
     ];
 
     # 黑名单模块 - 防止与手柄冲突
