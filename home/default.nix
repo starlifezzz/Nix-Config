@@ -32,7 +32,15 @@
   home.sessionVariables = {
     LANG = "zh_CN.UTF-8";
     LC_ALL = "zh_CN.UTF-8";
+    
+    # npm 全局包目录 - 指向用户可写目录
+    NPM_CONFIG_PREFIX = "$HOME/.local/share/npm-global";
   };
+
+  # 将 npm 全局 bin 目录添加到 PATH
+  home.sessionPath = [
+    "$HOME/.local/share/npm-global/bin"
+  ];
 
   # ═══════════════════════════════════════════════════════════
   # XDG 桌面集成
@@ -141,6 +149,7 @@
 
     # Flatpak 用户级管理
     flatpak # Flatpak 包管理器（用户级）
+
   ];
 
   # Shell 别名 - 强制 Flatpak 使用用户模式
