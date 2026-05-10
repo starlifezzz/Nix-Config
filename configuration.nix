@@ -27,7 +27,8 @@
     # ═══════════════════════════════════════════════════════════
     # ✅ 功能模块
     # ═══════════════════════════════════════════════════════════
-    ./modules/network/wireless.nix
+    ./modules/network/default.nix # 网络基础设施(防火墙、DNS、Avahi)
+    ./modules/network/wifi-bluetooth.nix # WiFi 和蓝牙配置
     ./modules/fonts/default.nix
 
     # ═══════════════════════════════════════════════════════════

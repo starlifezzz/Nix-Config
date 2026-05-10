@@ -88,7 +88,8 @@ passwd zhangchongjie
 - 硬件驱动 (CPU/GPU/外设)
 - 系统服务 (NetworkManager, PipeWire, SDDM)
 - 桌面环境安装 (KDE Plasma 6)
-- 网络配置 (防火墙、DNS)
+- 网络基础设施 (防火墙、DNS、Avahi) - [`modules/network/default.nix`](modules/network/default.nix)
+- 无线设备 (WiFi、蓝牙) - [`modules/network/wifi-bluetooth.nix`](modules/network/wifi-bluetooth.nix)
 - 字体包安装
 - 存储优化 (SSD TRIM、内核参数)
 - OOM 防护 (earlyoom)
@@ -201,7 +202,8 @@ hm-switch   # home-manager switch (单独使用)
 │   │   └── firmware.nix           # 统一固件管理模块
 │   │
 │   ├── network/                   # 网络功能模块
-│   │   └── wireless.nix           # WiFi和蓝牙合并配置
+│   │   ├── default.nix            # 网络基础设施(防火墙、DNS、Avahi)
+│   │   └── wifi-bluetooth.nix     # WiFi和蓝牙无线设备配置
 │   │
 │   └── storage/                   # 存储优化模块
 │       └── ssd.nix                # SSD专用优化配置
@@ -279,6 +281,24 @@ hm-switch   # home-manager switch (单独使用)
 - **蓝牙配置**: 从CPU模块移除，统一在无线模块中管理
 - **主配置精简**: `configuration.nix` 只负责模块导入，不包含具体配置细节
 - **职责明确**: 每个模块只负责其特定领域的配置
+
+### 7. 网络模块职责划分
+
+**基础设施层** ([`modules/network/default.nix`](modules/network/default.nix)):
+- 防火墙配置(包括 Clash TUN 信任接口)
+- DNS 解析服务(systemd-resolved)
+- mDNS 服务(Avahi)
+- Linux 网络性能优化参数
+
+**无线设备层** ([`modules/network/wifi-bluetooth.nix`](modules/network/wifi-bluetooth.nix)):
+- WiFi 后端配置(iwd/wpa_supplicant)
+- 蓝牙协议栈和 Blueman 管理器
+- 无线工具包(iw, wirelesstools)
+
+**优势**:
+- 有线/无线网络共用同一套防火墙和 DNS 基础设施
+- 无线设备配置独立,便于在不同硬件间切换
+- 避免配置重复和冲突
 
 ---
 
