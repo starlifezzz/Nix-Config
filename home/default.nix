@@ -26,17 +26,6 @@
   # ═══════════════════════════════════════════════════════════
   programs.home-manager.enable = true;
 
-  # ═══════════════════════════════════════════════════════════
-  # 环境变量配置 - 解决KDE locale警告
-  # ═══════════════════════════════════════════════════════════
-  home.sessionVariables = {
-    LANG = "zh_CN.UTF-8";
-    LC_ALL = "zh_CN.UTF-8";
-    
-    # npm 全局包目录 - 指向用户可写目录
-    NPM_CONFIG_PREFIX = "$HOME/.local/share/npm-global";
-  };
-
   # 将 npm 全局 bin 目录添加到 PATH
   home.sessionPath = [
     "$HOME/.local/share/npm-global/bin"
@@ -109,6 +98,7 @@
     kdePackages.filelight
     haruna
     ente-auth
+    
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器
     vscode # vscode 编辑器
@@ -163,6 +153,15 @@
   # ═══════════════════════════════════════════════════════════
   home.sessionVariables = {
     # ═══════════════════════════════════════════════════════════
+    # 系统区域设置 - 解决KDE locale警告
+    # ═══════════════════════════════════════════════════════════
+    LANG = "zh_CN.UTF-8";
+    LC_ALL = "zh_CN.UTF-8";
+    
+    # npm 全局包目录 - 指向用户可写目录
+    NPM_CONFIG_PREFIX = "$HOME/.local/share/npm-global";
+
+    # ═══════════════════════════════════════════════════════════
     # Wayland 专用配置
     # ═══════════════════════════════════════════════════════════
     # 启用 Firefox 的 Wayland 支持
@@ -197,6 +196,7 @@
 
     # 终端模拟器和 Multiplexer
     ./alacritty.nix # Alacritty 终端模拟器配置
+    ./ghostty.nix # Ghostty 终端模拟器配置（GPU加速，原生适配）
     ./zellij.nix # Zellij Terminal Multiplexer 配置
 
     # 开发环境工具

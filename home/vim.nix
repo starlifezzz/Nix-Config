@@ -51,10 +51,8 @@
       nnoremap <C-k> <C-w>k
       nnoremap <C-l> <C-w>l
       
-      " 更好的行移动
+      " 更好的行移动（注意：<C-j>/<C-k> 已被窗口导航占用，使用默认的 <C-e>/<C-y> 滚动）
       nnoremap J mzJ`z
-      nnoremap <C-j> <C-e>
-      nnoremap <C-k> <C-y>
       
       " 重新选择缩进
       vnoremap < <gv

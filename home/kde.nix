@@ -493,7 +493,8 @@
       switch to previous activity=none,,切换到上一个活动
       toggle do not disturb=none,,切换勿扰模式
 
-      [services][Alacritty.desktop]
+      # [services][Alacritty.desktop]
+      [services][com.mitchellh.ghostty.desktop]
       _launch=Ctrl+Alt+T
 
       [services][org.kde.konsole.desktop]
