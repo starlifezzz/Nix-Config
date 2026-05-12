@@ -195,7 +195,7 @@
     ./git.nix # Git 版本控制配置
 
     # 终端模拟器和 Multiplexer
-    ./alacritty.nix # Alacritty 终端模拟器配置
+    # ./alacritty.nix # Alacritty 终端模拟器配置
     ./ghostty.nix # Ghostty 终端模拟器配置（GPU加速，原生适配）
     ./zellij.nix # Zellij Terminal Multiplexer 配置
 
