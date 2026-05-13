@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{  lib, pkgs, ... }:
 
 {
   # ✅ CPU 频率调节模块 - Ryzen 1000 系列必需

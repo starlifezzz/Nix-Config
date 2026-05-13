@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   # 启用 AMDGPU 驱动 - RX 5500 XT (Navi 14 XT)

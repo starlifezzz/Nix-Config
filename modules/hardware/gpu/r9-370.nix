@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{  pkgs, ... }:
 
 {
   # ✅ 使用 amdgpu 驱动（更现代，支持更好）
