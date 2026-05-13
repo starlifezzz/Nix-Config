@@ -34,7 +34,7 @@
       
       Policy = {
         AutoEnable = true; # 自动启用蓝牙适配器
-        AutoPin = true; # 允许自动配对已知设备
+        # AutoPin = true; # 移除AutoPin配置，因为当前版本不支持
       };
     };
     
@@ -56,16 +56,16 @@
   };
 
   # ═══════════════════════════════════════════════════════════
-  # 蓝牙管理器 - Blueman
+  # 蓝牙管理器 - 禁用Blueman以避免服务冲突
   # ═══════════════════════════════════════════════════════════
-  services.blueman.enable = true;
+  # services.blueman.enable = false; # 完全注释掉，避免配置冲突
 
   # ═══════════════════════════════════════════════════════════
   # 必要的系统包
   # ═══════════════════════════════════════════════════════════
   environment.systemPackages = with pkgs; [
     bluez # 蓝牙协议栈
-    blueman # 蓝牙管理器 GUI
+    # blueman # 蓝牙管理器 GUI - 已禁用
     # WiFi相关工具
     iw
     wirelesstools
