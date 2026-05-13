@@ -2,7 +2,7 @@
 # Ghostty 终端模拟器配置
 # 官方文档：https://ghostty.org/docs/configuration
 # Home Manager: https://nix-community.github.io/home-manager/unstable/options.html#opt-programs.ghostty.enable
-{ config, pkgs, lib, ... }:
+{  pkgs,  ... }:
 
 {
   programs.ghostty = {

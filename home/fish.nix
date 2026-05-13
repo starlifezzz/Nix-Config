@@ -1,11 +1,5 @@
 # /etc/nixos/home/fish.nix
 # Fish Shell 配置
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
 
 {
   programs.fish = {

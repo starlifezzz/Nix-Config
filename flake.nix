@@ -21,7 +21,7 @@
       };
       
       # 引入 Nixpkgs lib（用于 mkForce 等函数）
-      lib = nixpkgs.lib;
+      # lib = nixpkgs.lib;
     in
     {
       nixosConfigurations = {

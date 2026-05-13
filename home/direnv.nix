@@ -1,6 +1,5 @@
 # /etc/nixos/home/direnv.nix
 # Direnv 开发环境配置
-{ config, pkgs, lib, ... }:
 
 {
   programs.direnv = {

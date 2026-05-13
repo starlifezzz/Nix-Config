@@ -1,6 +1,5 @@
 # /etc/nixos/home/git.nix
 # Git 版本控制配置
-{ config, pkgs, lib, ... }:
 
 {
   programs.git = {

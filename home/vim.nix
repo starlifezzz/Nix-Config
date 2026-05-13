@@ -1,6 +1,5 @@
 # /etc/nixos/home/vim.nix
 # Vim 文本编辑器配置
-{ config, pkgs, lib, ... }:
 
 {
   programs.vim = {

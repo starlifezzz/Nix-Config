@@ -1,10 +1,7 @@
 # /etc/nixos/home/default.nix
 # Home Manager 主配置文件 - 统一管理所有应用配置
 {
-  config,
   pkgs,
-  lib,
-  pkgs-unstable,
   ...
 }:
 
