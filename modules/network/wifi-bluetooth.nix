@@ -4,7 +4,7 @@
 # - https://nixos.org/manual/nixos/unstable/options.html#opt-hardware.bluetooth.enable
 # - https://nixos.org/manual/nixos/unstable/options.html#opt-networking.networkmanager.enable
 # ═══════════════════════════════════════════════════════════
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   # ═══════════════════════════════════════════════════════════
