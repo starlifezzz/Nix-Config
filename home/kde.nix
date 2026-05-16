@@ -1,7 +1,5 @@
 {
-  config,
   pkgs,
-  lib,
   ...
 }:
 
@@ -167,10 +165,10 @@
       XftHintStyle=hintslight
       XftSubPixel=none
       accentColorFromWallpaper=true
-      # font=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-      # menuFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-      # smallestReadableFont=LXGW WenKai Screen,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-      # toolBarFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+      font=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+      menuFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+      smallestReadableFont=LXGW WenKai Screen,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+      toolBarFont=LXGW WenKai Screen,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
 
       [Icons]
       Theme=Papirus
@@ -245,10 +243,8 @@
       _k_friendly_name=键盘布局切换器
 
       [com.qq.QQ]
-      178B1C43DB76A8EE7FE5A0CD02F9176F-Ctrl+Alt+Z=none,none,Electron shortcut Ctrl+Alt+Z
-      2FE1118039DAF08D01842F18A34C9575-Ctrl+Alt+X=none,none,Electron shortcut Ctrl+Alt+X
-      74F3770AFEB3B16CBBDDDB8FC8C8F919-Ctrl+Alt+A=none,none,Electron shortcut Ctrl+Alt+A
-      CA64B99FCBE1A5C034940EC380B0D40A-Ctrl+Alt+L=none,none,Electron shortcut Ctrl+Alt+L
+      8AAB8812708223DBC78147F0CD9C498B-Ctrl+Alt+Z=Ctrl+Alt+Z
+      
       _k_friendly_name=QQ
 
       [kaccess]

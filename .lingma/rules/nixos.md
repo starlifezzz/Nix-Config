@@ -8,7 +8,7 @@ trigger: always_on
 # 我的环境信息（固定不变，每次提问直接带）
 - **系统**: NixOS Unstable 26.05 (x86_64-linux)
 - **桌面环境**: KDE Plasma 6 (Wayland)
-- **Kernel** Linux 7.0.3
+- **Kernel** Linux 7.0.5-zen1
 - **Shell**: fish
 - **终端复用器**: zellij
 - **系统配置入口**: /etc/nixos/configuration.nix

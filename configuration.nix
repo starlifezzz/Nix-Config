@@ -2,10 +2,8 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running 'nixos-help').
 {
-  config,
   lib,
   pkgs,
-  pkgs-unstable,
   ...
 }:
 
@@ -34,13 +32,18 @@
     # ═══════════════════════════════════════════════════════════
     # ✅ SSD 存储优化模块
     # ═══════════════════════════════════════════════════════════
-    # ./modules/storage/ssd.nix
+    ./modules/storage/ssd.nix
   ];
 
   # 启用可重新分发的固件
   hardware.enableRedistributableFirmware = true;
   # 统一的固件配置 - 包含所有必需的固件
   hardware.firmware = [ pkgs.linux-firmware ];
+
+  # ═══════════════════════════════════════════════════════════
+  # ✅ 固件更新服务 - 支持SSD和其他设备固件更新
+  # ═══════════════════════════════════════════════════════════
+  services.fwupd.enable = true;
 
   # 启动配置
   boot = {
@@ -54,8 +57,16 @@
     };
 
     # 内核配置 - 使用最新稳定版内核
-    kernelPackages = pkgs.linuxPackages_latest;
+    # kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_zen;
     kernelParams = [
+      # ═══════════════════════════════════════════════════════════
+      # NVMe SSD 优化 - 解决 SUBNQN 警告和性能问题
+      # ═══════════════════════════════════════════════════════════
+      "nvme_core.default_ps_max_latency_us=0" # 禁用电源管理以提高性能
+      "nvme_core.multipath=N" # 禁用多路径（单设备）
+      "nvme_core.io_timeout=4294967295" # 最大IO超时
+
       # ═══════════════════════════════════════════════════════════
       # USB 设备稳定性优化 - NixOS 官方推荐设置
       # ═══════════════════════════════════════════════════════════
@@ -113,10 +124,6 @@
       # 文件系统优化
       "fs.inotify.max_user_watches" = 524288;
       "fs.file-max" = 2097152;
-
-      # ✅ Linux 7.0 XFS 自修复功能监控
-      "fs.xfs.error_level" = 3; # 启用详细的XFS错误报告
-      "fs.xfs.panic_mask" = 0; # 不panic，只记录错误
 
       # ═══════════════════════════════════════════════════════════
       # ✅ 性能计数器权限 - 解决 "Could not retrieve perf counters (-19)" 问题
@@ -220,8 +227,11 @@
   programs.firefox.enable = false;
 
   # 允许 unfree 和 broken 包
+  # nixpkgs.config.allowUnfree = true;
+  # nixpkgs.config.allowBroken = true;
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.allowBroken = true;
+  nixpkgs.config.allowBroken = false;
+  
 
   # ═══════════════════════════════════════════════════════════
   # ✅ 覆盖 KDE 包集 - 阻止不需要的应用被安装
@@ -255,6 +265,7 @@
 
     # Nix 代码格式化工具
     nixfmt # Nix 格式化器
+    nixd # Nix 语言服务器
 
     # ⚠️ 用户级应用由 Home Manager 管理（programs.x + home.packages）
     # 包括：vscode, vim, fish, alacritty, zellij, git, direnv, nodejs, python3, uv, 等
@@ -360,10 +371,6 @@
   # Flatpak 配置
   services.flatpak.enable = true;
 
-  # fwupd 固件更新服务配置
-  # 参考官方文档: https://nixos.org/manual/nixos/unstable/options.html#opt-services.fwupd.enable
-  services.fwupd.enable = true;
-
   # XDG Portal 配置 - KDE Plasma 环境
   xdg.portal = {
     enable = true;
@@ -437,8 +444,6 @@
     # ✅ 定义用户配置（在 nixos-rebuild 时自动应用）
     users.zhangchongjie =
       {
-        config,
-        pkgs,
         lib,
         ...
       }:
