@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}:
+{ pkgs , ... }:
 
 {
   # KDE Plasma 桌面环境配置
@@ -243,8 +240,10 @@
       _k_friendly_name=键盘布局切换器
 
       [com.qq.QQ]
+      2D59F3ECB6A4CF6AFB00764B70034BC9-Ctrl+Alt+L=Ctrl+Alt+L
+      50CD026BD913BFEE35352B1D2455BC71-Ctrl+Alt+C=Ctrl+Alt+C
       8AAB8812708223DBC78147F0CD9C498B-Ctrl+Alt+Z=Ctrl+Alt+Z
-      
+
       _k_friendly_name=QQ
 
       [kaccess]
@@ -522,12 +521,12 @@
   # ═══════════════════════════════════════════════════════════
   # 防止系统更新后自动启用夜间颜色导致屏幕泛黄
   # 通过声明式配置直接写入禁用的配置文件，覆盖任何自动生成的设置
-  home.file.".local/state/knighttimestaterc" = {
-    text = ''
-      [AutomaticLocation]
-      Available=false
-    '';
-    force = true;
-  };
+  # home.file.".local/state/knighttimestaterc" = {
+  #   text = ''
+  #     [AutomaticLocation]
+  #     Available=false
+  #   '';
+  #   force = true;
+  # };
 
 }
