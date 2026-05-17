@@ -118,6 +118,7 @@
     # lutris-free # 游戏管理器
     # Heroic Games Launcher
     heroic
+    ludusavi
     _64gram
 
     # ═══════════════════════════════════════════════════════════
