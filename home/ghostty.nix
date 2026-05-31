@@ -42,7 +42,7 @@
       # 确保窗口不会启动时最大化
       # window-maximized = false;
 
-      gtk-single-instance = true;  # 必须设为 true 以匹配桌面文件
+      gtk-single-instance = false;  # 禁用单实例避免 D-Bus "name not activatable" 错误
 
       cursor-style = "bar";
       cursor-style-blink = true;

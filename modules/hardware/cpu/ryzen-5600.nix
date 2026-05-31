@@ -5,13 +5,10 @@
     # ✅ 启用 CPU 频率和温度传感器支持
   boot.kernelModules = [ 
     "acpi-cpufreq"  # CPU 频率调节模块
-    "k10temp"       # ✅ 新增：AMD CPU 温度传感器
-    "iwlwifi"       # ✅ Intel WiFi 驱动模块（必需）
-    "iwlmvm"        # ✅ Intel WiFi 管理模块（必需）
+    "k10temp"       # AMD CPU 温度传感器（Ryzen 专属）
   ];
-  
-  # ✅ Initrd 配置 - 确保 WiFi 驱动在启动早期可用
-  boot.initrd.availableKernelModules = [ "iwlwifi" "iwlmvm" ];
+
+  # Intel WiFi 驱动已由 Linux 内核自动加载，无需在此声明
   
   # ✅ CPU 频率和电源管理 - Linux 7.0+ 兼容版本，针对 Zen 3 优化
   boot.kernelParams = [
