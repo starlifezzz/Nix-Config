@@ -95,6 +95,7 @@
     kdePackages.filelight
     haruna
     ente-auth
+    remmina
     
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器
