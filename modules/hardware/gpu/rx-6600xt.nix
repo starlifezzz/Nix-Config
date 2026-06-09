@@ -6,8 +6,8 @@
   boot.kernelParams = [
     # ✅ 移除 amdgpu.runpm=0 - Linux 7.0 中运行时电源管理已足够稳定
     
-    # ✅ PCIe ASPM 节能模式（桌面用户推荐）
-    "pcie_aspm=powersupersave"
+    # # ✅ PCIe ASPM 节能模式（桌面用户推荐）
+    # "pcie_aspm=powersupersave"
     
     # ✅ HDMI/DP 音频输出（GPU 专属配置，其他模块不应重复设置）
     "amdgpu.audio=1"
@@ -18,13 +18,13 @@
     "amdgpu.gpu_recovery=1"
     
     # Navi 23 特定优化 - 调整值以平衡性能和稳定性
-    "amdgpu.sched_hw_submission=128"
+    # "amdgpu.sched_hw_submission=128"
     
     # ═══════════════════════════════════════════════════════════
     # ✅ GPU 稳定性增强 - 解决 AMD RX 5500 图形环超时问题
     # ═══════════════════════════════════════════════════════════
-    "drm.gpu_recovery=1" # 启用DRM GPU恢复机制
-    "drm.debug=0" # 禁用DRM调试（减少日志开销）
+    # "drm.gpu_recovery=1" # 启用DRM GPU恢复机制
+    # "drm.debug=0" # 禁用DRM调试（减少日志开销）
   ];
   
   hardware.graphics = {
@@ -43,7 +43,7 @@
       rocmPackages.clr.icd
       
       # ✅ 视频编解码加速
-      mesa
+      # mesa
       libva
       libvdpau-va-gl
       

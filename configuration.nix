@@ -381,6 +381,11 @@
       common.default = [ "kde" ];
     };
   };
+  
+  # 确保用户级 dbus 正确配置
+  services.dbus.implementation = "broker"; # 使用 dbus-broker，对 portal 支持更好
+
+  programs.dconf.enable = true;
 
   # 确保 D-Bus 服务启用（Flatpak 应用必需）
   services.dbus.enable = true;
@@ -413,7 +418,6 @@
     settings = {
       General = {
         EnableAvatars = false;
-        InputMethod = "qtvirtualkeyboard";
       };
     };
   };
