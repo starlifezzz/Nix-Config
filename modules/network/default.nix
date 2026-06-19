@@ -43,6 +43,7 @@
     "net.ipv4.tcp_rmem" = "4096 262144 134217728"; # TCP接收内存：min default max
     "net.ipv4.tcp_wmem" = "4096 65536 134217728"; # TCP发送内存：min default max
     "net.core.netdev_max_backlog" = 5000; # 增加网络设备输入队列长度
+    "net.ipv4.tcp_fastopen" = 3; # 减少 Clash 代理连接的握手延迟 (0: 关闭, 1: 客户端, 2: 服务器, 3: 两者)
   };
 
   # DNS 配置说明
@@ -58,9 +59,9 @@
       Resolve = {
         DNSStubListener = "yes";
         # ✅ 主 DNS: 国内 DNS (快速解析国内域名)
-        DNS = "119.29.29.29 223.5.5.5";
+        # DNS = "119.29.29.29 223.5.5.5";
         # ✅ Fallback DNS: 国际 DNS (当国内 DNS 失败时使用)
-        FallbackDNS = "1.1.1.1 8.8.8.8";
+        # FallbackDNS = "1.1.1.1 8.8.8.8";
         DNSSEC = "false";
         # ✅ 禁用 mDNS 以避免与 Avahi 冲突
         MulticastDNS = "no";
@@ -82,18 +83,8 @@
     # 增加权限以支持 KDE Connect
     openFirewall = true;
     # 允许所有接口进行服务发现
-    allowInterfaces = [ "lo" "*" ];
+    # allowInterfaces = [ "lo" "*" ];
+    
   };
 
-  # XDG Desktop Portal 配置文件
-  environment.etc."xdg/portals/portals.conf".text = ''
-    # XDG Desktop Portal 配置文件
-    # 参考官方文档: https://man.archlinux.org/man/portals.conf.5
-
-    [kde]
-    default=true
-    
-    [gtk]
-    default=false
-  '';
 }

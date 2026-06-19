@@ -33,17 +33,20 @@
     # ✅ SSD 存储优化模块
     # ═══════════════════════════════════════════════════════════
     ./modules/storage/ssd.nix
+
+    # ═══════════════════════════════════════════════════════════
+    # ✅ 系统服务模块
+    # ═══════════════════════════════════════════════════════════
+    ./modules/services/audio.nix           # 音频与多媒体 (PipeWire, RTKit)
+    ./modules/services/desktop.nix         # 桌面环境与显示管理 (Plasma6, SDDM)
+    ./modules/services/sandbox.nix         # 沙盒与容器 (Flatpak)
+    ./modules/services/system-daemons.nix  # 系统级守护进程 (fwupd, earlyoom)
   ];
 
   # 启用可重新分发的固件
   hardware.enableRedistributableFirmware = true;
   # 统一的固件配置 - 包含所有必需的固件
   hardware.firmware = [ pkgs.linux-firmware ];
-
-  # ═══════════════════════════════════════════════════════════
-  # ✅ 固件更新服务 - 支持SSD和其他设备固件更新
-  # ═══════════════════════════════════════════════════════════
-  services.fwupd.enable = true;
 
   # 启动配置
   boot = {
@@ -153,37 +156,6 @@
     LC_TIME = "zh_CN.UTF-8";
   };
 
-  # Fcitx5 输入法
-  i18n.inputMethod = {
-    enable = true;
-    type = "fcitx5";
-    fcitx5.addons = with pkgs; [
-      fcitx5-rime
-      qt6Packages.fcitx5-chinese-addons
-      qt6Packages.fcitx5-configtool
-    ];
-  };
-
-  # KDE Plasma 6 桌面环境
-  # services.xserver.enable = true; # 移除X11兼容层，Plasma 6默认使用Wayland
-  services.desktopManager.plasma6.enable = true;
-
-  # 打印服务（默认禁用）
-  services.printing.enable = false;
-
-  # 音频配置 - PipeWire（支持 DSD 硬解）
-  services.pulseaudio.enable = false;
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    jack.enable = true; # 注释掉jack支持以避免LD_LIBRARY_PATH冲突
-  };
-
-  # ✅ UPower 服务 - 修复 WirePlumber 电池百分比错误
-  services.upower.enable = true;
 
   # 用户配置
   users.users.zhangchongjie = {
@@ -203,17 +175,6 @@
     shell = pkgs.fish;
   };
 
-  # 环境变量配置 - 支持桌面集成
-  # ✅ 修正 XDG 变量以解决 Portal 注册问题并适配 Plasma 6 Wayland
-  environment.sessionVariables = {
-    XDG_CURRENT_DESKTOP = "KDE"; # 标准大写格式，确保 Portal 和应用正确识别桌面环境
-    XDG_MENU_PREFIX = "kde-"; # 确保菜单集成正确
-    XDG_SESSION_DESKTOP = "KDE"; # 添加会话桌面变量
-    DESKTOP_SESSION = "plasma"; # 根据项目规范添加
-    KDE_FULL_SESSION = "true"; # 根据项目规范添加
-    # 移除可能干扰 Portal 发现的废弃变量
-  };
-
   # Fish Shell（系统级）
   programs.fish.enable = true;
 
@@ -227,11 +188,8 @@
   programs.firefox.enable = false;
 
   # 允许 unfree 和 broken 包
-  # nixpkgs.config.allowUnfree = true;
-  # nixpkgs.config.allowBroken = true;
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowBroken = false;
-  
 
   # ═══════════════════════════════════════════════════════════
   # ✅ 覆盖 KDE 包集 - 阻止不需要的应用被安装
@@ -252,13 +210,11 @@
     })
   ];
 
-  # 系统软件包 - 仅保留系统级必需的工具（包含 ALSA DSD 支持）
+  # 系统软件包 - 仅保留系统级必需的工具
   environment.systemPackages = with pkgs; [
     # 系统核心工具
     home-manager # Home Manager（NixOS 集成模式）
-
-    # 系统维护工具（需要 root 权限）
-    # timeshift         # 系统备份工具
+    kdePackages.kdeconnect-kde
 
     # 全局依赖库
     ffmpeg-full # 完整的 FFmpeg（多媒体库）
@@ -266,26 +222,10 @@
     # Nix 代码格式化工具
     nixfmt # Nix 格式化器
     nixd # Nix 语言服务器
-
-    # ⚠️ 用户级应用由 Home Manager 管理（programs.x + home.packages）
-    # 包括：vscode, vim, fish, alacritty, zellij, git, direnv, nodejs, python3, uv, 等
-    clash-verge-rev
-    kdePackages.kdeconnect-kde
   ];
 
   # 传感器支持
   hardware.sensor.iio.enable = true;
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
 
   # Nix 配置优化
   nix = {
@@ -297,15 +237,8 @@
 
       # 二进制缓存镜像（优先级从高到低）
       substituters = [
-
-        # 主镜像源 - 中科大（最稳定，响应快）
         "https://mirrors.ustc.edu.cn/nix-channels/store"
-
-        # 备用镜像源 1 - 上海交通大学（稳定性优秀）
         "https://mirror.sjtu.edu.cn/nix-channels/store"
-
-        # 官方源（最后的选择）
-        # "https://cache.nixos.org"
       ];
 
       trusted-public-keys = [
@@ -321,105 +254,27 @@
       keep-derivations = true;
       keep-outputs = true;
 
-      # 并行构建配置 - 限制并行作业数量防止内存溢出
-      # ═══════════════════════════════════════════════════════════
-      # max-jobs = "auto" 会根据 CPU 核心数自动调整
-      # 配合下面的内存保护机制，实现"安全地榨干性能"
-      max-jobs = "auto"; # ✅ 自动检测 CPU 核心数
-      cores = 0; # 使用所有核心（单个构建任务内部并行）
+      max-jobs = "auto";
+      cores = 0;
 
-      # 🔥 关键：增加内存保护阈值
-      # 对于16GB内存系统，建议预留更多内存给系统
-      min-free = lib.mkDefault 2147483648; # 2GB 空闲磁盘空间保护线（原来是1GB）
+      min-free = lib.mkDefault 2147483648;
+      max-free = lib.mkDefault 8589934592;
 
-      # 磁盘空间管理
-      # 使用 lib.mkDefault 允许硬件模块覆盖此值
-      max-free = lib.mkDefault 8589934592; # 8GB 最大空闲空间（从4GB增加到8GB，更好地清理空间）
-
-      # ✅ 启用内存限制（如果支持）
-      # 这会给每个构建任务设置内存上限，超过则失败而非撑爆系统
-      # build-memory-limit = 2147483648; # 每个构建任务限制2GB内存（可选）
-
-      # 沙箱配置
       sandbox = true;
-
-      # 连接超时优化
-      connect-timeout = 10; # 降低超时时间，快速失败
-      log-lines = 25; # 增加日志行数
-
-      # ✅ 不强制要求签名，允许从未签名的镜像源下载
+      connect-timeout = 10;
+      log-lines = 25;
       require-sigs = false;
-
-      # ✅ 构建超时保护 - 防止单个 derivations 卡死超过 1 小时
       build-timeout = 3600;
-
-      # 不保留构建日志
       keep-build-log = false;
     };
 
-    # 垃圾回收
     gc = {
       automatic = true;
       dates = "daily";
       options = "--delete-older-than 3d";
     };
 
-    # 存储优化
     optimise.automatic = true;
-  };
-
-  # Flatpak 配置
-  services.flatpak.enable = true;
-
-  # XDG Portal 配置 - KDE Plasma 环境
-  xdg.portal = {
-    enable = true;
-    extraPortals = [
-      pkgs.kdePackages.xdg-desktop-portal-kde # KDE portal（完整实现）
-    ];
-    config = {
-      common.default = [ "kde" ];
-    };
-  };
-  
-  # 确保用户级 dbus 正确配置
-  services.dbus.implementation = "broker"; # 使用 dbus-broker，对 portal 支持更好
-
-  programs.dconf.enable = true;
-
-  # 确保 D-Bus 服务启用（Flatpak 应用必需）
-  services.dbus.enable = true;
-
-  # ═══════════════════════════════════════════════════════════
-  # ✅ 推荐方案：使用 earlyoom 用户空间 OOM 守护进程
-  # ═══════════════════════════════════════════════════════════
-  # 这是比 systemd-oomd 更成熟的方案，已在 NixOS 官方仓库中
-  # 功能：在内存耗尽前（默认剩余 5%）就主动杀掉占用最多的进程
-  # 优势：避免系统完全死机，保留最后响应能力
-  services.earlyoom = {
-    enable = true;
-    enableNotifications = true;
-    # ✅ 针对 Nix 构建场景优化阈值
-    # 默认 10% 对于构建来说太激进，降低到 5% 给构建更多缓冲空间
-    freeMemThreshold = 5; # 内存低于 5% 时触发 SIGTERM
-    freeSwapThreshold = 5; # Swap 低于 5% 时触发 SIGKILL
-
-    # ✅ 保护关键系统进程和桌面环境
-    # 注意：由于 systemd 引号转义问题，暂时不使用 --avoid 和 --prefer 参数
-    # 让 earlyoom 使用默认策略（根据 RSS 内存占用选择进程）
-    # 如需自定义，可通过配置文件方式实现
-  };
-
-  # SDDM 显示管理器配置
-  services.displayManager.defaultSession = "plasma";
-  services.displayManager.sddm = {
-    enable = true;
-    wayland.enable = true;
-    settings = {
-      General = {
-        EnableAvatars = false;
-      };
-    };
   };
 
   # 设置 /etc/nixos 目录权限，允许 zhangchongjie 用户完全控制
@@ -437,15 +292,10 @@
   # ═══════════════════════════════════════════════════════════
   # Home Manager 全局配置（NixOS 集成模式）
   # ═══════════════════════════════════════════════════════════
-  # ✅ 启用 Home Manager 作为 NixOS 模块
-  # 这样在执行 nixos-rebuild switch 时会自动应用用户配置
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
 
-    # ❌ 已移除 backupFileExtension - 不再备份
-
-    # ✅ 定义用户配置（在 nixos-rebuild 时自动应用）
     users.zhangchongjie =
       {
         lib,
@@ -468,9 +318,6 @@
       };
   };
 
-  # 安全强化 - 锁定内核模块加载 正常情况下，严禁使用
-  # security.lockKernelModules = true;
-
   # 系统版本
-  system.stateVersion = "26.05";
+  system.stateVersion = "26.11";
 }

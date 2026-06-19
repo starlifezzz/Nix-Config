@@ -23,7 +23,9 @@ CLASH_CONFIG_DIR="/home/zhangchongjie/.local/share/io.github.clash-verge-rev.cla
 CLASH_CONFIG_FILE="$CLASH_CONFIG_DIR/clash-verge-check.yaml"
 TEMP_CONFIG="/tmp/clash-tun.yaml"
 CLASH_PID_FILE="/tmp/clash.pid"
-MIHOMO_BIN="/run/current-system/sw/bin/verge-mihomo"
+# MIHOMO_BIN="/run/current-system/sw/bin/verge-mihomo"
+MIHOMO_BIN="/etc/profiles/per-user/zhangchongjie/bin/verge-mihomo"
+
 
 echo ""
 log_info "╔════════════════════════════════════════╗"

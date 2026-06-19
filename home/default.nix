@@ -96,6 +96,7 @@
     haruna
     ente-auth
     remmina
+    papirus-icon-theme
     
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器
@@ -119,6 +120,7 @@
     # lutris-free # 游戏管理器
     # Heroic Games Launcher
     heroic
+    clash-verge-rev
     ludusavi
     _64gram
 
