@@ -8,7 +8,7 @@
 
 **模块化设计 • 声明式配置 • 可重现构建**
 
-[📋 快速开始](#-快速开始) • [🏗️ 架构概览](#️-架构概览) • [📁 目录结构](#-目录结构) • [🔧 常用命令](#-常用命令)
+[📋 快速开始](#-快速开始) • [🔄 跨设备迁移](#-跨设备迁移-新电脑无代理装机) • [🏗️ 架构概览](#️-架构概览) • [📁 目录结构](#-目录结构) • [🔧 常用命令](#-常用命令)
 
 </div>
 
@@ -46,8 +46,62 @@ nixos-generate-config --no-filesystems --root /
 sudo nixos-rebuild switch --flake .#nixos
 
 # 5. 设置用户密码
-passwd <username>
+passwd 
 ```
+
+---
+
+## 🔄 跨设备迁移 (新电脑无代理装机)
+
+在全新电脑上安装 NixOS 时，为避免“无网络代理导致无法拉取依赖”的死循环，强烈推荐使用**物理迁移法**。此方法通过 U 盘直接转移配置和锁文件，实现真正的“零代理、纯国内网络直连”装机。
+
+#### 🛠️ 第一步：在旧电脑上“打包双黄蛋”
+```bash
+cd /etc/nixos
+
+# 1. 确保所有配置（尤其是 hardware-configuration.nix）都被 Git 追踪
+git add .
+git commit -m "chore: 终极无代理装机版配置"
+
+# 2. 【血包 A：个人配置】用 tar 打包你的配置文件（防止 archive 漏文件）
+tar -czvf ~/nixos-config.tar.gz .
+
+# 3. 【血包 B：HM源码】把 Flake 依赖打包到 U盘 (假设 U盘是 /mnt/usb)
+# 这会把 HM 和 nixpkgs 的源码原封不动拷过去
+nix flake archive --to /mnt/usb/nixos-archive
+
+# 4. 把血包 A 也拷到 U盘
+cp ~/nixos-config.tar.gz /mnt/usb/
+```
+
+#### 🛠️ 第二步：在新电脑上“解压配置 + 注射血包”
+新电脑装完基础系统重启后，**先不要 rebuild**，按顺序执行：
+
+```bash
+# 1. 清理新电脑默认的 /etc/nixos 目录
+sudo rm -rf /etc/nixos/*
+
+# 2. 【解压血包 A】把你的个人配置解压到 /etc/nixos
+sudo tar -xzvf /mnt/usb/nixos-config.tar.gz -C /etc/nixos
+sudo chown -R root:root /etc/nixos  # 恢复 root 权限（或者你的用户名）
+
+# 3. 【注射血包 B】把 U盘里的 HM 源码“注入”到新电脑的 /nix/store
+sudo nix copy --no-check-sigs --from /mnt/usb/nixos-archive
+```
+
+#### 🛠️ 第三步：见证奇迹的“离线重建”
+```bash
+cd /etc/nixos
+
+# 加上 --offline 强制断网！
+# Nix 会去 /nix/store 找 HM 源码，发现刚才注射的血包，直接开始构建！
+sudo nixos-rebuild switch --flake .#nixos --offline
+```
+
+
+
+> **💡 原理说明**：
+> 只要目录中存在 `flake.lock` 文件，Nix 就会跳过从 GitHub 拉取源码的步骤，直接读取本地锁定的版本，并结合 `configuration.nix` 中配置的国内二进制缓存源（Substituters）下载软件包，全程无需配置系统代理。
 
 ---
 
@@ -75,7 +129,7 @@ passwd <username>
 
 ## 📁 目录结构
 
-```
+```text
 /etc/nixos/
 ├── configuration.nix              # 系统主配置入口 ⭐
 ├── hardware-configuration.nix     # 硬件配置（自动生成，不提交Git）
