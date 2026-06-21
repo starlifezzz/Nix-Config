@@ -16,16 +16,23 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, ... }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      # nixpkgs-unstable,
+      home-manager,
+      ...
+    }:
     let
       system = "x86_64-linux";
-      
-      pkgs-unstable = import nixpkgs-unstable {
-        inherit system;
-        config.allowUnfree = true;
-        config.allowBroken = true;
-      };
-      
+
+      # pkgs-unstable = import nixpkgs-unstable {
+      #   inherit system;
+      #   config.allowUnfree = true;
+      #   config.allowBroken = true;
+      # };
+
       # 引入 Nixpkgs lib（用于 mkForce 等函数）
       # lib = nixpkgs.lib;
     in
@@ -33,14 +40,14 @@
       nixosConfigurations = {
         nixos = nixpkgs.lib.nixosSystem {
           inherit system;
-          
-          specialArgs = {
-            inherit self pkgs-unstable;
-          };
-          
+
+          # specialArgs = {
+          #   inherit self pkgs-unstable;
+          # };
+
           modules = [
             ./configuration.nix
-            
+
             # ═══════════════════════════════════════════════════════════
             # Home Manager 集成（仅作为模块加载器）
             # 具体配置在 configuration.nix 中定义
