@@ -49,6 +49,11 @@ log_success "TUN 设备已就绪"
 log_info "停止现有进程..."
 pkill -f verge-mihomo 2>/dev/null || true
 sleep 2
+# 强制 NetworkManager 重新加载物理网卡的路由和 DNS，模拟 KDE 的自动恢复机制
+nmcli networking off && sleep 1 && nmcli networking on
+# 重启 DNS 解析服务，清除假 IP 劫持
+systemctl restart systemd-resolved
+sleep 2
 
 # 4. 生成临时配置
 log_info "更新配置文件..."
