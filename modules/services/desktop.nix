@@ -6,14 +6,24 @@
 { pkgs, ... }:
 
 {
+  # i18n.inputMethod = {
+  #   enable = true;
+  #   type = "fcitx5";
+  #   fcitx5.addons = with pkgs; [
+  #     fcitx5-rime
+  #     qt6Packages.fcitx5-chinese-addons
+  #     qt6Packages.fcitx5-configtool
+  #   ];
+  # };
+
   # Fcitx5 输入法
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";
     fcitx5.addons = with pkgs; [
       fcitx5-rime
-      qt6Packages.fcitx5-chinese-addons
-      qt6Packages.fcitx5-configtool
+      kdePackages.fcitx5-chinese-addons
+      kdePackages.fcitx5-configtool
     ];
   };
 
@@ -46,9 +56,9 @@
   # XDG Portal - KDE Plasma 环境
   xdg.portal = {
     enable = true;
-    extraPortals = [
-      pkgs.kdePackages.xdg-desktop-portal-kde
-    ];
+    # extraPortals = [
+    #   pkgs.kdePackages.xdg-desktop-portal-kde
+    # ];
     config = {
       common.default = [ "kde" ];
     };
