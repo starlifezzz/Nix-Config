@@ -253,27 +253,22 @@ process_config() {
     local SOURCE_FILE="$1"
     local TARGET_FILE="$2"
     
-    cp "$SOURCE_FILE" "$TARGET_FILE"
-    
-    # 1. 删除单行冲突 Key
-    sed -i '/^log-level:/d' "$TARGET_FILE"
-    sed -i '/^external-controller:/d' "$TARGET_FILE"
-    sed -i '/^secret:/d' "$TARGET_FILE"
-    sed -i '/^external-ui:/d' "$TARGET_FILE"
-    sed -i '/^external-ui-url:/d' "$TARGET_FILE"
-    sed -i '/^external-ui-name:/d' "$TARGET_FILE"
-    sed -i '/^fallback:/d' "$TARGET_FILE"
-    sed -i '/^fallback-filter:/d' "$TARGET_FILE"
+    # 🌟 核心修复：补全了第 2 步的多行块拦截规则
+    awk '
+    # 1. 精准拦截并删除特定的顶级单行 Key (行首无空格)
+    /^(log-level|external-controller|secret|external-ui|external-ui-url|external-ui-name|fallback|fallback-filter):/ { next }
 
-    # 2. 删除多行冲突块 (dns, tun, sniffer, profile)
-    sed -i '/^dns:/,/^[a-zA-Z]/ { /^dns:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
-    sed -i '/^tun:/,/^[a-zA-Z]/ { /^tun:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
-    sed -i '/^sniffer:/,/^[a-zA-Z]/ { /^sniffer:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
-    sed -i '/^profile:/,/^[a-zA-Z]/ { /^profile:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
+    # 2. 🌟 精准拦截并删除特定的顶级多行块 (行首无空格，开启 skip 模式)
+    /^(dns|tun|sniffer|profile):/ { skip=1; next }
 
+    # 3. 遇到下一个真正的顶级 Key (行首是字母/数字/下划线/连字符，且无空格)，关闭 skip 模式
+    /^[a-zA-Z0-9_-]+:/ { skip=0 }
 
+    # 4. 如果 skip 为 0，则打印该行
+    !skip { print }
+    ' "$SOURCE_FILE" > "$TARGET_FILE"
 
-    # 3. 注入我们的完美配置
+    # 追加我们的完美 NixOS 专属配置
     cat << 'EOF' >> "$TARGET_FILE"
 
 # --- 🎛️ API 与 Web UI 面板配置 ---
@@ -282,7 +277,7 @@ external-ui: ui
 external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
 
 # --- 🚀 脚本自动注入：NixOS 专属高性能配置 ---
-log-level: error               # 🔇 绝对安静，只记录致命错误
+log-level: error
 tcp-concurrent: true
 unified-delay: true
 find-process-mode: off
@@ -334,7 +329,7 @@ tun:
   enable: true
   stack: system
   auto-route: true
-  auto-detect-interface: true  # 🌟 官方推荐：自动检测默认出站网卡，告别硬编码
+  auto-detect-interface: true
   strict-route: false
   dns-hijack:
     - any:53
@@ -345,7 +340,7 @@ EOF
 
 # 🆕 定时更新配置 (单位：秒，默认 24 小时)！！！！！！！！！！！！！！！！！！！！！！1
 # UPDATE_INTERVAL=86400 
-UPDATE_INTERVAL=1500 
+UPDATE_INTERVAL=1500
 
 echo ""
 log_info "╔════════════════════════════════════════╗"
@@ -432,12 +427,30 @@ echo ""
 
 
 # ═══════════════════════════════════════════════════════════
-# 🌟 后台守护函数：定时更新订阅 + API 热重载
+# 🌟 后台守护函数：定时更新订阅 + API 热重载 (防弹不死鸟版)
 # ═══════════════════════════════════════════════════════════
 auto_update_daemon() {
-    sleep 60 
+    # 🛡️ 核心防御 1：在子 Shell 中强制关闭 set -e，防止任何报错导致守护进程自杀
+    set +e 
+    
+    # 🛡️ 核心防御 2：防惊醒睡眠函数 (免疫 SIGCHLD 等信号中断)
+    robust_sleep() {
+        local target=$1
+        local start=$(date +%s)
+        while true; do
+            local now=$(date +%s)
+            local elapsed=$((now - start))
+            local remaining=$((target - elapsed))
+            if [ "$remaining" -le 0 ]; then break; fi
+            sleep "$remaining" 2>/dev/null || true # 即使被信号打断，也会计算剩余时间继续睡
+        done
+    }
+
+    # 首次启动延迟 60 秒，等待内核与 TUN 路由完全稳定
+    robust_sleep 60 
+    
     while true; do
-        sleep "$UPDATE_INTERVAL"
+        robust_sleep "$UPDATE_INTERVAL"
         
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] 触发定时更新..." >> /tmp/clash-meta.log
         
@@ -445,27 +458,46 @@ auto_update_daemon() {
         HTTP_CODE=$(curl -s -o "$CLASH_CONFIG_FILE.new" -w "%{http_code}" -A "$SUB_UA" --connect-timeout 15 -L "$SUB_URL")
         
         if [ "$HTTP_CODE" -eq 200 ] && [ -s "$CLASH_CONFIG_FILE.new" ]; then
-            # 2. 替换基础订阅文件
+            # 2. 替换基础订阅文件并重新加工
             mv "$CLASH_CONFIG_FILE.new" "$CLASH_CONFIG_FILE"
-            
-            # 3. 🌟 核心修复：重新加工配置 (把 error 级别和 TUN 重新注入进去！)
             process_config "$CLASH_CONFIG_FILE" "$TEMP_CONFIG"
             
-            # 4. 调用 API 热重载加工后的 $TEMP_CONFIG
-            RELOAD_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
-                -H "Content-Type: application/json" \
-                -d "{\"path\": \"$TEMP_CONFIG\"}" \
-                http://127.0.0.1:9090/configs)
-            # 🌟 强制 patch 开启 Sniffer（防止热重载后状态丢失）
-            curl -s -o /dev/null -X PATCH \
-                -H "Content-Type: application/json" \
-                -d '{"sniffer":{"enable":true}}' \
-                http://127.0.0.1:9090/configs
-                
-            if [ "$RELOAD_CODE" -eq 204 ] || [ "$RELOAD_CODE" -eq 200 ]; then
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ✅ 订阅更新并热重载成功！(已重新注入 error 级别与 TUN)" >> /tmp/clash-meta.log
+            # 🌟 3. 侦察-打击模式：热更新 Proxy Providers 和 Rule Providers
+            UPDATE_SUCCESS=true
+            
+            # 侦察并更新 Proxy Providers
+            PROXY_PROVIDERS=$(curl -s http://127.0.0.1:9090/providers/proxies)
+            if [ -n "$PROXY_PROVIDERS" ] && [ "$PROXY_PROVIDERS" != "{}" ]; then
+                # 提取所有 provider 的 name (使用 grep 和 sed 解析 JSON 的 keys)
+                NAMES=$(echo "$PROXY_PROVIDERS" | grep -oE '"[^"]+":\{"type":"http' | sed -E 's/"([^"]+)".*/\1/')
+                if [ -n "$NAMES" ]; then
+                    while IFS= read -r name; do
+                        CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "http://127.0.0.1:9090/providers/proxies/$name")
+                        if [ "$CODE" != "200" ] && [ "$CODE" != "204" ]; then
+                            UPDATE_SUCCESS=false
+                        fi
+                    done <<< "$NAMES"
+                fi
+            fi
+            
+            # 侦察并更新 Rule Providers (规则集)
+            RULE_PROVIDERS=$(curl -s http://127.0.0.1:9090/providers/rules)
+            if [ -n "$RULE_PROVIDERS" ] && [ "$RULE_PROVIDERS" != "{}" ]; then
+                NAMES=$(echo "$RULE_PROVIDERS" | grep -oE '"[^"]+":\{"type":"http' | sed -E 's/"([^"]+)".*/\1/')
+                if [ -n "$NAMES" ]; then
+                    while IFS= read -r name; do
+                        CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "http://127.0.0.1:9090/providers/rules/$name")
+                        if [ "$CODE" != "200" ] && [ "$CODE" != "204" ]; then
+                            UPDATE_SUCCESS=false
+                        fi
+                    done <<< "$NAMES"
+                fi
+            fi
+            
+            if [ "$UPDATE_SUCCESS" = true ]; then
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ✅ 节点与规则热更新成功！(TUN 路由保持稳定，未触发重启)" >> /tmp/clash-meta.log
             else
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ⚠️ API 热重载失败 (HTTP $RELOAD_CODE)，下次启动生效" >> /tmp/clash-meta.log
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ⚠️ 部分 Provider 热更新失败或无 Provider，配置已保存，下次重启生效" >> /tmp/clash-meta.log
             fi
         else
             echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ❌ 订阅下载失败 (HTTP $HTTP_CODE)" >> /tmp/clash-meta.log
