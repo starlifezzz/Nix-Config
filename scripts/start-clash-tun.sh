@@ -262,12 +262,16 @@ process_config() {
     sed -i '/^external-ui:/d' "$TARGET_FILE"
     sed -i '/^external-ui-url:/d' "$TARGET_FILE"
     sed -i '/^external-ui-name:/d' "$TARGET_FILE"
+    sed -i '/^fallback:/d' "$TARGET_FILE"
+    sed -i '/^fallback-filter:/d' "$TARGET_FILE"
 
     # 2. 删除多行冲突块 (dns, tun, sniffer, profile)
     sed -i '/^dns:/,/^[a-zA-Z]/ { /^dns:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
     sed -i '/^tun:/,/^[a-zA-Z]/ { /^tun:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
     sed -i '/^sniffer:/,/^[a-zA-Z]/ { /^sniffer:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
     sed -i '/^profile:/,/^[a-zA-Z]/ { /^profile:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
+
+
 
     # 3. 注入我们的完美配置
     cat << 'EOF' >> "$TARGET_FILE"
@@ -330,7 +334,7 @@ tun:
   enable: true
   stack: system
   auto-route: true
-  interface-name: wlo1         # ⚠️ 记得确认这是你的物理网卡名
+  auto-detect-interface: true  # 🌟 官方推荐：自动检测默认出站网卡，告别硬编码
   strict-route: false
   dns-hijack:
     - any:53
@@ -398,17 +402,20 @@ log_info "══════ 步骤 3/6：检查 TUN 设备 ══════"
 log_success "TUN 设备已就绪"
 echo ""
 
+# 4. 停止现有进程并清理残留路由 (优化版)
 # ═══════════════════════════════════════════════════════════
-# 4. 停止现有进程并重置网络 (最初版本灵魂逻辑！)
-# ═══════════════════════════════════════════════════════════
-log_info "══════ 步骤 4/6：停止进程与重置网络 ══════"
+log_info "══════ 步骤 4/6：停止进程与清理残留 ══════"
 pkill -f clash-meta 2>/dev/null || true
 sleep 2
-# ⚠️ 关键：重置 NetworkManager 防止 TUN 路由死锁
-nmcli networking off && sleep 1 && nmcli networking on
-systemctl restart systemd-resolved
-sleep 2
-log_success "旧进程已清理，网络已重置"
+
+# 🌟 优化：不再重启整个 NetworkManager，只清理可能残留的 TUN 设备
+ip link delete Meta 2>/dev/null || true
+ip link delete Mihomo 2>/dev/null || true
+
+# 刷新路由缓存
+sysctl -w net.ipv4.conf.all.route_localnet=1 >/dev/null 2>&1 || true
+
+log_success "旧进程已清理，TUN 残留已回收"
 echo ""
 
 
@@ -449,6 +456,11 @@ auto_update_daemon() {
                 -H "Content-Type: application/json" \
                 -d "{\"path\": \"$TEMP_CONFIG\"}" \
                 http://127.0.0.1:9090/configs)
+            # 🌟 强制 patch 开启 Sniffer（防止热重载后状态丢失）
+            curl -s -o /dev/null -X PATCH \
+                -H "Content-Type: application/json" \
+                -d '{"sniffer":{"enable":true}}' \
+                http://127.0.0.1:9090/configs
                 
             if [ "$RELOAD_CODE" -eq 204 ] || [ "$RELOAD_CODE" -eq 200 ]; then
                 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ✅ 订阅更新并热重载成功！(已重新注入 error 级别与 TUN)" >> /tmp/clash-meta.log
