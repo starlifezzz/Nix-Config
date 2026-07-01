@@ -215,7 +215,7 @@
 # fi  
 
 
-# !/bin/sh
+#!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════
 # Clash TUN 模式启动脚本 - NixOS（满血复活版）
 # 融合了最初版本的稳定路由逻辑 + 自动更新订阅/规则功能
@@ -245,9 +245,101 @@ GEOSITE_URL="https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/ge
 GEOIP_URL="https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
 
 FORCE_UPDATE=false
+
+# ═══════════════════════════════════════════════════════════
+# 🏭 配置加工厂：清理冲突 + 注入 NixOS 专属高性能配置
+# ═══════════════════════════════════════════════════════════
+process_config() {
+    local SOURCE_FILE="$1"
+    local TARGET_FILE="$2"
+    
+    cp "$SOURCE_FILE" "$TARGET_FILE"
+    
+    # 1. 删除单行冲突 Key
+    sed -i '/^log-level:/d' "$TARGET_FILE"
+    sed -i '/^external-controller:/d' "$TARGET_FILE"
+    sed -i '/^secret:/d' "$TARGET_FILE"
+    sed -i '/^external-ui:/d' "$TARGET_FILE"
+    sed -i '/^external-ui-url:/d' "$TARGET_FILE"
+    sed -i '/^external-ui-name:/d' "$TARGET_FILE"
+
+    # 2. 删除多行冲突块 (dns, tun, sniffer, profile)
+    sed -i '/^dns:/,/^[a-zA-Z]/ { /^dns:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
+    sed -i '/^tun:/,/^[a-zA-Z]/ { /^tun:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
+    sed -i '/^sniffer:/,/^[a-zA-Z]/ { /^sniffer:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
+    sed -i '/^profile:/,/^[a-zA-Z]/ { /^profile:/d; /^[a-zA-Z]/!d; }' "$TARGET_FILE"
+
+    # 3. 注入我们的完美配置
+    cat << 'EOF' >> "$TARGET_FILE"
+
+# --- 🎛️ API 与 Web UI 面板配置 ---
+external-controller: 127.0.0.1:9090
+external-ui: ui
+external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
+
+# --- 🚀 脚本自动注入：NixOS 专属高性能配置 ---
+log-level: error               # 🔇 绝对安静，只记录致命错误
+tcp-concurrent: true
+unified-delay: true
+find-process-mode: off
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+sniffer:
+  enable: true
+  sniff:
+    HTTP: { ports: [80, 8080-8880], override-destination: true }
+    TLS:  { ports: [443, 8443] }
+    QUIC: { ports: [443, 8443] }
+  skip-domain:
+    - "Mijia Cloud"
+    - "+.push.apple.com"
+
+dns:
+  enable: true
+  ipv6: false
+  prefer-h3: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - '*.lan'
+    - '*.local'
+    - 'localhost.ptlogin2.qq.com'
+    - '+.stun.*.*'
+    - '+.stun.*.*.*'
+    - '+.dnscloudcloud.top'
+    - 'detectportal.firefox.com'
+    - '+.push.apple.com'
+  default-nameserver: [223.5.5.5, 119.29.29.29]
+  proxy-server-nameserver: [223.5.5.5, 119.29.29.29]
+  respect-rules: true
+  nameserver:
+    - "https://doh.pub/dns-query"
+    - "https://dns.alidns.com/dns-query"
+  nameserver-policy:
+    "geosite:cn,private":
+      - "https://doh.pub/dns-query"
+      - "https://dns.alidns.com/dns-query"
+    "geosite:geolocation-!cn":
+      - "https://1.1.1.1/dns-query"
+      - "https://8.8.8.8/dns-query"
+
+tun:
+  enable: true
+  stack: system
+  auto-route: true
+  interface-name: wlo1         # ⚠️ 记得确认这是你的物理网卡名
+  strict-route: false
+  dns-hijack:
+    - any:53
+EOF
+}
+
 [ "$1" = "--update" ] && FORCE_UPDATE=true
 
-# 🆕 定时更新配置 (单位：秒，默认 24 小时)
+# 🆕 定时更新配置 (单位：秒，默认 24 小时)！！！！！！！！！！！！！！！！！！！！！！1
 # UPDATE_INTERVAL=86400 
 UPDATE_INTERVAL=1500 
 
@@ -321,112 +413,13 @@ echo ""
 
 
 # ═══════════════════════════════════════════════════════════
-# 5. 生成 TUN 配置 (修复 YAML 重复 Key 报错 + 性能优化 + NixOS网卡修复)
+# 5. 生成 TUN 配置 (调用配置加工厂)
 # ═══════════════════════════════════════════════════════════
 log_info "══════ 步骤 5/6：生成 TUN 配置与性能优化 ══════"
 [ -f "$CLASH_CONFIG_FILE" ] || { log_error "未找到配置文件：$CLASH_CONFIG_FILE"; exit 1; }
 
-cp "$CLASH_CONFIG_FILE" "$TEMP_CONFIG"
-
-# 🛠️ 核心修复：清理原文件中的冲突配置，防止 YAML 重复 Key 报错
-log_info "清理原文件中的基础配置与 API 配置..."
-
-# 1. 删除单行冲突 Key (基础配置 + API/UI 配置)
-sed -i '/^log-level:/d' "$TEMP_CONFIG"
-sed -i '/^external-controller:/d' "$TEMP_CONFIG"
-sed -i '/^secret:/d' "$TEMP_CONFIG"
-sed -i '/^external-ui:/d' "$TEMP_CONFIG"
-sed -i '/^external-ui-url:/d' "$TEMP_CONFIG"
-sed -i '/^external-ui-name:/d' "$TEMP_CONFIG"
-
-# 2. 删除原文件的整个 dns: 块
-sed -i '/^dns:/,/^[a-zA-Z]/ { /^dns:/d; /^[a-zA-Z]/!d; }' "$TEMP_CONFIG"
-
-# 3. 清理可能残留的旧 tun: 和 sniffer: 块
-sed -i '/^tun:/,/^[a-zA-Z]/ { /^tun:/d; /^[a-zA-Z]/!d; }' "$TEMP_CONFIG"
-sed -i '/^sniffer:/,/^[a-zA-Z]/ { /^sniffer:/d; /^[a-zA-Z]/!d; }' "$TEMP_CONFIG"
-sed -i '/^profile:/,/^[a-zA-Z]/ { /^profile:/d; /^[a-zA-Z]/!d; }' "$TEMP_CONFIG"
-
-log_success "原文件冲突配置已清理"
-
-# 🚀 追加 NixOS 专属高性能配置
-cat << 'EOF' >> "$TEMP_CONFIG"
-
-# --- 🎛️ API 与 Web UI 面板配置 ---
-external-controller: 127.0.0.1:9090
-external-ui: ui
-external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
-
-# --- 🚀 脚本自动注入：NixOS 专属高性能配置 ---
-
-# 1. 基础性能与日志优化
-log-level: error
-tcp-concurrent: true
-unified-delay: true
-find-process-mode: off
-
-# 2. 缓存与状态持久化
-profile:
-  store-selected: true
-  store-fake-ip: true
-
-# 3. 核心：Sniffer 嗅探器
-sniffer:
-  enable: true
-  sniff:
-    HTTP: { ports: [80, 8080-8880], override-destination: true }
-    TLS:  { ports: [443, 8443] }
-    QUIC: { ports: [443, 8443] }
-  skip-domain:
-    - "Mijia Cloud"
-    - "+.push.apple.com"
-
-# 4. 现代 DNS 架构（修复版）
-dns:
-  enable: true
-  ipv6: false
-  prefer-h3: true
-  enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.1/16
-  fake-ip-filter:
-    - '*.lan'
-    - '*.local'
-    - 'localhost.ptlogin2.qq.com'
-    - '+.stun.*.*'
-    - '+.stun.*.*.*'
-    - '+.dnscloudcloud.top'
-    - 'detectportal.firefox.com'
-    - '+.push.apple.com'
-  default-nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
-  proxy-server-nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
-  nameserver:
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query
-  nameserver-policy:
-    "geosite:cn,private":
-      - https://doh.pub/dns-query
-      - https://dns.alidns.com/dns-query
-    "geosite:geolocation-!cn":
-      - https://dns.cloudflare.com/dns-query
-      - https://dns.google/dns-query
-
-# 5. TUN 虚拟网卡（NixOS 修复版）
-tun:
-  enable: true
-  stack: system
-  auto-route: true
-  # 🆕 NixOS 关键修复：关闭自动检测，手动指定物理网卡
-  # 请运行 `ip route show default | awk '{print $5}'` 查看你的网卡名
-  interface-name: wlo1
-  strict-route: false
-  dns-hijack:
-    - any:53
-EOF
-
+log_info "清理冲突并注入 NixOS 专属配置..."
+process_config "$CLASH_CONFIG_FILE" "$TEMP_CONFIG"
 log_success "配置已更新 (注入 TUN + Sniffer + DoH + Web UI + NixOS网卡修复)"
 echo ""
 
@@ -435,35 +428,35 @@ echo ""
 # 🌟 后台守护函数：定时更新订阅 + API 热重载
 # ═══════════════════════════════════════════════════════════
 auto_update_daemon() {
-    # 首次启动先让系统稳定跑一会儿，再开始计时
     sleep 60 
-    
     while true; do
         sleep "$UPDATE_INTERVAL"
         
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] 触发定时更新..." >> /tmp/clash-meta.log
         
-        # 1. 下载新订阅
+        # 1. 下载新订阅到临时文件
         HTTP_CODE=$(curl -s -o "$CLASH_CONFIG_FILE.new" -w "%{http_code}" -A "$SUB_UA" --connect-timeout 15 -L "$SUB_URL")
         
         if [ "$HTTP_CODE" -eq 200 ] && [ -s "$CLASH_CONFIG_FILE.new" ]; then
-            # 2. 替换旧文件
+            # 2. 替换基础订阅文件
             mv "$CLASH_CONFIG_FILE.new" "$CLASH_CONFIG_FILE"
             
-            # 3. 🌟 核心：调用 Clash API 热重载配置 (无需重启进程，网络不断流！)
-            # 注意：如果你配置了 secret，这里可能需要加 -H "Authorization: Bearer 你的密码"
+            # 3. 🌟 核心修复：重新加工配置 (把 error 级别和 TUN 重新注入进去！)
+            process_config "$CLASH_CONFIG_FILE" "$TEMP_CONFIG"
+            
+            # 4. 调用 API 热重载加工后的 $TEMP_CONFIG
             RELOAD_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
                 -H "Content-Type: application/json" \
-                -d "{\"path\": \"$CLASH_CONFIG_FILE\"}" \
+                -d "{\"path\": \"$TEMP_CONFIG\"}" \
                 http://127.0.0.1:9090/configs)
                 
             if [ "$RELOAD_CODE" -eq 204 ] || [ "$RELOAD_CODE" -eq 200 ]; then
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ✅ 订阅更新并热重载成功！" >> /tmp/clash-meta.log
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ✅ 订阅更新并热重载成功！(已重新注入 error 级别与 TUN)" >> /tmp/clash-meta.log
             else
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ⚠️ 订阅已更新，但 API 热重载失败 (HTTP $RELOAD_CODE)，下次启动生效" >> /tmp/clash-meta.log
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ⚠️ API 热重载失败 (HTTP $RELOAD_CODE)，下次启动生效" >> /tmp/clash-meta.log
             fi
         else
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ❌ 订阅下载失败 (HTTP $HTTP_CODE)，保持原配置" >> /tmp/clash-meta.log
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [DAEMON] ❌ 订阅下载失败 (HTTP $HTTP_CODE)" >> /tmp/clash-meta.log
             rm -f "$CLASH_CONFIG_FILE.new"
         fi
     done
@@ -500,7 +493,6 @@ if ps -p $CLASH_PID > /dev/null 2>&1 && (ip link show Meta > /dev/null 2>&1 || i
     
     echo ""
     log_info "======================================"
-    log_info "🎉 启动完成！"
     # 🚀 启动后台定时更新守护进程
     log_info "启动后台定时更新守护进程 (间隔: $((UPDATE_INTERVAL / 3600)) 小时)..."
     auto_update_daemon &
