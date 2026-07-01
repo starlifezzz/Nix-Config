@@ -232,7 +232,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 # ═══════════════════════════════════════════════════════════
 # 配置路径
 # ═══════════════════════════════════════════════════════════
-CLASH_CONFIG_DIR="/home/zhangchongjie/.local/share/io.github.clash-verge-rev.clash-verge-rev"
+CLASH_CONFIG_DIR="$HOME/.local/share/io.github.clash-verge-rev.clash-verge-rev"
 CLASH_CONFIG_FILE="$CLASH_CONFIG_DIR/clash-verge-check.yaml"
 TEMP_CONFIG="/tmp/clash-tun.yaml"
 CLASH_PID_FILE="/tmp/clash.pid"
