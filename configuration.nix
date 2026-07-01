@@ -60,8 +60,8 @@
     };
 
     # 内核配置 - 使用最新稳定版内核
-    # kernelPackages = pkgs.linuxPackages_latest;
-    kernelPackages = pkgs.linuxPackages_zen;
+    kernelPackages = pkgs.linuxPackages_latest;
+    # kernelPackages = pkgs.linuxPackages_zen;
     kernelParams = [
       # ═══════════════════════════════════════════════════════════
       # NVMe SSD 优化 - 解决 SUBNQN 警告和性能问题
@@ -188,8 +188,10 @@
   programs.firefox.enable = false;
 
   # 允许 unfree 和 broken 包
-  nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.allowBroken = false;
+  nixpkgs.config = {
+    allowBroken = true;
+    allowUnfree = true; # 如果你原来有这行就保留
+  };
 
   # ═══════════════════════════════════════════════════════════
   # ✅ 覆盖 KDE 包集 - 阻止不需要的应用被安装
@@ -237,8 +239,9 @@
 
       # 二进制缓存镜像（优先级从高到低）
       substituters = [
+        "https://cache.nixos.org/"
+        "https://nix-community.cachix.org"
         "https://mirrors.ustc.edu.cn/nix-channels/store"
-        "https://mirror.sjtu.edu.cn/nix-channels/store"
       ];
 
       trusted-public-keys = [
