@@ -247,8 +247,6 @@ GEOIP_URL="https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoi
 FORCE_UPDATE=false
 [ "$1" = "--update" ] && FORCE_UPDATE=true
 
-[ "$1" = "--update" ] && FORCE_UPDATE=true
-
 # 🆕 定时更新配置 (单位：秒，默认 24 小时)
 # UPDATE_INTERVAL=86400 
 UPDATE_INTERVAL=1500 
