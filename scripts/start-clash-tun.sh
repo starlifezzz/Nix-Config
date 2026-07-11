@@ -236,7 +236,7 @@ CLASH_CONFIG_DIR="$HOME/.local/share/io.github.clash-verge-rev.clash-verge-rev"
 CLASH_CONFIG_FILE="$CLASH_CONFIG_DIR/clash-verge-check.yaml"
 TEMP_CONFIG="/tmp/clash-tun.yaml"
 CLASH_PID_FILE="/tmp/clash.pid"
-CLASH_META_BIN="/etc/profiles/per-user/zhangchongjie/bin/clash-meta"
+CLASH_META_BIN="/etc/profiles/per-user/zhangchongjie/bin/mihomo"
 
 # 订阅与规则配置
 SUB_URL="https://103.14.76.98/sub/fsc/73623668d01a5f26dd678989b2ae9cec"
