@@ -2,13 +2,14 @@
 
 {
   # KDE Plasma 桌面环境配置
-  home.pointerCursor = {
-    # Wayland 光标主题（移除X11特定配置）
-    name = "Papirus";
-    package = pkgs.papirus-icon-theme;
-    size = 24;
-    # x11.enable = true;
-  };
+  # ✅ 光标主题由 KDE 系统设置管理，不在此强制声明
+  # 原因：Papirus 是图标主题（不含光标文件），导致 KWin 报 "Failed to load cursor theme"
+  # 解决方案：通过 KDE 系统设置 → 光标 自行选择可用主题（如 Breeze）
+  # home.pointerCursor = {
+  #   name = "Breeze_Light";
+  #   package = pkgs.kdePackages.breeze;
+  #   size = 24;
+  # };
 
   # 全局外观和主题
   qt = {
