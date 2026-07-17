@@ -34,7 +34,7 @@
       generations = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
       # clash快速启动
       start-clash = "cd /etc/nixos/scripts/ && sudo ./start-clash-tun.sh";
-
+      stop-clash  = "bash /etc/nixos/scripts/stop-clash.sh";
       # npm 全局安装配置 - 指向用户目录
       "npm-g" = "npm install -g --prefix ~/.local/share/npm-global";
     };
