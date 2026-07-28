@@ -18,14 +18,11 @@
       command = "${pkgs.zellij}/bin/zellij";
       theme = "Lovelace"; # 注释里的 Catppuccin 改掉
       background-opacity = 0.92;
+      background-opacity-cells = true; # ➕ 新增：zellij 内也透明
       background-blur = true; # ✅ 保留！官方合法，Plasma 上有效
 
       font-family = "LXGW WenKai Mono";
       font-size = 14;
-      font-feature = [
-        "calt"
-        "liga"
-      ];
 
       window-width = 110;
       window-height = 29;
@@ -34,20 +31,16 @@
       window-decoration = "auto";
       window-theme = "auto";
       window-padding-balance = true;
+      window-padding-color = "extend"; # ➕ 新增：padding 颜色延伸
 
       gtk-single-instance = false;
+      linux-cgroup = "always"; # ➕ 新增：补偿 single-instance=false
 
       cursor-style = "bar";
       cursor-style-blink = true;
 
-      shell-integration-features = [
-        "cursor"
-        "sudo"
-        "title"
-        "ssh-env"
-        "ssh-terminfo"
-      ]; # ➕ 官方支持，替代写死 term
-
+      # ➕ 官方支持，替代写死 term
+      shell-integration-features = "cursor,sudo,title,ssh-env,ssh-terminfo,path"; # ➕ 加 path
       confirm-close-surface = false;
       copy-on-select = "clipboard";
       mouse-hide-while-typing = true;
