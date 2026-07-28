@@ -5,69 +5,64 @@
   programs.fish = {
     enable = true;
 
-    shellInit = "";
-
     shellAliases = {
-      # 基础命令
+      # ═══ 基础命令 ═══
       ll = "ls -la";
       la = "ls -A";
       c = "clear";
       s = "sudo";
       sk = "sudo killall -9";
-      
-      # NixOS 系统管理
-      rebuild = "sudo -E nixos-rebuild switch";
-      rebuild-test = "sudo -E nixos-rebuild test";
-      update = "sudo nixos-rebuild switch";
-      nrs = "sudo nixos-rebuild switch";
-      nrt = "sudo nixos-rebuild test";
 
-      # Home Manager
-      hm-switch = "home-manager switch";
+      # ═══ 目录导航 ═══
+      cdup = "cd ..";
+      cd2up = "cd ../..";
+      cd3up = "cd ../../..";
 
-      # 垃圾回收与优化
+      # ═══ NixOS 系统管理（Flakes） ═══
+      # 来源：https://nixos.org/manual/nixos/stable/#sec-changing-config
+      # 去掉 -E：避免 "$HOME is not owned by you" 警告
+      # TUN 模式下代理在网络层生效，不依赖环境变量
+      rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#nixos";
+      rebuild-test = "sudo nixos-rebuild test --flake /etc/nixos#nixos";
+      rebuild-boot = "sudo nixos-rebuild boot --flake /etc/nixos#nixos";
+
+      # ═══ 垃圾回收与优化（手动紧急清理，日常由 nix.gc.automatic 处理） ═══
       gc = "sudo nix-collect-garbage -d";
       optimise = "sudo nix-store --optimise";
 
-      # Nix 工具
-      ns = "nix-shell";
+      # ═══ Nix 工具 ═══
       generations = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
-      # clash快速启动
-      start-clash = "cd /etc/nixos/scripts/ && sudo ./start-clash-tun.sh";
-      stop-clash  = "bash /etc/nixos/scripts/stop-clash.sh";
-      # npm 全局安装配置 - 指向用户目录
-      "npm-g" = "npm install -g --prefix ~/.local/share/npm-global";
+      ns = "nix-shell";
+
+      # ═══ Clash ═══
+      start-clash = "sudo /etc/nixos/scripts/start-clash-tun.sh";
+      stop-clash = "bash /etc/nixos/scripts/stop-clash.sh";
+
     };
 
     functions = {
-      # 🔴 Flakes 重建命令（使用国内镜像源加速）
-      rebuild-flake = ''
-        sudo -E nixos-rebuild switch --flake /etc/nixos#nixos \
-          --option substituters "https://mirrors.cernet.edu.cn/nix-channels/store https://mirrors.ustc.edu.cn/nix-channels/store" \
-          --option trusted-public-keys "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      # 离线重建
+      # --offline 来源：https://nix.dev/manual/nix/stable/command-ref/new-cli/nix3-flake.html
+      rebuild-offline = ''
+        sudo nixos-rebuild switch --flake /etc/nixos#nixos --offline
       '';
 
-      # 🔴 离线重建命令（无网络环境使用）
-      rebuild-offline = ''
-        sudo -E nixos-rebuild switch --flake /etc/nixos#nixos --offline
-      '';
-      
-      # 🔄 更新依赖并重建系统（一键完成 flake update + rebuild）
+      # 更新 flake 锁文件并重建
+      # nix flake update --flake 来源：https://nix.dev/manual/nix/stable/command-ref/new-cli/nix3-flake-update.html
+      # /etc/nixos 已通过 tmpfiles.rules 授权给 zhangchongjie，无需 sudo
       rebuild-update = ''
+        nix flake update --flake /etc/nixos && \
+        sudo nixos-rebuild switch --flake /etc/nixos#nixos
+      '';
+
+      # 提交配置并重建（解决 "Git tree is dirty" 警告）
+      # Flakes 只构建 Git 已追踪的文件，未提交的修改不会生效
+      # 来源：https://nix.dev/manual/nix/stable/command-ref/new-cli/nix3-flake.html
+      rebuild-commit = ''
         cd /etc/nixos && \
-        sudo nix flake update && \
+        git add -A && \
+        git commit -m "chore: update config $(date +%Y%m%d-%H%M%S)" && \
         sudo nixos-rebuild switch --flake .#nixos
-      '';
-      
-      # 目录导航函数
-      cdup = ''
-        cd ..
-      '';
-      cd2up = ''
-        cd ../..
-      '';
-      cd3up = ''
-        cd ../../..
       '';
     };
   };
