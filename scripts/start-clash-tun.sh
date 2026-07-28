@@ -354,7 +354,7 @@ check_update_webui() {
     fi
     rm -rf "$WEBUI_DIR" "$TEMP_EXTRACT"
     mkdir -p "$TEMP_EXTRACT"
-    tar -xzf "$TEMP_ZIP" -C "$TEMP_EXTRACT"  
+    unzip -q "$TEMP_ZIP" -d "$TEMP_EXTRACT"
     mv "$TEMP_EXTRACT"/metacubexd-gh-pages "$WEBUI_DIR"
     echo "$REMOTE_SHA" > "$WEBUI_SHA_FILE"
     rm -rf "$TEMP_ZIP" "$TEMP_EXTRACT"
