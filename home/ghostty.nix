@@ -2,7 +2,7 @@
 # Ghostty 终端模拟器配置
 # 官方文档：https://ghostty.org/docs/configuration
 # Home Manager: https://nix-community.github.io/home-manager/unstable/options.html#opt-programs.ghostty.enable
-{  pkgs,  ... }:
+{ pkgs, ... }:
 
 {
   programs.ghostty = {
@@ -16,12 +16,9 @@
     # ════════════════════════════════════════════════════════
     settings = {
       command = "${pkgs.zellij}/bin/zellij";
-
-      theme = "Lovelace";
+      theme = "Lovelace"; # 注释里的 Catppuccin 改掉
       background-opacity = 0.92;
-      background-blur = true;
-      window-decoration = "auto";
-      window-theme = "auto";
+      background-blur = true; # ✅ 保留！官方合法，Plasma 上有效
 
       font-family = "LXGW WenKai Mono";
       font-size = 14;
@@ -30,29 +27,36 @@
         "liga"
       ];
 
-      # 设置合理的默认窗口尺寸，避免过小或过大
       window-width = 110;
-      window-height = 31;
+      window-height = 29;
       window-padding-x = 8;
       window-padding-y = 4;
-      window-save-state = "never";
-      window-colorspace = "display-p3";
-      window-vsync = true;
+      window-decoration = "auto";
+      window-theme = "auto";
+      window-padding-balance = true;
 
-      # 确保窗口不会启动时最大化
-      # window-maximized = false;
-
-      gtk-single-instance = false;  # 禁用单实例避免 D-Bus "name not activatable" 错误
+      gtk-single-instance = false;
 
       cursor-style = "bar";
       cursor-style-blink = true;
 
-      term = "xterm-256color";
-      shell-integration = "zsh";
-      confirm-close-surface = false;
+      shell-integration-features = [
+        "cursor"
+        "sudo"
+        "title"
+        "ssh-env"
+        "ssh-terminfo"
+      ]; # ➕ 官方支持，替代写死 term
 
+      confirm-close-surface = false;
       copy-on-select = "clipboard";
       mouse-hide-while-typing = true;
+
+      # 可选增强（官方均存在）
+      clipboard-trim-trailing-spaces = true;
+      clipboard-paste-protection = true;
+      adjust-cell-height = 2; # 增量+2，中文行距更透气
+      minimum-contrast = 1.1; # 可选
 
       keybind = [
         "super+c=copy_to_clipboard"
@@ -62,5 +66,6 @@
         "super+0=reset_font_size"
       ];
     };
+
   };
 }
