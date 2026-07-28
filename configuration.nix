@@ -18,7 +18,6 @@
     ./modules/hardware/cpu/ryzen-5600.nix # 可选：ryzen-1600x, ryzen-2600, ryzen-3600, ryzen-5600
     ./modules/hardware/gpu/rx-6600xt.nix # 可选：r9-370, rx-5500xt, rx-6600xt
 
-
     # ✅ 内核与启动参数模块
     ./modules/kernel/default.nix
 
@@ -31,10 +30,10 @@
     ./modules/storage/ssd.nix
 
     # ✅ 系统服务模块
-    ./modules/services/audio.nix           # 音频与多媒体 (PipeWire, RTKit)
-    ./modules/services/desktop.nix         # 桌面环境与显示管理 (Plasma6, SDDM)
-    ./modules/services/sandbox.nix         # 沙盒与容器 (Flatpak)
-    ./modules/services/system-daemons.nix  # 系统级守护进程 (fwupd, earlyoom)
+    ./modules/services/audio.nix # 音频与多媒体 (PipeWire, RTKit)
+    ./modules/services/desktop.nix # 桌面环境与显示管理 (Plasma6, SDDM)
+    ./modules/services/sandbox.nix # 沙盒与容器 (Flatpak)
+    ./modules/services/system-daemons.nix # 系统级守护进程 (fwupd, earlyoom)
   ];
 
   # 启用可重新分发的固件
@@ -54,7 +53,6 @@
     LC_TELEPHONE = "zh_CN.UTF-8";
     LC_TIME = "zh_CN.UTF-8";
   };
-
 
   # 用户配置
   users.users.zhangchongjie = {
@@ -116,6 +114,7 @@
 
     # 全局依赖库
     ffmpeg-full # 完整的 FFmpeg（多媒体库）
+    unzip # Zip 解压缩工具
 
     # Nix 代码格式化工具
     nixfmt # Nix 格式化器
