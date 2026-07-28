@@ -42,7 +42,7 @@
       # ➕ 官方支持，替代写死 term
       shell-integration-features = "cursor,sudo,title,ssh-env,ssh-terminfo,path"; # ➕ 加 path
       confirm-close-surface = false;
-      copy-on-select = "clipboard";
+      copy-on-select = false;
       mouse-hide-while-typing = true;
 
       # 可选增强（官方均存在）

@@ -1,52 +1,33 @@
 # /etc/nixos/home/zellij.nix
 # Zellij Terminal Multiplexer 配置
+# /etc/nixos/home/zellij.nix
+# Zellij Terminal Multiplexer 配置
 
 {
   programs.zellij = {
     enable = true;
 
     extraConfig = ''
-      // 添加到配置中
-      general {
-        serialization_interval 60000          // 减少序列化频率（默认 10 秒 → 60 秒）
-        serialize_pane_viewport false         // 禁用面板视口序列化，减少内存占用
-        styled_underlines true                // 启用样式下划线（如果终端支持）
-        support_kitty_keyboard_protocol true  // 启用 Kitty 键盘协议
-      }
-
-      theme "gruvbox-dark"  // Gruvbox 主题（暖色调）
-
-      // 添加默认 Shell
+      // ═══ 基础设置 ═══
       default_shell "fish"
+      theme "gruvbox-dark"
+      show_startup_tips false
 
-      // ═══════════════════════════════════════════════════════════
-      // 鼠标模式 - 使用 Zellij 原生支持
-      // ═══════════════════════════════════════════════════════════
+      // ═══ 终端特性 ═══
+      styled_underlines true
+      support_kitty_keyboard_protocol true
       mouse_mode true
+      scroll_buffer_size 50000
 
-      // 自动复制到剪贴板
+      // ═══ 剪贴板 ═══
       copy_on_select true
 
-      // ═══════════════════════════════════════════════════════════
-      // 滚动优化 - 解决长输出选择时的自动滚动问题
-      // ═══════════════════════════════════════════════════════════
-      // 增加历史缓冲区大小（默认 10000 行 → 50000 行）
-      scroll_buffer_size 50000
-      
-      // 调整鼠标滚动速度（关键！）
-      // 数值越大，滚动越快。设置为极高的值实现快速连续滚动
-      scroll_speed 20
-      
-      // 启用平滑滚动（如果支持）
-      smooth_scroll true
-      
-      // ✅ 使用 Zellij 官方默认快捷键
-      // 默认前缀：Ctrl+空格 (或 Ctrl+P)
-      // 完整快捷键列表见：https://zellij.dev/documentation/keybindings.html
+      // ═══ 会话序列化优化 ═══
+      // 默认就是 60 秒，无需修改；如要调整：
+      // serialization_interval 120
+      serialize_pane_viewport false
 
-      // ═══════════════════════════════════════════════════════════
-      // 插件配置
-      // ═══════════════════════════════════════════════════════════
+      // ═══ 插件配置 ═══
       plugins {
         about location="zellij:about"
         compact-bar location="zellij:compact-bar"
@@ -63,13 +44,6 @@
           welcome_screen true
         }
       }
-
-      // 后台加载插件（不阻塞启动）
-      load_plugins {
-      }
-
-      // 禁用启动提示
-      show_startup_tips false
     '';
   };
 }

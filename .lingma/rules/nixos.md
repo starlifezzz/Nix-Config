@@ -8,9 +8,10 @@ trigger: always_on
 # 我的环境信息（固定不变，每次提问直接带）
 - **系统**: NixOS Unstable 26.11 (x86_64-linux)
 - **桌面环境**: KDE Plasma 6 (Wayland)
-- **Kernel** Linux 7.1.2-zen1
-- **Shell**: fish
-- **终端复用器**: zellij
+- **Kernel** Linux 7.1.4-zen1
+- **Shell**: fish(官方文档址：https://fishshell.com/docs/current/index.html)
+- **终端**: ghstty(官方文档址:https://ghostty.org/docs/config/reference)
+- **终端复用器**: zellij(官方文档址:https://zellij.dev/documentation/options.html)
 - **系统配置入口**: /etc/nixos/configuration.nix
 - **用户配置入口**: ~/.config/home-manager/home.nix
 - **核心诉求**: 构建一套统一、可复现、无状态的系统配置，零冲突、零冗余。
@@ -18,11 +19,11 @@ trigger: always_on
 - **代理状态**: clash-verge-rev 全局代理
 
 ## 严格遵循的规则（必须遵守）
-0.  **拒绝\严禁猜测，严禁“你认为”，“你觉得”，“你可以”等情况的猜测！！！！！！！！
+0.  **拒绝\严禁猜测，严禁“你认为”，“你觉得”，“你可以”等不确定词汇的猜测结果！！！！！！！！
 1.  **仅引用官方权威来源**: 所有配置必须来自NixOS官方手册(https://nixos.org/manual/nixos/unstable/)或本地所在位置(file:///nix/store/0wmmc2cfbnblqr7hx1pgmxakrgdankyg-nixos-manual-html/share/doc/nixos/index.html#ch-configuration)、Home Manager官方手册(https://nix-community.github.io/home-manager/unstable/)、nixpkgs官方包列表(https://search.nixos.org/packages)，**必须标注每个配置项对应的官方文档链接**。
 2.  **基于当前系统状态，无冲突配置**: 所有给出的配置必须与我已启用的服务、已安装的包、现有配置完全兼容，不得出现重复定义、依赖冲突，优先在我现有配置基础上修改，而非从零生成。
 3.  **严格遵循声明式配置原则**: 所有配置必须写入`configuration.nix`（系统级）或`home.nix`（用户级），严禁使用临时命令、手动修改文件，必须通过`sudo nixos-rebuild switch --flake .#nixos`生效。
-4.  **版本一致性**: 仅使用nixos-Unstable 26.05滚动分支的包和配置，严禁使用nixos-25.11等旧稳定版配置，若需特殊说明必须明确标注风险。
+4.  **版本一致性**: 仅使用nixos-Unstable 26.11滚动分支的包和配置，严禁使用nixos-25.11等旧稳定版配置，若需特殊说明必须明确标注风险。
 5.  **完整性与可复现性**: 给出完整的配置代码块，包含所有必要的imports、依赖、环境变量，确保复制后直接可编译通过，无语法错误。
 6.  **解释清晰**: 对每个关键配置项做简要说明，解释其作用、官方依据，以及与我现有系统的兼容性。
 7.  **严禁假设可行性**: **绝对禁止**在没有验证的情况下声称某个功能"可行"或"有官方解决方案"。必须先查阅 NixOS 官方 issue、文档或实际测试验证，确认功能在 NixOS 环境下确实可用后再提供方案。对于 GUI 应用的高级功能（如 Clash Verge Rev 的服务安装），必须明确说明 NixOS 的限制和已知问题。
