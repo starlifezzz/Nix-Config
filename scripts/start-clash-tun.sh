@@ -257,7 +257,6 @@ process_config() {
 
 external-controller: 127.0.0.1:9090
 external-ui: ui
-external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
 
 log-level: error
 tcp-concurrent: true
