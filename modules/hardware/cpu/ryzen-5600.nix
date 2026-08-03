@@ -4,12 +4,9 @@
 
     # ✅ 启用 CPU 频率和温度传感器支持
   boot.kernelModules = [ 
-    "acpi-cpufreq"  # CPU 频率调节模块
     "k10temp"       # AMD CPU 温度传感器（Ryzen 专属）
   ];
 
-  # Intel WiFi 驱动已由 Linux 内核自动加载，无需在此声明
-  
   # ✅ CPU 频率和电源管理 - Linux 7.0+ 兼容版本，针对 Zen 3 优化
   boot.kernelParams = [
     "amd_pstate=active"  # Zen 3 完全支持 amd_pstate，启用主动模式
@@ -21,8 +18,8 @@
     "transparent_hugepage=madvise"  # 透明大页优化
     # ✅ 移除 numa_balancing=1 内核参数，该参数应通过 sysctl 设置，避免 mempolicy 解析错误
     
-    # ✅ Linux 7.0+ 新增：启用 EEVDF 调度器相关优化
-    "sched_schedstats=0"  # 禁用调度统计以提升性能
+    # ✅ Linux 7.0 新增：启用 EEVDF 调度器（取代 CFS）
+    "schedstats=disable"
   ];
   
   # 电源管理优化 - 启用 powertop，不配置 CPU 频率调节器
@@ -40,12 +37,6 @@
     # 内存优化 - 针对现代系统优化
     "vm.swappiness" = lib.mkForce 1;  # 最小化 swap 使用
     "vm.vfs_cache_pressure" = lib.mkForce 50;  # 降低 VFS 缓存压力
-    
-    # ✅ Linux 7.0+ 内存管理优化
-    "vm.compaction_proactiveness" = lib.mkForce 20;  # 主动内存压缩
-    
-    # ✅ 移除：kernel.sched_migration_cost_ns 和 kernel.sched_wakeup_granularity_ns 
-    # 在Linux 7.0中已重命名或移除，保留会导致systemd-sysctl警告
   };
   
   # ═══════════════════════════════════════════════════════════

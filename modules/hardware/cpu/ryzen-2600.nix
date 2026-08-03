@@ -31,7 +31,7 @@
     # "numa_balancing=1"  # NUMA 自动平衡（Ryzen 是多 Die 设计）
     
     # ✅ Linux 7.0 新增：启用 EEVDF 调度器（取代 CFS）
-    "sched_schedstats=0"  # 禁用调度统计以提升性能（除非需要调试）
+    "schedstats=disable"
   ];
   
   # 电源管理优化 - 启用 powertop，不配置 CPU 频率调节器
@@ -50,8 +50,6 @@
     "vm.swappiness" = lib.mkForce 1;  # ✅ 从 12 改为 1（16GB 内存应最小化 swap）
     "vm.vfs_cache_pressure" = lib.mkForce 50;  # 降低 VFS 缓存压力
     
-    # ✅ Linux 7.0 内存管理优化
-    "vm.compaction_proactiveness" = lib.mkForce 20;  # 主动内存压缩
     
     # 移除已废弃或路径错误的参数：
     # - kernel.page-table-isolation: 在较新内核中已移除
