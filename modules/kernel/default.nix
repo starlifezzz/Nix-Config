@@ -33,9 +33,6 @@
       
       "spectre_v2=on"
       "acpi_enforce_resources=lax"
-      "zswap.enabled=1"
-      "zswap.compressor=zstd"
-      "zswap.max_pool_percent=20"
     ];
 
     # 内核模块
