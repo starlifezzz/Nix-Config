@@ -40,6 +40,8 @@
   # 这里只启用基础功能，不强制指定路径，避免中英文目录并存
   xdg.userDirs = {
     enable = true;
+    createDirectories = false; # 让 KDE 根据 locale 自动管理
+    setSessionVariables = false;
   };
 
   # ═══════════════════════════════════════════════════════════
@@ -84,8 +86,7 @@
     haruna
     ente-auth
     remmina
-    papirus-icon-theme
-    
+      
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器
     vscode # vscode 编辑器
@@ -108,7 +109,8 @@
     # lutris-free # 游戏管理器
     # Heroic Games Launcher
     heroic
-    clash-verge-rev
+    # clash-verge-rev
+    mihomo
     ludusavi
     _64gram
     opencode # AI 编程助手（当前运行中的本会话依赖此包）
