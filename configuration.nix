@@ -124,9 +124,6 @@
     papirus-icon-theme
   ];
 
-  # 传感器支持
-  hardware.sensor.iio.enable = true;
-
   # Nix 配置优化
   nix = {
     settings = {

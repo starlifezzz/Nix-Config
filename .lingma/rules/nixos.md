@@ -10,7 +10,7 @@ trigger: always_on
 - **桌面环境**: KDE Plasma 6 (Wayland)
 - **Kernel** Linux 7.1.4-zen1
 - **Shell**: fish(官方文档址：https://fishshell.com/docs/current/index.html)
-- **终端**: ghstty(官方文档址:https://ghostty.org/docs/config/reference)
+- **终端**: Alacritty(官方文档址:https://alacritty.org/config-alacritty.html)
 - **终端复用器**: zellij(官方文档址:https://zellij.dev/documentation/options.html)
 - **系统配置入口**: /etc/nixos/configuration.nix
 - **用户配置入口**: ~/.config/home-manager/home.nix

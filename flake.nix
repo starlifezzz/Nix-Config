@@ -3,8 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # nixpkgs.url = "git+https://mirrors.tuna.tsinghua.edu.cn/git/nixpkgs.git?ref=nixos-unstable&shallow=1";
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -15,30 +13,16 @@
     {
       self,
       nixpkgs,
-      # nixpkgs-unstable,
       home-manager,
       ...
     }:
     let
       system = "x86_64-linux";
-
-      # pkgs-unstable = import nixpkgs-unstable {
-      #   inherit system;
-      #   config.allowUnfree = true;
-      #   config.allowBroken = true;
-      # };
-
-      # 引入 Nixpkgs lib（用于 mkForce 等函数）
-      # lib = nixpkgs.lib;
     in
     {
       nixosConfigurations = {
         nixos = nixpkgs.lib.nixosSystem {
           inherit system;
-
-          # specialArgs = {
-          #   inherit self pkgs-unstable;
-          # };
 
           modules = [
             ./configuration.nix
@@ -51,7 +35,7 @@
           ];
         };
       };
-      
+
       packages.${system} = {
         default = self.nixosConfigurations.nixos.config.system.build.toplevel;
       };
