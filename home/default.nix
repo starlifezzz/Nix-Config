@@ -11,7 +11,7 @@
   # ═══════════════════════════════════════════════════════════
   home.username = "zhangchongjie";
   home.homeDirectory = "/home/zhangchongjie";
-  home.stateVersion = "26.05"; # ✅ 与 system.stateVersion 保持一致
+  home.stateVersion = "26.11"; # ✅ 与 system.stateVersion 保持一致
 
   # 启用 DConf 支持 - 更好地管理 GTK 应用设置
 
@@ -40,8 +40,6 @@
   # 这里只启用基础功能，不强制指定路径，避免中英文目录并存
   xdg.userDirs = {
     enable = true;
-    createDirectories = false; # 让 KDE 根据 locale 自动管理
-    setSessionVariables = false;
   };
 
   # ═══════════════════════════════════════════════════════════
@@ -53,20 +51,10 @@
   xdg.mimeApps = {
     enable = true;
     # 只声明基础 Web 浏览器的 MIME 关联
-    # 其他应用（如 Lutris、VSCode）的 MIME 关聯由 KDE 动态管理
-    defaultApplications = {
-      "text/html" = [ "floorp.desktop" ];
-      "x-scheme-handler/http" = [ "floorp.desktop" ];
-      "x-scheme-handler/https" = [ "floorp.desktop" ];
-      "x-scheme-handler/about" = [ "floorp.desktop" ];
-    };
   };
 
   # 强制覆盖现有的 mimeapps.list 文件，避免 Home Manager 启动失败
   xdg.configFile."mimeapps.list".force = true;
-
-  # 强制覆盖现有的字体配置文件，避免 Home Manager 启动失败
-  xdg.configFile."fontconfig/conf.d/10-hm-fonts.conf".force = true;
 
   # ═══════════════════════════════════════════════════════════
   # 桌面快捷方式 - Lutris（lutris-free 版本）
@@ -123,6 +111,7 @@
     clash-verge-rev
     ludusavi
     _64gram
+    opencode # AI 编程助手（当前运行中的本会话依赖此包）
 
     # ═══════════════════════════════════════════════════════════
     # 🎵 音频播放器配置
@@ -150,43 +139,6 @@
     flatpak = "flatpak --user";
   };
 
-  # ═══════════════════════════════════════════════════════════
-  # 环境变量 - 简洁配置
-  # ═══════════════════════════════════════════════════════════
-  home.sessionVariables = {
-    # ═══════════════════════════════════════════════════════════
-    # 系统区域设置 - 解决KDE locale警告
-    # ═══════════════════════════════════════════════════════════
-    LANG = "zh_CN.UTF-8";
-    LC_ALL = "zh_CN.UTF-8";
-    
-    # npm 全局包目录 - 指向用户可写目录
-    NPM_CONFIG_PREFIX = "$HOME/.local/share/npm-global";
-
-    # ═══════════════════════════════════════════════════════════
-    # Wayland 专用配置
-    # ═══════════════════════════════════════════════════════════
-    # 启用 Firefox 的 Wayland 支持
-    MOZ_ENABLE_WAYLAND = "1";
-
-    # Qt 应用优先使用 Wayland，回退到 XCB
-    QT_QPA_PLATFORM = "wayland;xcb";
-
-    # ⚠️ 注意：不设置全局 GDK_BACKEND，让 GTK 应用自行选择后端
-    # 避免旧版 Electron 和 Flatpak 应用因强制 Wayland 而黑屏
-
-    # 明确会话类型为 Wayland
-    XDG_SESSION_TYPE = "wayland";
-
-    # Clutter 工具包使用 Wayland
-    CLUTTER_BACKEND = "wayland";
-
-    # SDL 应用使用 Wayland
-    SDL_VIDEODRIVER = "wayland";
-
-    # ⚠️ 注意：ELECTRON_OZONE_PLATFORM_HINT 在 Electron 38+ 已移除
-    # 需要时应在启动命令中传递 --ozone-platform=x11 参数
-  };
 
   # ═══════════════════════════════════════════════════════════
   # 导入所有应用配置模块
@@ -197,12 +149,12 @@
     ./git.nix # Git 版本控制配置
 
     # 终端模拟器和 Multiplexer
-    # ./alacritty.nix # Alacritty 终端模拟器配置
-    ./ghostty.nix # Ghostty 终端模拟器配置（GPU加速，原生适配）
+    ./alacritty.nix # Alacritty 终端模拟器配置
+    # ./ghostty.nix # Ghostty 终端模拟器配置（GPU加速，原生适配）
     ./zellij.nix # Zellij Terminal Multiplexer 配置
 
     # 开发环境工具
-    ./direnv.nix # Direnv 开发环境配置
+    ./direnv.nix # Direnv 开发环境配置（用户级，系统级已移除）
 
     # 代码编辑器
     ./vim.nix # Vim 文本编辑器配置
