@@ -9,6 +9,14 @@
   networking = {
     hostName = "nixos";
     networkmanager.enable = true;
+
+    # ═══════════════════════════════════════════════════════════
+    # 禁用 ModemManager - 本机无调制解调器硬件
+    # NetworkManager 模块默认以 lib.mkDefault true 隐式启用，
+    # 显式关闭避免空转服务。
+    # 官方选项: https://search.nixos.org/options?query=networking.modemmanager.enable
+    # ═══════════════════════════════════════════════════════════
+    modemmanager.enable = false;
     
     # ═══════════════════════════════════════════════════════════
     # 防火墙配置 - 支持 Clash TUN 模式

@@ -8,21 +8,33 @@ let
 
     set_shortcut() {
       local group="$1" key="$2" value="$3"
-      if grep -q "^\[$group\]" "$f"; then
-        if grep -q "^$key=" "$f"; then
-          sed -i "s|^$key=.*|$key=$value|" "$f"
-        else
-          sed -i "/^\[$group\]/a $key=$value" "$f"
-        fi
-      else
-        printf '\n[%s]\n%s=%s\n' "$group" "$key" "$value" >> "$f"
-      fi
+      # 幂等：先删除该 group 的全部旧段（含重复），再追加唯一一段
+      awk -v g="[$group]" '
+        $0 == g { skip = 1; next }
+        skip && /^\[/ { skip = 0 }
+        skip { next }
+        { print }
+      ' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+      printf '\n[%s]\n%s=%s\n' "$group" "$key" "$value" >> "$f"
     }
+
+    remove_group() {
+      local group="$1"
+      awk -v g="[$group]" '
+        $0 == g { skip = 1; next }
+        skip && /^\[/ { skip = 0 }
+        skip { next }
+        { print }
+      ' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+    }
+
+    # 清理已卸载的 ghostty 快捷键段（避免 Ctrl+Alt+T 冲突）
+    remove_group "services][com.mitchellh.ghostty.desktop"
 
     set_shortcut "com.qq.QQ" "2D59F3ECB6A4CF6AFB00764B70034BC9-Ctrl+Alt+L" "Ctrl+Alt+L,Ctrl+Alt+L,Electron shortcut Ctrl+Alt+L"
     set_shortcut "com.qq.QQ" "50CD026BD913BFEE35352B1D2455BC71-Ctrl+Alt+C" "Ctrl+Alt+C,Ctrl+Alt+C,Electron shortcut Ctrl+Alt+C"
     set_shortcut "com.qq.QQ" "8AAB8812708223DBC78147F0CD9C498B-Ctrl+Alt+Z" "Ctrl+Alt+Z,Ctrl+Alt+Z,Electron shortcut Ctrl+Alt+Z"
-    set_shortcut "services][com.mitchellh.ghostty.desktop" "_launch" "Ctrl+Alt+T"
+    set_shortcut "services][Alacritty.desktop" "_launch" "Ctrl+Alt+T"
     set_shortcut "services][org.kde.spectacle.desktop" "RectangularRegionScreenShot" "Ctrl+Alt+A	Meta+Shift+Print"
   '';
 in
@@ -82,8 +94,9 @@ in
       [Tiling]
       padding=4
 
+      # 已移除 InputMethod= 行：避免与 /etc/xdg/autostart/org.fcitx.Fcitx5.desktop
+      # 重复启动 fcitx5（日志：Unable to request dbus name）。KDE 会自动探测输入法。
       [Wayland]
-      InputMethod=/run/current-system/sw/share/applications/org.fcitx.Fcitx5.desktop
       VirtualKeyboardEnabled=true
     '';
     force = true;

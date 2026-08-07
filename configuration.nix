@@ -71,14 +71,31 @@
     shell = pkgs.fish;
   };
 
+  # sudo 免密（允许无 TTY 会话如 opencode 直接执行 sudo）
+  security.sudo.extraRules = [
+    {
+      users = [ "zhangchongjie" ];
+      commands = [
+        {
+          command = "ALL";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
+
+  # ═══════════════════════════════════════════════════════════
+  # journald 日志大小限制（防止 /var/log/journal 无限增长）
+  # 依据: journald.conf(5) SystemMaxUse/MaxRetentionSec
+  # 官方选项: https://search.nixos.org/options?query=services.journald.extraConfig
+  # ═══════════════════════════════════════════════════════════
+  services.journald.extraConfig = ''
+    SystemMaxUse=512M
+    MaxRetentionSec=7d
+  '';
+
   # Fish Shell（系统级）
   programs.fish.enable = true;
-
-  # direnv 配置
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true; # 启用 nix-direnv 集成
-  };
 
   # 允许 unfree 包
   nixpkgs.config = {

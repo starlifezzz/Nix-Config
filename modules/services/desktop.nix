@@ -3,7 +3,7 @@
 # 官方文档：
 #   https://nixos.org/manual/nixos/unstable/options.html#opt-services.desktopManager.plasma6.enable
 #   https://nixos.org/manual/nixos/unstable/options.html#opt-services.displayManager.sddm.enable
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   # i18n.inputMethod = {
@@ -56,9 +56,10 @@
   # XDG Portal - KDE Plasma 环境
   xdg.portal = {
     enable = true;
-    # extraPortals = [
-    #   pkgs.kdePackages.xdg-desktop-portal-kde
-    # ];
+    # ✅ 显式指定仅使用 KDE portal，阻止 GTK portal 被隐式拉入
+    extraPortals = lib.mkForce [
+      pkgs.kdePackages.xdg-desktop-portal-kde
+    ];
     config = {
       common.default = [ "kde" ];
     };
