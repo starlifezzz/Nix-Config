@@ -102,12 +102,9 @@ in
     force = true;
   };
 
-  home.sessionVariables = {
-    GTK_IM_MODULE = "";
-    QT_IM_MODULE = "";
-    XMODIFIERS = "@im=fcitx";
-    SDL_IM_MODULE = "fcitx";
-  };
+  # home.sessionVariables（GTK_IM_MODULE/QT_IM_MODULE/XMODIFIERS/SDL_IM_MODULE）
+  # 已迁移至 ./fcitx5.nix，集中管理输入法相关环境变量。
+  # 风险提示: Wayland 下 GTK/QT IM module 必须留空，删除会导致部分程序无法输入中文。
 
   dconf.enable = true;
 }

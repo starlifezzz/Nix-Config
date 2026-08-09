@@ -163,6 +163,7 @@
 
     # 桌面环境
     ./kde.nix # KDE Plasma 6 详细设置
+    ./fcitx5.nix # fcitx5 输入法（用户级声明式配置）
 
     # ../configs/mpd-dsd.nix # MPD DSD 听歌配置
   ];
