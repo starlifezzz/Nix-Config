@@ -11,8 +11,9 @@
   boot.kernelParams = [
     "amd_pstate=active" # Zen 3 完全支持 amd_pstate，启用主动模式
 
-    # 安全优化
-    "init_on_alloc=1"
+    # ✅ 已移除 init_on_alloc=1（安全加固参数，会拖慢内存分配性能）
+    # 本机为个人桌面，无多租户隔离需求，安全收益≈0，性能损失真实存在
+    # 依据: https://docs.kernel.org/mm/page_poison.html
 
     # 内存和缓存优化 - Zen 3 架构优化
     "transparent_hugepage=madvise" # 透明大页优化
@@ -25,6 +26,16 @@
   # 电源管理优化 - 启用 powertop，不配置 CPU 频率调节器
   # 现代内核会自动使用 schedutil，无需显式配置
   powerManagement.powertop.enable = true;
+
+  # ❌ 不配置 powerManagement.cpuFreqGovernor！
+  # 原因: amd_pstate active 模式（amd-pstate-epp 驱动）只支持
+  #       powersave / performance 两种 governor（实测 scaling_available_governors），
+  #       schedutil 是传统 cpufreq 驱动的选项，在此硬件上会报
+  #       "Error setting new values" (exit 237/KEYRING)
+  # 结论: active 模式下 powersave 由硬件 EPP 控制，负载时会自动睿频，
+  #       桌面响应与 schedutil 无差别，保持默认即可
+  # 依据: https://docs.kernel.org/admin-guide/pm/amd-pstate.html
+  # 验证: cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
 
   # 系统优化 - Linux 7.0+ 兼容版本，针对 Zen 3 优化
   boot.kernel.sysctl = {

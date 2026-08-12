@@ -41,6 +41,13 @@
 
   # 时区和语言设置
   time.timeZone = "Asia/Shanghai";
+
+  # ✅ 显式声明 hostId（可复现性优化）
+  # 作用: 某些 NixOS 模块（如 ZFS/系统服务）需要稳定的 hostId
+  #       声明后配置可复现，不依赖 /etc/machine-id 的隐式生成
+  # 注意: 此值由 machine-id 前 8 位派生（ee7b4b79），固定不变
+  # 官方选项: https://search.nixos.org/options?query=networking.hostId
+  networking.hostId = "ee7b4b79";
   i18n.defaultLocale = "zh_CN.UTF-8";
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "zh_CN.UTF-8";
@@ -71,28 +78,10 @@
     shell = pkgs.fish;
   };
 
-  # sudo 免密（允许无 TTY 会话如 opencode 直接执行 sudo）
-  security.sudo.extraRules = [
-    {
-      users = [ "zhangchongjie" ];
-      commands = [
-        {
-          command = "ALL";
-          options = [ "NOPASSWD" ];
-        }
-      ];
-    }
-  ];
-
   # ═══════════════════════════════════════════════════════════
-  # journald 日志大小限制（防止 /var/log/journal 无限增长）
-  # 依据: journald.conf(5) SystemMaxUse/MaxRetentionSec
-  # 官方选项: https://search.nixos.org/options?query=services.journald.extraConfig
+  # （journald 日志配置已迁移至 ./modules/storage/ssd.nix）
+  # 目的：日志不落盘（Storage=volatile），减少 SSD 写入
   # ═══════════════════════════════════════════════════════════
-  services.journald.extraConfig = ''
-    SystemMaxUse=512M
-    MaxRetentionSec=7d
-  '';
 
   # Fish Shell（系统级）
   programs.fish.enable = true;
@@ -177,8 +166,10 @@
 
     gc = {
       automatic = true;
-      dates = "daily";
-      options = "--delete-older-than 3d";
+      # weekly + 14d：降频 GC 减少 /nix/store 写入频次（配合 SSD 优化）
+      # 官方选项: https://search.nixos.org/options?query=nix.gc.automatic
+      dates = "weekly";
+      options = "--delete-older-than 14d";
     };
 
     optimise.automatic = true;
