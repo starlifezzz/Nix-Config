@@ -82,11 +82,9 @@
     #系统工具
     # ════
     pkgs.bleachbit
-    kdePackages.filelight
-    haruna
     ente-auth
     remmina
-      
+
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器
     vscode # vscode 编辑器
@@ -98,7 +96,7 @@
     uv # Python 包管理器
     rust-analyzer # Rust LSP server（opencode 使用）
     typescript-language-server # TypeScript LSP server（opencode 使用）
-    taplo #（opencode 使用）
+    taplo # （opencode 使用）
     # ═══════════════════════════════════════════════════════════
     # 系统信息工具
     # ═══════════════════════════════════════════════════════════
@@ -126,7 +124,7 @@
 
     #下载相关
     # parabolic
-    
+
     motrix-next
 
     #浏览器
@@ -142,7 +140,6 @@
     # 强制 Flatpak 默认使用 --user 参数，避免占用系统根分区
     flatpak = "flatpak --user";
   };
-
 
   # ═══════════════════════════════════════════════════════════
   # 导入所有应用配置模块
@@ -164,7 +161,7 @@
     ./vim.nix # Vim 文本编辑器配置
 
     # 桌面环境
-    ./kde.nix # KDE Plasma 6 详细设置
+    ./cosmic.nix # COSMIC 详细设置（feat/cosmic 分支，原 kde.nix 已替换）
     ./fcitx5.nix # fcitx5 输入法（用户级声明式配置）
 
     # ../configs/mpd-dsd.nix # MPD DSD 听歌配置

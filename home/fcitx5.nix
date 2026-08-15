@@ -12,13 +12,13 @@
 #   - force = true: 首次 switch 时覆盖已存在的旧配置文件（内容一致，无数据丢失）
 # 风险提示（决策 3）:
 #   GTK_IM_MODULE / QT_IM_MODULE 在 Wayland 下必须留空字符串（禁用 XIM 桥接，
-#   改由 Wayland 原生 text-input 协议输入），原值迁移自 home/kde.nix，
+#   改由 Wayland 原生 text-input 协议输入），继承自原 KDE 配置（值保持），
 #   若删除会导致部分程序无法输入中文，且 fcitx5 启动时提示 IM module 错误。
 { ... }:
 
 {
   # ═══════════════════════════════════════════════════════════
-  # 输入法环境变量（迁移自 home/kde.nix，值保持不变）
+  # 输入法环境变量（继承自原 KDE 分支，值保持不变；KDE 桌面配置已随 feat/cosmic 移除）
   # ═══════════════════════════════════════════════════════════
   home.sessionVariables = {
     # Wayland 下 GTK/QT 走原生输入法协议，必须为空字符串（禁用 XIM 桥接）

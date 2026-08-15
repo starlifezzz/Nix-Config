@@ -31,7 +31,7 @@
 
     # ✅ 系统服务模块
     ./modules/services/audio.nix # 音频与多媒体 (PipeWire, RTKit)
-    ./modules/services/desktop.nix # 桌面环境与显示管理 (Plasma6, SDDM)
+    ./modules/services/desktop-cosmic.nix # 桌面环境与显示管理 (COSMIC, cosmic-greeter) — feat/cosmic 分支
     ./modules/services/sandbox.nix # 沙盒与容器 (Flatpak)
     ./modules/services/system-daemons.nix # 系统级守护进程 (fwupd, earlyoom)
   ];
@@ -92,30 +92,15 @@
   };
 
   # ═══════════════════════════════════════════════════════════
-  # ✅ 覆盖 KDE 包集 - 阻止不需要的应用被安装
+  # (KDE 包集裁剪 overlay 已删除 —— COSMIC 不捆绑 KDE 元包，无需 overrideScope)
   # ═══════════════════════════════════════════════════════════
-  # 问题：KDE 元包会强制捆绑大量不需要的应用
-  # 解决：使用 overrideScope 将不需要的包替换为空包
-  nixpkgs.overlays = [
-    (final: prev: {
-      kdePackages = prev.kdePackages.overrideScope (
-        kdeFinal: kdePrev: {
-          # 二维码扫描器（不需要）
-          qrca = final.runCommand "qrca-empty" { } "mkdir -p $out";
-
-          # Konsole 终端（已有 Alacritty + Zellij，不需要）
-          konsole = final.runCommand "konsole-empty" { } "mkdir -p $out";
-        }
-      );
-    })
-  ];
 
   # 系统软件包 - 仅保留系统级必需的工具
   environment.systemPackages = with pkgs; [
     # 系统核心工具
     home-manager # Home Manager（NixOS 集成模式）
 
-    # kdePackages.kdeconnect # KDE Connect（手机与电脑互联）
+    # KDE Connect（手机与电脑互联）— 用户明确保留，不依赖 Plasma 桌面
     kdePackages.kdeconnect-kde
 
     # 全局依赖库
@@ -197,16 +182,6 @@
         imports = [
           ./home/default.nix
         ];
-
-        # 清理图标缓存激活脚本
-        home.activation.clearIconCache = lib.mkAfter ''
-          if [ "$USER" = "zhangchongjie" ]; then
-            echo "Clearing Plasma icon cache..."
-            rm -f ~/.cache/icon-cache.kcache
-            rm -f ~/.cache/plasma-svgelements-*
-            rm -rf ~/.cache/plasmashell*
-          fi
-        '';
       };
   };
 
