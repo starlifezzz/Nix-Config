@@ -8,17 +8,12 @@
   # 字体包（系统级）
   # ═══════════════════════════════════════════════════════════
   fonts.packages = with pkgs; [
-    # 中文支持（Noto CJK 包含简繁中日韩）
-    noto-fonts-cjk-sans
-    noto-fonts-cjk-serif
-    noto-fonts-color-emoji
-    
     # 霞鹜文楷（主要显示字体，Screen 版本优化屏幕显示）
     lxgw-wenkai-screen
     lxgw-wenkai
     
-    # 等宽字体（编程用）- JetBrains Mono 已足够
-    jetbrains-mono
+    # 等宽字体（编程用）
+    monaspace
   ];
   
   # ═══════════════════════════════════════════════════════════
@@ -28,10 +23,9 @@
     enable = true;
     
     defaultFonts = {
-      serif = ["LXGW WenKai Screen" "Noto Serif CJK SC"];
-      sansSerif = ["LXGW WenKai Screen" "Noto Sans CJK SC"];
-      monospace = ["JetBrains Mono" "LXGW WenKai Screen" "Noto Sans Mono CJK SC"];
-      emoji = ["Noto Color Emoji"];
+      serif = ["LXGW WenKai Screen" ];
+      sansSerif = ["LXGW WenKai Screen"];
+      monospace = ["monaspace" "LXGW WenKai Mono"];
     };
     
     antialias = true;
