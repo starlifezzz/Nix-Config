@@ -84,10 +84,13 @@
     pkgs.bleachbit
     ente-auth
     remmina
+    kdePackages.filelight
+    mihomo
 
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器
     vscode # vscode 编辑器
+
     # ═══════════════════════════════════════════════════════════
     # 开发运行时（不支持 programs.x）
     # ═══════════════════════════════════════════════════════════
@@ -97,6 +100,7 @@
     rust-analyzer # Rust LSP server（opencode 使用）
     typescript-language-server # TypeScript LSP server（opencode 使用）
     taplo # （opencode 使用）
+
     # ═══════════════════════════════════════════════════════════
     # 系统信息工具
     # ═══════════════════════════════════════════════════════════
@@ -108,9 +112,9 @@
     # ═══════════════════════════════════════════════════════════
     # lutris-free # 游戏管理器
     # Heroic Games Launcher
+    haruna
     heroic
     # clash-verge-rev
-    mihomo
     ludusavi
     _64gram
     opencode # AI 编程助手（当前运行中的本会话依赖此包）
