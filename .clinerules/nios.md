@@ -9,14 +9,14 @@
 - **网络管理**: NetworkManager
 - **时区与语言**: Asia/Shanghai, zh_CN.UTF-8
 - **Kernel**: Linux 7.1.5-zen1
-- **Shell**: fish (官方文档址：https://fishshell.com/docs/current/index.html)
-- **终端**: Alacritty (官方文档址：https://alacritty.org/config-alacritty.html)
-- **终端复用器**: zellij (官方文档址：https://zellij.dev/documentation/options.html)
+- **Shell**: fish (官方文档地址：https://fishshell.com/docs/current/index.html)
+- **终端**: Alacritty (官方文档地址：https://alacritty.org/config-alacritty.html)
+- **终端复用器**: zellij (官方文档地址：https://zellij.dev/documentation/options.html)
 - **Nix 版本**: 2.28.x（Unstable 26.11 配套）
 - **系统配置入口**: /etc/nixos/configuration.nix
 - **用户配置入口**: /etc/nixos/home/default.nix
 - **核心诉求**: 构建一套统一、可复现、无状态的系统配置，零冲突、零冗余。
-- **硬件环境**: 目录下包含多个配置文件，该配置是为了多台系统配置，故目录下包含多个配置文件。务必针对当前硬件环境进行条件化配置，严禁一刀切！！
+- **硬件环境**: 目录下包含多个配置文件，本配置服务于多台系统。务必针对当前硬件环境进行条件化配置，严禁一刀切！！
 - **代理状态**: clash-verge-rev 全局代理
 
 ## 严格遵循的规则（必须遵守）
@@ -34,7 +34,7 @@
     - NixOS 模块是否完整支持该软件的所有特性
     - 是否有成功案例或官方文档证明该配置在 NixOS 环境下可行
     - **特别注意**: 对于新兴功能（如 sing-box 的 providers 订阅功能），必须先验证 NixOS 模块是否支持，不能仅因为软件本身支持就认为在 NixOS 中可用
-9.  **严禁重复配置**: 绝对禁止配置前检查所有配置，没有重复配置项，冲突项。
+9.  **严禁重复配置**: 配置前必须检查所有现有配置，确保没有重复配置项、冲突项。
 10. **安全配置验证**: 在添加任何安全相关配置（如 security.lockKernelModules）前，必须验证其对系统功能的实际影响。某些安全选项会破坏硬件驱动加载，导致网络、显示等基本功能失效。
 11. **测试验证与回滚流程**: 任何配置变更必须经过以下流程：
     - 在配置文件中添加注释说明配置来源和目的
@@ -61,7 +61,7 @@
     - 涉及 `pkgs` 依赖时，优先使用 `pkgs.xxxx` 而非硬编码 store path
 17. **配置注释规范**: 
     - 每个新增配置项必须附带注释，说明：配置目的（一句话）、官方文档链接（NixOS 手册或 Home Manager 选项页）、与其他配置的依赖关系（如有）
-18. **配置回归排查协议（知乎教训，2026-08-15）**:
+18. **配置回归排查协议（微信输入法事故复盘，2026-08-15）**:
     - **凡是"改配置后功能失效"且此前可用的问题，必须先做配置变更审查（git diff），严禁直接投入运行时取证（进程 environ / XIM / DBus / socket 探测）**。配置变更史是此类问题的最短路径；运行时取证只能用于验证，不能用于定位。
     - 具体流程（强制）：
       1. `cd /etc/nixos && git log --oneline -20` 列出近期所有配置变更
@@ -70,7 +70,7 @@
       4. 对可疑变更，先验证其提交说明是否"因果倒置"（如把消除某种冗余当作目的，却破坏了功能通路）
     - 完整案例复盘见：`/etc/nixos/.clinerules/incidents.md`（2026-08-15 微信输入法事件）
 19. **KDE Plasma Wayland 输入法红线（禁止违背）**:
-    - KDE Plasma Wayland 下，fcitx5 必须由 **KWin 托管启动**。kwinrc `[Wayland] InputMethod=/run/current-system/sw/share/applications/org.fcitx.Fcitx5.desktop` 是 KWin 加载输入法托管组件（inputmethod.cpp）的**唯一开关**，**严禁删除**（无论任何"避免重复启动/清理冗余"理由）。
+    - KDE Plasma Wayland 下，fcitx5 必须由 **KWin 托管启动**。kwinrc `[Wayland] InputMethod=/run/current-system/sw/share/applications/org.fcitx.Fcitx5.desktop` 是 KWin 识别并托管输入法的配置入口，**严禁删除**（无论任何"避免重复启动/清理冗余"理由）。
     - 官方依据:
       - ArchWiki Fcitx5 — KDE Plasma: "Plasma on Wayland requires the input method process to be invoked by KWin" https://wiki.archlinux.org/title/Fcitx5
       - fcitx5 官方 Wiki: "KWin Wayland 5.24+: You will need to let KWin start input method as a special client" https://fcitx-im.org/wiki/Special:MyLanguage/Setup_Fcitx_5

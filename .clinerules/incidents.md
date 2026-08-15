@@ -27,7 +27,7 @@
 
 - **机制**（官方文档确认）：
   - KDE Plasma Wayland 要求输入法进程**由 KWin 调用**（ArchWiki: "Plasma on Wayland requires the input method process to be invoked by KWin"）。
-  - 该 `InputMethod=` 行正是 KWin 加载输入法托管组件（kwin/src/inputmethod.cpp）的唯一开关。
+  - 该 `InputMethod=` 行是 KWin 识别并托管输入法的配置入口。
   - 微信渲染器跑在 XWayland，其 IME 状态必须经 KWin 转发给 fcitx5。删除该行 → KWin 不托管输入法 → XWayland 应用输入法失效。
   - "duplicate fcitx5 startup" 是伪问题：官方正确做法是让 KWin 托管 + **禁用 autostart desktop**，而非删除 `InputMethod=`。
 
