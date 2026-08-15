@@ -96,7 +96,9 @@
     nodejs # Node.js 运行时
     python3 # Python 3 解释器
     uv # Python 包管理器
-
+    rust-analyzer # Rust LSP server（opencode 使用）
+    typescript-language-server # TypeScript LSP server（opencode 使用）
+    taplo #（opencode 使用）
     # ═══════════════════════════════════════════════════════════
     # 系统信息工具
     # ═══════════════════════════════════════════════════════════

@@ -140,9 +140,9 @@
 
       # 二进制缓存镜像（优先级从高到低）
       substituters = [
+        "https://mirrors.ustc.edu.cn/nix-channels/store"
         "https://cache.nixos.org/"
         "https://nix-community.cachix.org"
-        "https://mirrors.ustc.edu.cn/nix-channels/store"
       ];
 
       trusted-public-keys = [
