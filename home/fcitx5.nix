@@ -120,13 +120,13 @@
         AutoSavePeriod=30
 
         [Behavior/DisabledAddons]
-        0=cloudpinyin
-        1=dbusfrontend
-        2=fcitx4frontend
-        3=ibusfrontend
-        4=pinyin
-        5=xim
-      '';
+        # ⚠️ DisabledAddons 整段已清空（2026-08-15）
+        # 原因: 与旧机（未声明式托管）行为对齐——旧机 fcitx5 addon 全部默认启用。
+        #       保留 dbusfrontend/ibusfrontend 等，避免沙盒应用（微信/QQ）
+        #       的 DBus 输入前端被禁用后无法连接 fcitx5。
+        # 注意: XIM 前端（xim）不在此处禁用，保持启用。
+        # 回滚: 恢复 0=cloudpinyin ~ 4=pinyin 后 rebuild   
+        '';  
     };
 
     # ── 输入法列表 profile ───────────────────────────────────

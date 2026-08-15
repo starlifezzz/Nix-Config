@@ -61,3 +61,18 @@
     - 涉及 `pkgs` 依赖时，优先使用 `pkgs.xxxx` 而非硬编码 store path
 17. **配置注释规范**: 
     - 每个新增配置项必须附带注释，说明：配置目的（一句话）、官方文档链接（NixOS 手册或 Home Manager 选项页）、与其他配置的依赖关系（如有）
+18. **配置回归排查协议（知乎教训，2026-08-15）**:
+    - **凡是"改配置后功能失效"且此前可用的问题，必须先做配置变更审查（git diff），严禁直接投入运行时取证（进程 environ / XIM / DBus / socket 探测）**。配置变更史是此类问题的最短路径；运行时取证只能用于验证，不能用于定位。
+    - 具体流程（强制）：
+      1. `cd /etc/nixos && git log --oneline -20` 列出近期所有配置变更
+      2. `git log -p --all -- <疑似模块文件>` 精确 diff 每条变更
+      3. 用 `git diff <旧机/旧 generation> <当前>` 做多机/多版本对比
+      4. 对可疑变更，先验证其提交说明是否"因果倒置"（如把消除某种冗余当作目的，却破坏了功能通路）
+    - 完整案例复盘见：`/etc/nixos/.clinerules/incidents.md`（2026-08-15 微信输入法事件）
+19. **KDE Plasma Wayland 输入法红线（禁止违背）**:
+    - KDE Plasma Wayland 下，fcitx5 必须由 **KWin 托管启动**。kwinrc `[Wayland] InputMethod=/run/current-system/sw/share/applications/org.fcitx.Fcitx5.desktop` 是 KWin 加载输入法托管组件（inputmethod.cpp）的**唯一开关**，**严禁删除**（无论任何"避免重复启动/清理冗余"理由）。
+    - 官方依据:
+      - ArchWiki Fcitx5 — KDE Plasma: "Plasma on Wayland requires the input method process to be invoked by KWin" https://wiki.archlinux.org/title/Fcitx5
+      - fcitx5 官方 Wiki: "KWin Wayland 5.24+: You will need to let KWin start input method as a special client" https://fcitx-im.org/wiki/Special:MyLanguage/Setup_Fcitx_5
+      - 若担心重复启动：正确做法是**禁用 autostart desktop 文件**（`/run/current-system/sw/etc/xdg/autostart/org.fcitx.Fcitx5.desktop`），而**不是**删除 `InputMethod=`。
+    - 删除该行会导致 XWayland 应用（微信/QQ flatpak）IME 状态无法经 KWin 同步给 fcitx5 → 输入法失效。2026-08-07 提交 `a4df79b` 曾因"避免重复启动"删除该行，酿成 8 天排障事故。

@@ -94,9 +94,13 @@ in
       [Tiling]
       padding=4
 
-      # 已移除 InputMethod= 行：避免与 /etc/xdg/autostart/org.fcitx.Fcitx5.desktop
-      # 重复启动 fcitx5（日志：Unable to request dbus name）。KDE 会自动探测输入法。
+      # 恢复 KWin InputMethod= 行（2026-08-15）
+      # 原因: 2026-08-13 撤销后微信/QQ 无法输入中文。
+      # 依据: 旧机（Ventoy 复制配置，20260723）同一行存在且微信可正常输入，
+      #       证实该行不是冲突元凶，而是 KWin 转发输入所必需。
+      # 官方机制: KWin 通过 desktop 路径指定输入法，见 kwinrc(5) [Wayland] 组。
       [Wayland]
+      InputMethod=/run/current-system/sw/share/applications/org.fcitx.Fcitx5.desktop
       VirtualKeyboardEnabled=true
     '';
     force = true;
