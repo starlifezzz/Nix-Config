@@ -125,8 +125,6 @@
     #下载相关
     # parabolic
 
-    motrix-next
-
     #浏览器
     floorp-bin
 

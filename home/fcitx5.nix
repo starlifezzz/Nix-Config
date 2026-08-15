@@ -126,7 +126,7 @@
         #       的 DBus 输入前端被禁用后无法连接 fcitx5。
         # 注意: XIM 前端（xim）不在此处禁用，保持启用。
         # 回滚: 恢复 0=cloudpinyin ~ 4=pinyin 后 rebuild   
-        '';  
+      '';
     };
 
     # ── 输入法列表 profile ───────────────────────────────────
@@ -178,8 +178,10 @@
         UseInputMethodLanguageToDisplayText=True
         # 主题
         Theme=Material-Color-teal
-        # 深色主题
-        DarkTheme=plasma
+        # 深色主题（原为 plasma —— KDE 专属主题，COSMIC 下不存在，
+        # 会导致 fcitx5 每次启动调用 fcitx5-plasma-theme-generator 失败；
+        # 改用已安装的 Material-Color-teal 消除该残留进程）
+        DarkTheme=Material-Color-teal
         # 跟随系统浅色/深色设置
         UseDarkTheme=True
         # 当被主题和桌面支持时使用系统的重点色
