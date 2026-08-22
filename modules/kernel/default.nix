@@ -98,6 +98,8 @@
   # ═══════════════════════════════════════════════════════════════════════
   environment.variables = {
     # 关键：让 pressure-vessel (umu-run 沙箱) 暴露 gamemode 库
-    PRESSURE_VESSEL_EXTRA_LIBS = "${pkgs.gamemode}/lib";
+    # ⚠️ 必须用 ${pkgs.gamemode.lib}（lib output），gamemode 有 out/dev/lib/man 多个 output，
+    #    libgamemode.so 在 lib output 中，${pkgs.gamemode}/lib（out output）下没有该库
+    PRESSURE_VESSEL_EXTRA_LIBS = "${pkgs.gamemode.lib}/lib";
   };
 }
