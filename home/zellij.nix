@@ -1,33 +1,38 @@
 # /etc/nixos/home/zellij.nix
 # Zellij Terminal Multiplexer 配置
-# /etc/nixos/home/zellij.nix
-# Zellij Terminal Multiplexer 配置
 
 {
   programs.zellij = {
     enable = true;
 
+    # ═══ 基础配置（结构化，由 HM 生成 KDL，无注释语法风险）═══
+    settings = {
+      default_shell = "fish";
+      theme = "gruvbox-dark";
+      show_startup_tips = false;
+      session_serialization = false;
+
+      # v0.45.0 UI 适配
+      pane_frame_style = "full"; # 删除此行则使用新版单行标题栏
+      stacked_pane_list = false; # 删除此行则使用新版列表式 stacked
+      nested_session_handling = "ask"; # 嵌套会话策略
+      mouse_hover_tips = true; # 按需开启
+      mouse_scroll_resize = true; # 按需开启
+
+      # 终端特性
+      styled_underlines = true;
+      support_kitty_keyboard_protocol = true;
+      mouse_mode = true;
+      scroll_buffer_size = 50000;
+
+      # 剪贴板 & 序列化
+      copy_on_select = true;
+      serialize_pane_viewport = false;
+      # serialization_interval = 120;      # 默认 60 秒，按需取消注释
+    };
+
+    # ═══ 插件配置（HM 模块暂不支持结构化，保留 extraConfig）═══
     extraConfig = ''
-      // ═══ 基础设置 ═══
-      default_shell "fish"
-      theme "gruvbox-dark"
-      show_startup_tips false
-
-      // ═══ 终端特性 ═══
-      styled_underlines true
-      support_kitty_keyboard_protocol true
-      mouse_mode true
-      scroll_buffer_size 50000
-
-      // ═══ 剪贴板 ═══
-      copy_on_select true
-
-      // ═══ 会话序列化优化 ═══
-      // 默认就是 60 秒，无需修改；如要调整：
-      // serialization_interval 120
-      serialize_pane_viewport false
-
-      // ═══ 插件配置 ═══
       plugins {
         about location="zellij:about"
         compact-bar location="zellij:compact-bar"

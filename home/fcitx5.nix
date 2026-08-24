@@ -25,7 +25,7 @@
     GTK_IM_MODULE = "";
     QT_IM_MODULE = "";
     # XIM 客户端识别 fcitx5（兼容老程序/Java）
-    XMODIFIERS = "@im=fcitx";
+    XMODIFIERS = "@im=fcitx5";
     # SDL 应用输入法模块
     SDL_IM_MODULE = "fcitx";
   };
