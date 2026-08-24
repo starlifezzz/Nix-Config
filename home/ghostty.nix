@@ -9,7 +9,7 @@ let
     export SHELL="${pkgs.fish}/bin/fish"
     export GTK_IM_MODULE=fcitx5
     export XMODIFIERS=@im=fcitx5
-    export GLFW_IM_MODULE=ibus
+    export GLFW_IM_MODULE=ibus  # Ghostty 官方 IME 桥接：fcitx5 通过 ibus 协议接入（已验证中文可输入）
     exec ${pkgs.ghostty}/bin/ghostty "$@"
   '';
 in
@@ -21,11 +21,11 @@ in
     installBatSyntax = true;
 
     # ════════════════════════════════════════════════════════
-    # 美化配置 - 透明背景、Catppuccin 主题
+    # 美化配置 - 透明背景、Lovelace 主题
     # ════════════════════════════════════════════════════════
     settings = {
       command = "${pkgs.zellij}/bin/zellij";
-      theme = "Lovelace"; # 注释里的 Catppuccin 改掉
+      theme = "Lovelace";
       background-opacity = 0.92;
       background-opacity-cells = true; # ➕ 新增：zellij 内也透明
       background-blur = true; # ✅ 保留！官方合法，Plasma 上有效
