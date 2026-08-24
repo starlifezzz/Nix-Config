@@ -4,6 +4,15 @@
 # Home Manager: https://nix-community.github.io/home-manager/unstable/options.html#opt-programs.ghostty.enable
 { pkgs, ... }:
 
+let
+  ghostty-ime = pkgs.writeShellScriptBin "ghostty-ime" ''
+    export SHELL="${pkgs.fish}/bin/fish"
+    export GTK_IM_MODULE=fcitx5
+    export XMODIFIERS=@im=fcitx5
+    export GLFW_IM_MODULE=ibus
+    exec ${pkgs.ghostty}/bin/ghostty "$@"
+  '';
+in
 {
   programs.ghostty = {
     enable = true;
@@ -61,4 +70,20 @@
     };
 
   };
+
+  home.packages = [ ghostty-ime ];
+
+  # ✅ 用 home.file 强制写入
+  home.file.".local/share/applications/com.mitchellh.ghostty.desktop".force = true;
+  home.file.".local/share/applications/com.mitchellh.ghostty.desktop".text = ''
+    [Desktop Entry]
+    Name=Ghostty
+    Exec=${ghostty-ime}/bin/ghostty-ime %U
+    Icon=com.mitchellh.ghostty
+    Terminal=false
+    Type=Application
+    Categories=System;TerminalEmulator;
+    StartupWMClass=ghostty
+  '';
+
 }

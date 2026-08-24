@@ -25,7 +25,7 @@
     GTK_IM_MODULE = "";
     QT_IM_MODULE = "";
     # XIM 客户端识别 fcitx5（兼容老程序/Java）
-    XMODIFIERS = "@im=fcitx";
+    XMODIFIERS = "@im=fcitx5";
     # SDL 应用输入法模块
     SDL_IM_MODULE = "fcitx";
   };
@@ -126,7 +126,7 @@
         #       的 DBus 输入前端被禁用后无法连接 fcitx5。
         # 注意: XIM 前端（xim）不在此处禁用，保持启用。
         # 回滚: 恢复 0=cloudpinyin ~ 4=pinyin 后 rebuild   
-        '';  
+      '';
     };
 
     # ── 输入法列表 profile ───────────────────────────────────
