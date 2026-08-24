@@ -75,6 +75,9 @@
     settings = {
       general = {
         renice = 10;
+        # 禁用屏保抑制（KDE 无 org.freedesktop.ScreenSaver 服务，避免 D-Bus 报错）
+        # 依据: https://wiki.nixos.org/wiki/GameMode "Known Errors" 章节
+        inhibit_screensaver = 0;
       };
       cpu = {
         cpu_affinity = true;
