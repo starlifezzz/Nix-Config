@@ -7,9 +7,13 @@
 let
   ghostty-ime = pkgs.writeShellScriptBin "ghostty-ime" ''
     export SHELL="${pkgs.fish}/bin/fish"
-    export GTK_IM_MODULE=fcitx5
+    # 方案 1：GTK_IM_MODULE=wayland → Wayland text-input 协议
+    # 依据: Ghostty discussion #3628，fcitx5 开发者 wengxt 确认该方式总是有效，
+    #       且根治 Ghostty key-release 过滤 bug（Ctrl+Shift 切换输入法失效问题）
+    # 说明: Ghostty 主 runtime 是 GTK，GLFW_IM_MODULE 无效（官方 collaborator 确认）
+    export GTK_IM_MODULE=wayland
+    # XWayland 应用（如从终端启动的 vscode）回退用 fcitx5 模块
     export XMODIFIERS=@im=fcitx5
-    export GLFW_IM_MODULE=ibus  # Ghostty 官方 IME 桥接：fcitx5 通过 ibus 协议接入（已验证中文可输入）
     exec ${pkgs.ghostty}/bin/ghostty "$@"
   '';
 in
