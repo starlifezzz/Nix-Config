@@ -67,6 +67,8 @@
     isNormalUser = true; # 普通用户
     description = "zhangchongjie";
     # 添加 netadmin 权限以允许 Clash 创建 TUN 设备
+    # gamemode 组：允许无密码切换 CPU governor（cpugovctl）
+    # 依据: https://wiki.nixos.org/wiki/GameMode "Verifying Optimisations" 章节
     extraGroups = [
       "networkmanager"
       "wheel"
@@ -74,6 +76,7 @@
       "video"
       "render"
       "input"
+      "gamemode"
     ];
     # 设置默认 shell 为 fish
     shell = pkgs.fish;
