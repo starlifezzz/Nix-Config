@@ -179,6 +179,11 @@
     optimise.automatic = true;
   };
 
+  # ── 指纹认证服务 (fprintd + libfprint 主库) ────────────────
+  # 目的：启动 fprintd 守护进程，安装含 Synaptics 驱动的 libfprint
+  # 依赖：本机 USB 指纹锁 06cb:00f0；与 SDDM/KDE 无冲突（fprintd 是独立 D-Bus 服务）
+  services.fprintd.enable = true;
+
   # 设置 /etc/nixos 目录权限，允许 zhangchongjie 用户完全控制
   systemd.tmpfiles.rules = [
     "d /etc/nixos 0775 zhangchongjie users -"
