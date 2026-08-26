@@ -17,7 +17,6 @@
     # 修改这里来切换硬件配置
     ./modules/hardware/cpu/ryzen-5600.nix # 可选：ryzen-1600x, ryzen-2600, ryzen-3600, ryzen-5600
     ./modules/hardware/gpu/rx-6600xt.nix # 可选：r9-370, rx-5500xt, rx-6600xt
-    ./modules/hardware/fingerprint.nix # USB 指纹锁 (Synaptics Prometheus 06cb:00df)
 
     # ✅ 内核与启动参数模块
     ./modules/kernel/default.nix
