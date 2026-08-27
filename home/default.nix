@@ -87,6 +87,7 @@
     kdePackages.filelight
     mihomo
     loupe
+    gnome-disk-utility
 
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器
