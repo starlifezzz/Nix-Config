@@ -1,0 +1,14 @@
+{
+    (
+        modifiers: [
+            Ctrl,
+            Alt,
+        ],
+        key: "a",
+    ): System(Screenshot),
+    (
+        modifiers: [
+            Super,
+        ],
+    ): System(AppLibrary),
+}

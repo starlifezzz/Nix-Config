@@ -1,14 +1,1 @@
-(
-    base: "#DEBA6FFF",
-    hover: "#C5A96DFF",
-    pressed: "#7A6842FF",
-    selected: "#C5A96DFF",
-    selected_text: "#DEBA6FFF",
-    focus: "#DEBA6FFF",
-    divider: "#000000FF",
-    on: "#000000FF",
-    disabled: "#DEBA6FFF",
-    on_disabled: "#6F5D38FF",
-    border: "#DEBA6FFF",
-    disabled_border: "#DEBA6F80",
-)
+/nix/store/05h1n1ib7d44vzvyvwk7s9i5wn5mjx01-home-manager-files/.config/cosmic/com.system76.CosmicTheme.Dark/v2/accent

@@ -1,14 +1,1 @@
-(
-    base: "#00000000",
-    hover: "#00000000",
-    pressed: "#16161680",
-    selected: "#00000000",
-    selected_text: "#DEBA6FFF",
-    focus: "#DEBA6FFF",
-    divider: "#FFFFFF33",
-    on: "#FFFFFFFF",
-    disabled: "#00000000",
-    on_disabled: "#FFFFFFA6",
-    border: "#BEBEBEFF",
-    disabled_border: "#BEBEBE80",
-)
+/nix/store/05h1n1ib7d44vzvyvwk7s9i5wn5mjx01-home-manager-files/.config/cosmic/com.system76.CosmicTheme.Dark/v2/list_button

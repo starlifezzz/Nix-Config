@@ -86,6 +86,7 @@
     remmina
     kdePackages.filelight
     mihomo
+    loupe
 
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器

@@ -37,8 +37,8 @@ in
       font-family = "LXGW WenKai Mono";
       font-size = 14;
 
-      window-width = 110;
-      window-height = 29;
+      window-width = 126;
+      window-height = 34;
       window-padding-x = 8;
       window-padding-y = 4;
       window-decoration = "auto";
@@ -82,7 +82,7 @@ in
   home.file.".local/share/applications/com.mitchellh.ghostty.desktop".text = ''
     [Desktop Entry]
     Name=Ghostty
-    Exec=${ghostty-ime}/bin/ghostty-ime %U
+    Exec=${ghostty-ime}/bin/ghostty-ime
     Icon=com.mitchellh.ghostty
     Terminal=false
     Type=Application
