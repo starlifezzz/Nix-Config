@@ -1,1 +1,14 @@
-/nix/store/05h1n1ib7d44vzvyvwk7s9i5wn5mjx01-home-manager-files/.config/cosmic/com.system76.CosmicTheme.Light/v2/destructive_button
+(
+    base: "#78292EFF",
+    hover: "#743539FF",
+    pressed: "#9B7376FF",
+    selected: "#743539FF",
+    selected_text: "#B6174BFF",
+    focus: "#B6174BFF",
+    divider: "#DEDEDEFF",
+    on: "#FFFFFFFF",
+    disabled: "#78292EFF",
+    on_disabled: "#FFFFFF80",
+    border: "#78292EFF",
+    disabled_border: "#78292E80",
+)

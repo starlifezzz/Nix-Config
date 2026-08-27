@@ -1,1 +1,14 @@
-/nix/store/05h1n1ib7d44vzvyvwk7s9i5wn5mjx01-home-manager-files/.config/cosmic/com.system76.CosmicTheme.Light/v2/warning_button
+(
+    base: "#534800FF",
+    hover: "#564D14FF",
+    pressed: "#88835FFF",
+    selected: "#564D14FF",
+    selected_text: "#B6174BFF",
+    focus: "#B6174BFF",
+    divider: "#000000FF",
+    on: "#FFFFFFFF",
+    disabled: "#534800FF",
+    on_disabled: "#FFFFFF80",
+    border: "#534800FF",
+    disabled_border: "#53480080",
+)
