@@ -176,10 +176,54 @@ sudo nixos-rebuild switch --flake .#nixos --offline
 │
 ├── scripts/                       # 实用脚本
 │   ├── start-clash-tun.sh         # Clash TUN启动脚本
-│   └── check-clash-tun.sh         # TUN状态检查脚本
+│   ├── check-clash-tun.sh         # TUN状态检查脚本
+│   └── sync-cosmic.sh             # COSMIC配置快照同步脚本
 │
 └── README.md                      # 本文档
 ```
+
+---
+
+## 🖥️ COSMIC 配置更新方法（声明式）
+
+COSMIC 桌面配置已声明式固化在 `home/cosmic-config/`（由 `home/cosmic.nix` 通过 `xdg.configFile` 加载）。
+**在设置面板（GUI）改配置后，必须用脚本同步回快照**，否则下次 `switch` 会被声明式版本覆盖。
+
+### 一键同步
+
+```bash
+# 1. 先看差异（默认模式，不改任何文件）
+/etc/nixos/scripts/sync-cosmic.sh diff
+
+# 2. 确认差异符合预期后，应用同步（自动排除壁纸等机器路径）
+/etc/nixos/scripts/sync-cosmic.sh apply
+
+# 3. 审查 + 提交（脚本会提示）
+cd /etc/nixos
+git diff home/cosmic-config
+git add home/cosmic-config && git commit -m "cosmic: 同步桌面配置"
+
+# 4. 构建验证 + 生效
+sudo nixos-rebuild build --flake /etc/nixos#nixos
+sudo nixos-rebuild switch --flake /etc/nixos#nixos
+```
+
+### 脚本安全设计
+
+| 特性 | 说明 |
+|------|------|
+| `diff`（默认） | 只显示快照 vs 运行时的差异，绝不自动覆盖 |
+| `apply` | 显式传入才同步；自动排除壁纸/机器路径文件 |
+| 静态路径防护 | 同步后自动检查，若快照中出现 `run/media` 或 `/home/` 路径引用则中止并报错 |
+
+### 排除规则（机器相关，不进快照）
+
+| 文件 | 原因 |
+|------|------|
+| `CosmicBackground/v1/all`、`backgrounds`、`output.*` | 壁纸路径（每台 PC 不同） |
+| `CosmicSettings.Wallpaper/v1/current-folder`、`recent-folders` | 壁纸目录历史（机器相关） |
+
+**原则**：只固化与机器无关的设置（主题/面板/快捷键/锁屏时间/文件管理器等），壁纸类静态引用留空（新 PC 回落到默认壁纸，不报错）。
 
 ---
 

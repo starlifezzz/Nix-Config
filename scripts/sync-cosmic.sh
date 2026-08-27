@@ -42,11 +42,26 @@ case "${MODE}" in
   apply)
     echo "将快照目录同步为运行时状态..."
     # 同步: 新增/修改运行时中新出现的文件（保留快照中已被删除的占位——不删，保守策略）
+    # 排除壁纸/静态路径引用（机器相关，切 PC 后路径不同，不允许进快照）
     rsync -a --delete-excluded \
       --exclude='.DS_Store' \
+      --exclude='/com.system76.CosmicBackground/v1/all' \
+      --exclude='/com.system76.CosmicBackground/v1/backgrounds' \
+      --exclude='/com.system76.CosmicBackground/v1/output.*' \
+      --exclude='/com.system76.CosmicSettings.Wallpaper/v1/current-folder' \
+      --exclude='/com.system76.CosmicSettings.Wallpaper/v1/recent-folders' \
       "${LIVE_DIR}/" "${SNAPSHOT_DIR}/"
-    echo "已同步。请审查 git diff 后提交:"
+    # 残留检查: 禁止任何含机器路径的文件进入快照
+    if grep -rlE 'run/media|/home/zhangchongjie' "${SNAPSHOT_DIR}/" 2>/dev/null | grep -q .; then
+      echo "⚠️  警告: 快照中发现机器路径引用，已阻止提交。请手动检查:" >&2
+      grep -rlE 'run/media|/home/zhangchongjie' "${SNAPSHOT_DIR}/" 2>/dev/null >&2
+      exit 1
+    fi
+    echo "✅ 已同步（${SNAPSHOT_DIR}）"
+    echo "请审查 git diff 后提交:"
     echo "  cd /etc/nixos && git diff home/cosmic-config && git add home/cosmic-config && git commit"
+    echo "提交后构建验证:"
+    echo "  sudo nixos-rebuild build --flake /etc/nixos#nixos"
     ;;
   *)
     echo "用法: ${BASH_SOURCE[0]} [diff|apply]" >&2
