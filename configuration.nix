@@ -104,7 +104,7 @@
     home-manager # Home Manager（NixOS 集成模式）
 
     # KDE Connect（手机与电脑互联）— 用户明确保留，不依赖 Plasma 桌面
-    # kdePackages.kdeconnect-kde
+    kdePackages.kdeconnect-kde
 
     # 全局依赖库
     ffmpeg-full # 完整的 FFmpeg（多媒体库）
