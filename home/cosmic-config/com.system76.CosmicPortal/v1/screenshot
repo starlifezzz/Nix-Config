@@ -1,10 +1,1 @@
-(
-    save_location: Clipboard,
-    choice: Rectangle,
-    last_rectangle: Some((
-        left: 634,
-        top: 101,
-        right: 1952,
-        bottom: 1306,
-    )),
-)
+/nix/store/3z5qqpbsvsw68ciyzc7s1rqrglzqw63s-home-manager-files/.config/cosmic/com.system76.CosmicPortal/v1/screenshot

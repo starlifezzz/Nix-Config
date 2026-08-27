@@ -1,1 +1,14 @@
-/nix/store/bjz2wkjaa59pb8aj8r7q2m7hj6zn15zh-home-manager-files/.config/cosmic/com.system76.CosmicTheme.Light/v2/success_button
+(
+    base: "#185529FF",
+    hover: "#275835FF",
+    pressed: "#6B8973FF",
+    selected: "#275835FF",
+    selected_text: "#B6174BFF",
+    focus: "#B6174BFF",
+    divider: "#DEDEDEFF",
+    on: "#FFFFFFFF",
+    disabled: "#185529FF",
+    on_disabled: "#FFFFFF80",
+    border: "#185529FF",
+    disabled_border: "#18552980",
+)
