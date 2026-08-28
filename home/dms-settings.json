@@ -123,7 +123,8 @@
     {
       "id": "brightnessSlider",
       "enabled": true,
-      "width": 50
+      "width": 50,
+      "deviceName": "ddc:i2c-6"
     },
     {
       "id": "wifi",
@@ -273,7 +274,7 @@
   "dankLauncherV2UnloadOnClose": false,
   "dankLauncherV2IncludeFilesInAll": false,
   "dankLauncherV2IncludeFoldersInAll": false,
-  "launcherUseOverlayLayer": false,
+  "launcherUseOverlayLayer": true,
   "launcherStyle": "full",
   "spotlightBarShowModeChips": false,
   "keybindsFloatingWindow": false,
@@ -356,7 +357,7 @@
   "soundPluggedIn": true,
   "muteSoundsWhenMediaPlaying": true,
   "acMonitorTimeout": 0,
-  "acLockTimeout": 0,
+  "acLockTimeout": 30,
   "acSuspendTimeout": 0,
   "acSuspendBehavior": 0,
   "acProfileName": "",
@@ -593,8 +594,8 @@
       "innerPadding": 4,
       "barInsetPadding": -1,
       "bottomGap": 0,
-      "transparency": 0.4,
-      "widgetTransparency": 0.4,
+      "transparency": 0.15,
+      "widgetTransparency": 0.15,
       "squareCorners": false,
       "noBackground": false,
       "maximizeWidgetIcons": false,
@@ -707,7 +708,14 @@
   "desktopWidgetGridSettings": {},
   "desktopWidgetInstances": [],
   "desktopWidgetGroups": [],
-  "builtInPluginSettings": {},
+  "builtInPluginSettings": {
+    "dms_settings_search": {
+      "trigger": "?"
+    },
+    "dms_clipboard_search": {
+      "trigger": "cb"
+    }
+  },
   "clipboardClickToPaste": false,
   "clipboardEnterToPaste": false,
   "clipboardRememberTypeFilter": false,

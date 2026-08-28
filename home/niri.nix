@@ -29,8 +29,7 @@
     # mako 已移除：DMS 接管通知（org.freedesktop.Notifications）
     swaybg # 壁纸
     matugen # 壁纸自动配色（Material You）
-    swaylock-effects # 锁屏（模糊特效）
-    swayidle # 闲置管理
+    # swaylock-effects/swayidle 已移除（DMS 自带锁屏+会话管理）
     wlogout # 关机菜单
     grim # 截图
     slurp # 区域选择
@@ -116,6 +115,15 @@
         };
         "Alt+Shift+F" = {
           fullscreen-window = { };
+        };
+        # 外接显示器亮度（DMS 控制中心不含 DDC——用命令行步进）
+        "Alt+Shift+Up" = {
+          _props."hotkey-overlay-title" = "Brightness Up";
+          "spawn-sh" = "${pkgs.bash}/bin/bash ${./scripts/brightness-step.sh} up";
+        };
+        "Alt+Shift+Down" = {
+          _props."hotkey-overlay-title" = "Brightness Down";
+          "spawn-sh" = "${pkgs.bash}/bin/bash ${./scripts/brightness-step.sh} down";
         };
         "Alt+V" = {
           _props."hotkey-overlay-title" = "Toggle Floating";
@@ -503,20 +511,6 @@
       };
       Install = {
         WantedBy = [ "niri.service" ];
-      };
-    };
-    # swayidle: 闲置锁屏
-    swayidle = {
-      Unit = {
-        Description = "Sway idle manager";
-        After = [ "graphical-session.target" ];
-      };
-      Service = {
-        # 注意: ExecStart 必须是单行（systemd 不支持续行）
-        ExecStart = "${pkgs.swayidle}/bin/swayidle -w timeout 600 '${pkgs.swaylock-effects}/bin/swaylock -f' timeout 900 '${pkgs.swaybg}/bin/swaybg' before-sleep '${pkgs.swaylock-effects}/bin/swaylock -f'";
-      };
-      Install = {
-        WantedBy = [ "graphical-session.target" ];
       };
     };
   };
