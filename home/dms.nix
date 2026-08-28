@@ -15,12 +15,9 @@
   ...
 }:
 {
-  # ═══ DMS 配置声明式管理 ═══
-  # settings.json 完整声明（home/dms-settings.json，530 字段）
-  #   - bar 状态栏配置（widgets/autoHide/位置）由 HM 接管
-  #   - greeter 指纹等固定项
-  # 注: 动态配色在独立文件 dms-colors.json（matugen 生成）——不受此声明影响
-  # 修改方法: 改 home/dms-settings.json → rebuild
-  home.file.".config/DankMaterialShell/settings.json".source =
-    ./dms-settings.json;
+  # ═══ DMS 配置：DMS 自主 + HM 仓库同步 ═══
+  # settings.json 由 DMS 运行时管理（真实文件可写——HM 部署软链会只读导致 DMS 设置失效）
+  # home/dms-settings.json 是同步副本（版本控制/回滚）
+  # 工作流: DMS 设置中心改 → ./scripts/sync-dms-settings.sh（同步到 HM）→ rebuild
+  # ⚠️ 不部署 settings.json（避免 clobber + 只读冲突）
 }

@@ -37,6 +37,8 @@
     wl-clipboard # 剪贴板（wl-copy/wl-paste）
     # 系统托盘图标支持（kdeconnect 托盘图标需要）
     libdbusmenu-gtk3
+    # GTK 主题（Dolphin/Qt 应用美化——Material 风与 DMS 契合）
+    colloid-gtk-theme
     # 音量控制（niri 快捷键用）
     playerctl
   ];
@@ -58,7 +60,9 @@
           tap = { };
           "natural-scroll" = { };
         };
-        mouse = { };
+        mouse = {
+          "accel-profile" = "flat"; # 关闭鼠标加速（libinput 默认 adaptive 加速——用户对比 Win 明显）
+        };
       };
 
       # ═══ 显示器：完全自动化（零写死）═══
@@ -200,13 +204,19 @@
     extraConfig = ''
       // ═══ 自动显示器配置（niri-auto-output 脚本生成，最高分辨率+最高刷新率+VRR）═══
       include optional=true "output.kdl"
+      // DMS 显示器设置（DMS 设置中心管理：VRR/分辨率/位置等）
+      // 注: 在 output.kdl 之后 include → DMS 设置优先（自动检测为 fallback）
+      include optional=true "dms/outputs.kdl"
 
       // ═══ DMS 集成分片（DMS 设置中心写入 ~/.config/niri/dms/*.kdl）═══
       // 预置 include → DMS 检测到已包含 → 只写可写分片（不尝试改只读 config.kdl）
       // 修复: DMS 键盘快捷键/窗口规则等设置无法保存（Fix failed）
       include optional=true "dms/binds.kdl"
       include optional=true "dms/binds-user.kdl"
+      include optional=true "dms/cursor.kdl"
       include optional=true "dms/colors.kdl"
+      include optional=true "dms/input.kdl"
+      include optional=true "dms/alttab.kdl"
       include optional=true "dms/layout.kdl"
       include optional=true "dms/windowrules.kdl"
       include optional=true "dms/wpblur.kdl"
@@ -255,7 +265,8 @@
 
       // 基础服务（DMS shell 由 dms.service 启动，见 programs.dank-material-shell）
       spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP"
-      spawn-at-startup "fcitx5" "-d"
+      // fcitx5 已由 i18n.inputMethod 的 XDG autostart 启动——此处不重复
+      // （之前双实例: "Failed to create addon: dbus ... another fcitx already running"）
       spawn-at-startup "kdeconnect-indicator"
       // PolicyKit 授权弹窗：由 DMS 自带 agent 处理（样式统一）
       // （移除了 polkit-kde-agent——避免与 DMS agent 冲突 "already exists"）
@@ -422,7 +433,9 @@
   # DMS 图标/主题依赖 GTK 设置
   gtk = {
     enable = true;
-    theme.name = "Adwaita";
+    # Colloid-Dark: Material 风（与 DMS 契合），替代默认 Adwaita
+    # Dolphin 等 Qt 应用通过 QT_QPA_PLATFORMTHEME=gtk3 读取
+    theme.name = "Colloid-Dark";
     iconTheme.name = "Papirus";
     font.name = "LXGW WenKai Screen";
     font.size = 10;

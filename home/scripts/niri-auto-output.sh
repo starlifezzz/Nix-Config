@@ -31,7 +31,7 @@ for block in blocks:
     best = max(modes, key=lambda t: (int(t[0]) * int(t[1]), float(t[2])))
     result.append(f'output "{name}" {{')
     result.append(f'    mode "{best[0]}x{best[1]}@{best[2]}"')
-    result.append('    variable-refresh-rate')
+    # VRR 已关闭（用户反馈日常闪烁）——如需游戏 FreeSync 再开
     result.append('}')
     result.append('')
 print('\n'.join(result))
