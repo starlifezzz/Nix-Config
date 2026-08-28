@@ -62,6 +62,7 @@
   };
 
   # 用户配置
+  users.groups.i2c = { }; # i2c 组（ddcutil 访问 /dev/i2c-N 需要）
   users.users.zhangchongjie = {
     isNormalUser = true; # 普通用户
     description = "zhangchongjie";
@@ -76,6 +77,7 @@
       "render"
       "input"
       "gamemode"
+      "i2c" # 访问 /dev/i2c-N（ddcutil 调外接显示器亮度需要）
     ];
     # 设置默认 shell 为 fish
     shell = pkgs.fish;
@@ -167,6 +169,13 @@
   # 目的：启动 fprintd 守护进程，安装含 Synaptics 驱动的 libfprint
   # 依赖：本机 USB 指纹锁 06cb:00f0；与 SDDM/KDE 无冲突（fprintd 是独立 D-Bus 服务）
   services.fprintd.enable = true;
+
+  # ── i2c-dev 设备权限（ddcutil 调外接显示器亮度）────────────
+  # 依据: https://www.ddcutil.com/i2c_permissions
+  # 内核创建 /dev/i2c-N 默认 root:root，需 udev 规则改为 i2c 组
+  services.udev.extraRules = ''
+    SUBSYSTEM=="i2c-dev", GROUP="i2c", MODE="0660"
+  '';
 
   # 设置 /etc/nixos 目录权限，允许 zhangchongjie 用户完全控制
   systemd.tmpfiles.rules = [

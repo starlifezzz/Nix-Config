@@ -38,6 +38,13 @@ Singleton {
     readonly property bool wifiConnected: activeWifi !== null
     readonly property bool wiredConnected: wiredDevices.some(device => device.connected)
     readonly property bool ethernetConnected: wiredConnected
+    readonly property int wiredLinkSpeed: {
+        for (const device of wiredDevices) {
+            if (device.connected && device.linkSpeed > 0)
+                return device.linkSpeed;
+        }
+        return 0;
+    }
 
     // Quickshell's NetworkManager backend already groups BSSIDs by SSID and keeps the
     // strongest AP as the WifiNetwork representative. This second pass only merges the
@@ -86,11 +93,14 @@ Singleton {
         }))
     readonly property var activeWifi: accessPoints.find(network => network.active) || null
     readonly property var activeNetwork: {
+        // WiFi 优先：有活跃 WiFi 显示 SSID，否则有线（避免双连时误显示有线）
+        if (activeWifi)
+            return activeWifi;
         for (const device of root._nativeWiredDevices) {
             if (device && device.connected && device.network)
                 return root._describeWiredNetwork(device, device.network);
         }
-        return activeWifi;
+        return null;
     }
     readonly property string activeSsid: activeWifi ? activeWifi.ssid : ""
     readonly property string activeConnection: activeNetwork
@@ -158,8 +168,9 @@ Singleton {
     }
 
     function _describeWiredNetwork(device, network) {
+        // 有线统一显示"有线网络"（不显示设备名 enp34s0 / 连接名，保持中文简洁）
         return {
-            "name": String(network.name || device.name || qsTr("有线网络")),
+            "name": qsTr("有线网络"),
             "deviceName": String(device.name || ""),
             "type": "wired",
             "known": !!network.known,

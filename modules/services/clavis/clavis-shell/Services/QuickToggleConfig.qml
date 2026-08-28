@@ -22,7 +22,8 @@ Singleton {
             { "type": "mic", "size": 1 },
             { "type": "audio", "size": 2 },
             { "type": "theme", "size": 2 },
-            { "type": "dnd", "size": 1 }
+            { "type": "dnd", "size": 1 },
+            { "type": "windowMode", "size": 1 }
         ];
     }
 

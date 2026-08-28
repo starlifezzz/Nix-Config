@@ -4221,6 +4221,31 @@
         <translation>免打扰</translation>
     </message>
     <message>
+        <location filename="../Modules/QuickSettings/QuickSettingsSurface.qml" line="81"/>
+        <source>窗口模式</source>
+        <translation>窗口模式</translation>
+    </message>
+    <message>
+        <location filename="../Modules/QuickSettings/QuickSettingsSurface.qml" line="109"/>
+        <source>浮动</source>
+        <translation>浮动</translation>
+    </message>
+    <message>
+        <location filename="../Modules/QuickSettings/QuickSettingsSurface.qml" line="109"/>
+        <source>平铺</source>
+        <translation>平铺</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Sidebars/Right/NetworkContent.qml"/>
+        <source>有线网络</source>
+        <translation>有线网络</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Sidebars/Right/NetworkContent.qml"/>
+        <source>个设备</source>
+        <translation>个设备</translation>
+    </message>
+    <message>
         <location filename="../Modules/QuickSettings/QuickSettingsSurface.qml" line="89"/>
         <location filename="../Modules/QuickSettings/QuickSettingsSurface.qml" line="95"/>
         <source>不可用</source>

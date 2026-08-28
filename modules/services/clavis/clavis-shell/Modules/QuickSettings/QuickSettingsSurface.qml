@@ -78,6 +78,7 @@ WidgetPanel {
         case "audio": return qsTr("声音");
         case "theme": return qsTr("外观");
         case "dnd": return qsTr("免打扰");
+        case "windowMode": return qsTr("窗口模式");
         default: return type;
         }
     }
@@ -106,6 +107,8 @@ WidgetPanel {
             return PersonalizationConfig.themeMode === "dark" ? qsTr("深色") : qsTr("浅色");
         case "dnd":
             return UiPreferences.dndEnabled ? qsTr("已开启") : qsTr("已关闭");
+        case "windowMode":
+            return WindowModeService.floating ? qsTr("浮动") : qsTr("平铺");
         default:
             return "";
         }
@@ -127,6 +130,8 @@ WidgetPanel {
             return PersonalizationConfig.themeMode === "dark" ? "dark_mode" : "light_mode";
         case "dnd":
             return UiPreferences.dndEnabled ? "notifications_paused" : "notifications";
+        case "windowMode":
+            return WindowModeService.floating ? "open_in_full" : "view_agenda";
         default:
             return "toggle_off";
         }
@@ -141,6 +146,7 @@ WidgetPanel {
         case "audio": return !Volume.sinkMuted && Volume.sinkVolume > 0;
         case "theme": return PersonalizationConfig.themeMode === "dark";
         case "dnd": return UiPreferences.dndEnabled;
+        case "windowMode": return WindowModeService.floating;
         default: return false;
         }
     }
@@ -175,6 +181,9 @@ WidgetPanel {
             break;
         case "dnd":
             UiPreferences.toggleDnd();
+            break;
+        case "windowMode":
+            WindowModeService.toggle();
             break;
         }
     }

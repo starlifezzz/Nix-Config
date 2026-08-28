@@ -39,6 +39,7 @@
     kernelModules = [
       "xpad" # Xbox 手柄驱动
       "ntsync" # NTSYNC内核驱动 - 提升Windows应用程序多线程同步性能
+      "i2c-dev" # 创建 /dev/i2c-N（ddcutil 调外接显示器亮度需要，Clavis Brightness 服务依赖）
     ];
 
     # 黑名单模块 - 防止与手柄冲突

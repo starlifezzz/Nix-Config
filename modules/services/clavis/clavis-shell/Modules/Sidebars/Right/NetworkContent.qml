@@ -195,12 +195,14 @@ WidgetPanel {
 
             SettingsRow {
                 Layout.fillWidth: true
-                iconName: NetworkService.activeConnectionType === "ETHERNET"
-                    ? "lan"
+                iconName: !NetworkService.wifiEnabled
+                    ? "wifi_off"
                     : NetworkService.wifiConnected ? "wifi" : "wifi_off"
-                title: NetworkService.activeNetwork
-                    ? NetworkService.activeConnection
-                    : qsTr("未连接")
+                title: !NetworkService.wifiEnabled
+                    ? qsTr("Wi-Fi 已关闭")
+                    : NetworkService.wifiConnected
+                        ? (NetworkService.activeConnection || qsTr("已连接"))
+                        : qsTr("未连接")
                 supportingText: root.connectivityText()
                 highlighted: NetworkService.connected
 
@@ -246,7 +248,7 @@ WidgetPanel {
         StyledFlickable {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            visible: root.networkUsable
+            visible: root.networkUsable || NetworkService.wiredDevices.length > 0
             contentWidth: width
             contentHeight: networkContent.implicitHeight
 
@@ -255,6 +257,26 @@ WidgetPanel {
 
                 width: parent.width - Appearance.spacing.small
                 spacing: Appearance.spacing.small
+
+                SettingsSection {
+                    Layout.fillWidth: true
+                    visible: NetworkService.wiredDevices.length > 0
+                    title: qsTr("有线网络")
+                    supportingText: NetworkService.wiredDevices.length + qsTr(" 个设备")
+
+                    // 固定一行"有线网络"：不显示裸设备名（enp34s0），
+                    // 状态取自 wiredConnected（任一有线设备连接）
+                    SettingsRow {
+                        Layout.fillWidth: true
+                        iconName: NetworkService.wiredConnected ? "lan" : "lan_disconnect"
+                        title: qsTr("有线网络")
+                        supportingText: NetworkService.wiredConnected
+                            ? qsTr("已连接") + (NetworkService.wiredLinkSpeed > 0
+                                ? " · " + NetworkService.wiredLinkSpeed + " Mb/s" : "")
+                            : qsTr("未连接")
+                        highlighted: NetworkService.wiredConnected
+                    }
+                }
 
                 SettingsSection {
                     Layout.fillWidth: true

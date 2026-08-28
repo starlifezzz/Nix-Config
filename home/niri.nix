@@ -12,7 +12,13 @@
 # 官方文档:
 #   niri 配置: https://niri-wm.github.io/niri/Configuration%3A-Introduction.html
 #   DMS: https://danklinux.com
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  nixosConfig,
+  ...
+}:
 
 let
   # Clavis 打包（与系统模块共用同一份源码）
@@ -60,125 +66,231 @@ in
     playerctl
   ];
 
-  # ── niri 配置文件 (KDL 格式) ────────────────────────────────
-  # niri 官方配置路径: ~/.config/niri/config.kdl
-  xdg.configFile."niri/config.kdl".text = ''
-        // Niri config (KDL)
-        // Beauty: gradient border + rounded corners + background blur + Catppuccin Mocha
+  # ── niri 窗口管理器（home-manager 声明式接管，替代手写 config.kdl）──
+  wayland.windowManager.niri = {
+    enable = true;
+    # checkConfig: 生成后自动 niri validate（build 期暴露语法错误）
 
-        // Clavis 集成分片（Clavis 设置中心写入 ~/.config/niri/clavis/*.kdl）
-        // 必须预置 include，否则 Clavis 因 config.kdl 只读报"权限不够"
-        include optional=true "clavis/effects.kdl"
-        include optional=true "clavis/cursor.kdl"
-        include optional=true "clavis/colors.kdl"
-        include optional=true "clavis/wallpaper.kdl"
+    # 声明式配置（settings → config.kdl，类型检查）
+    settings = {
+      # 输入设备
+      input = {
+        keyboard.xkb = {
+          layout = "us";
+          options = "ctrl:nocaps";
+        };
+        touchpad = {
+          tap = { };
+          "natural-scroll" = { };
+        };
+        mouse = { };
+      };
 
-        input {
-                    keyboard {
-                        xkb {
-                            layout "us"
-                            options "ctrl:nocaps"
-                        }
-                    }
-                    touchpad {
-                        tap
-                        natural-scroll
-                    }
-                    mouse {
-                    }
-                }
+      # ═══ 显示器：完全自动化（零写死）═══
+      # 分辨率/刷新率由 niri-auto-output 脚本动态检测生成 output.kdl
+      # （最高分辨率 + 最高刷新率 + VRR），换 4K 显示器自动适配
+      # 见 extraConfig 的 include + systemd.services.niri-auto-output
+      # 布局（Clavis overview 需要透明 workspace 背景）
+      layout = {
+        gaps = 16;
+        "background-color" = "transparent";
+        "focus-ring" = {
+          width = 2;
+          "active-color" = "#cba6f7";
+          "inactive-color" = "#45475a";
+        };
+        border = {
+          width = 2;
+          "active-color" = "#89b4fa";
+          "inactive-color" = "#313244";
+        };
+        "default-column-width" = {
+          proportion = 0.5;
+        };
+      };
 
-                output "PHL 325E1" {
-                    mode "2560x1440@75.000"
-                }
+      # 快捷键（声明式结构化）
+      binds = {
+        "Alt+Return" = {
+          _props."hotkey-overlay-title" = "Open Terminal";
+          spawn = [ "ghostty-ime" ];
+        };
+        "Alt+D" = {
+          _props."hotkey-overlay-title" = "Run Application";
+          spawn = [
+            "key"
+            "ipc"
+            "call"
+            "spotlight"
+            "toggle"
+          ];
+        };
+        "Alt+B" = {
+          _props."hotkey-overlay-title" = "Open Browser";
+          spawn = [ "floorp" ];
+        };
+        "Alt+Q" = {
+          close-window = { };
+        };
+        "Alt+F" = {
+          maximize-column = { };
+        };
+        "Alt+Shift+F" = {
+          fullscreen-window = { };
+        };
+        "Alt+V" = {
+          _props."hotkey-overlay-title" = "Toggle Floating";
+          "toggle-window-floating" = { };
+        };
+        "Alt+L" = {
+          _props."hotkey-overlay-title" = "Lock Screen";
+          spawn = [ "swaylock" ];
+        };
+        "Alt+P" = {
+          _props."hotkey-overlay-title" = "Power Menu";
+          spawn = [ "wlogout" ];
+        };
+        "Alt+M" = {
+          _props."hotkey-overlay-title" = "Open Dashboard";
+          spawn = [
+            "key"
+            "ipc"
+            "call"
+            "keystone"
+            "dashboard"
+          ];
+        };
+        "Alt+Shift+W" = {
+          _props."hotkey-overlay-title" = "Open Hub";
+          spawn = [
+            "key"
+            "ipc"
+            "call"
+            "keystone"
+            "hub"
+          ];
+        };
+        "Ctrl+Alt+A" = {
+          _props."hotkey-overlay-title" = "Screenshot Region";
+          "spawn-sh" =
+            "grim -g \"$(slurp)\" - | satty --filename - --output-filename /tmp/screenshot.png; wl-copy < /tmp/screenshot.png";
+        };
+        "Alt+Shift+C" = {
+          _props."hotkey-overlay-title" = "Clipboard History";
+          spawn = [ "key" "ipc" "call" "spotlight" "openMode" "clipboard" ];
+        };
+        "Alt+H" = {
+          focus-column-left = { };
+        };
+        "Alt+J" = {
+          focus-column-right = { };
+        };
+        "Alt+Shift+H" = {
+          move-column-left = { };
+        };
+        "Alt+Shift+J" = {
+          move-column-right = { };
+        };
+        "Alt+1" = {
+          focus-workspace = 1;
+        };
+        "Alt+2" = {
+          focus-workspace = 2;
+        };
+        "Alt+3" = {
+          focus-workspace = 3;
+        };
+        "Alt+4" = {
+          focus-workspace = 4;
+        };
+        "Alt+Shift+1" = {
+          "move-column-to-workspace" = 1;
+        };
+        "Alt+Shift+2" = {
+          "move-column-to-workspace" = 2;
+        };
+        "Alt+Shift+3" = {
+          "move-column-to-workspace" = 3;
+        };
+        "Alt+Shift+4" = {
+          "move-column-to-workspace" = 4;
+        };
+        "Alt+E" = {
+          quit = { };
+        };
+      };
+    };
 
-    layout {
-        gaps 16
-        // Clavis overview 背景需要透明 workspace 背景
-        // （backdrop 与窗口透明/模糊共存的必要条件，Clavis 文档 wallpaper-backends.md）
-        background-color "transparent"
-        focus-ring {
-                        width 2
-                        active-color "#cba6f7"
-                        inactive-color "#45475a"
-                    }
-                    border {
-                        width 2
-                        active-color "#89b4fa"
-                        inactive-color "#313244"
-                    }
-                    default-column-width { proportion 0.5; }
-                }
+    # 复杂/重复节点保持 KDL（window-rule ×5、spawn-at-startup ×4、include、layer-rule）
+    extraConfig = ''
+      // ═══ 自动显示器配置（niri-auto-output 脚本生成，最高分辨率+最高刷新率+VRR）═══
+      include optional=true "output.kdl"
 
-                // Clavis overview 壁纸层（放 backdrop 后面，Clavis 文档 wallpaper-backends.md）
-                layer-rule {
-                    match namespace="^clavis-overview-wallpaper$"
-                    place-within-backdrop true
-                }
+      // Clavis 集成分片（Clavis 设置中心写入 ~/.config/niri/clavis/*.kdl）
+      // 必须预置 include，否则 Clavis 因 config.kdl 只读报"权限不够"
+      include optional=true "clavis/effects.kdl"
+      include optional=true "clavis/cursor.kdl"
+      include optional=true "clavis/colors.kdl"
+      include optional=true "clavis/wallpaper.kdl"
+      // 窗口模式分片（Clavis 设置中心平铺/浮动开关管理）
+      include optional=true "clavis/floating.kdl"
 
-                // background blur for all windows (niri 26.04 feature)
-                window-rule {
-                    match app-id=r#"^.*$"#
-                    background-effect {
-                        blur true
-                    }
-                }
+      // Clavis overview 壁纸层（放 backdrop 后面，Clavis 文档 wallpaper-backends.md）
+      layer-rule {
+          match namespace="^clavis-overview-wallpaper$"
+          place-within-backdrop true
+      }
 
-                // rounded corners for all windows
-                window-rule {
-                    match app-id=r#"^.*$"#
-                    geometry-corner-radius 12
-                    clip-to-geometry true
-                }
+      // background blur for all windows (niri 26.04 feature)
+      window-rule {
+          match app-id=r#"^.*$"#
+          background-effect {
+              blur true
+          }
+      }
 
-                // terminal semi-transparent
-                window-rule {
-                    match app-id=r#"^ghostty|^com\.mitchellh\.ghostty$"#
-                    opacity 0.9
-                }
+      // ═══ 游戏窗口排除背景模糊（性能关键）═══
+      // 全局 blur 会让全屏游戏每帧被高斯模糊 → GPU 占用暴增（75帧→50帧）
+      // 实测: Steam/Proton 游戏 app-id = "steam_app_default"（RE2 实测确认）
+      window-rule {
+          match app-id=r#"(?i)(^re2$|^re[0-9]$|resident|wine|proton|dxvk|^gamescope$|steam_app_default)"#
+          background-effect {
+              blur false
+          }
+      }
 
-                // 所有窗口默认浮动（含以后新装的）——KDE/COSMIC 式堆叠窗口
-                // niri 是平铺合成器，但 open-floating 让所有窗口按浮动布局打开：
-                // 可自由拖动（按住窗口移动）、调整大小（拖边缘）、堆叠
-                window-rule {
-                    match app-id=r#"^.*$"#
-                    open-floating true
-                }
+      // rounded corners for all windows
+      window-rule {
+          match app-id=r#"^.*$"#
+          geometry-corner-radius 12
+          clip-to-geometry true
+      }
 
-                binds {
-                    Mod+Return hotkey-overlay-title="Open Terminal" { spawn "ghostty-ime"; }
-                    Mod+D hotkey-overlay-title="Run Application" { spawn "fuzzel"; }
-                    Mod+B hotkey-overlay-title="Open Browser" { spawn "floorp"; }
-                    Mod+Q { close-window; }
-                    Mod+F { maximize-column; }
-                    Mod+Shift+F { fullscreen-window; }
-                    Mod+V { toggle-window-floating; }
-                    Mod+L hotkey-overlay-title="Lock Screen" { spawn "swaylock"; }
-                    Mod+P hotkey-overlay-title="Power Menu" { spawn "wlogout"; }
-                    Print { spawn "grim" "-g" "$(slurp)" "-" "|" "wl-copy"; }
+      // terminal semi-transparent
+      window-rule {
+          match app-id=r#"^ghostty|^com\.mitchellh\.ghostty$"#
+          opacity 0.9
+      }
 
-                    Mod+H { focus-column-left; }
-                    Mod+J { focus-column-right; }
-                    Mod+Shift+H { move-column-left; }
-                    Mod+Shift+J { move-column-right; }
+      // ═══ 窗口模式（平铺/浮动）由 Clavis 设置中心切换 ═══
+      // 规则在 clavis/floating.kdl（WindowModeService 管理），此处不再写死
 
-                    Mod+1 { focus-workspace 1; }
-                    Mod+2 { focus-workspace 2; }
-                    Mod+3 { focus-workspace 3; }
-                    Mod+4 { focus-workspace 4; }
-                    Mod+Shift+1 { move-column-to-workspace 1; }
-                    Mod+Shift+2 { move-column-to-workspace 2; }
-                    Mod+Shift+3 { move-column-to-workspace 3; }
-                    Mod+Shift+4 { move-column-to-workspace 4; }
+      // 基础服务（Clavis shell 由 clavis-shell.service 启动）
+      spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP"
+      spawn-at-startup "fcitx5" "-d"
+      spawn-at-startup "kdeconnect-indicator"
+      // PolicyKit 授权弹窗（Dolphin 挂载硬盘需要）
+      spawn-at-startup "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1"
+    '';
+  };
 
-                    Mod+E { quit; }
-                }
-
-            spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP"
-            // Clavis shell 由 clavis-shell.service 启动（systemd user unit），
-            // 这里只启动基础服务
-            spawn-at-startup "fcitx5" "-d"
-            spawn-at-startup "kdeconnect-indicator"
+  # ── DXVK 全局配置（声明式，替代手工 ~/.config/dxvk.conf）──
+  # 作用: 强制 DXVK 不内建 vsync，防止 niri 双重锁帧（50fps 问题兜底）
+  home.file.".config/dxvk.conf".text = ''
+    # DXVK 全局配置：关闭内建 vsync
+    # 解决 niri 下双重 vsync（DXVK FIFO + 合成器）导致的 50fps 锁帧
+    # 由 niri 合成器统一 vsync（VRR 自适应）
+    dxgi.syncInterval = 0
   '';
 
   # ── 壁纸 (通过 matugen 自动配色) ────────────────────────────
@@ -328,6 +440,22 @@ in
     '';
     force = true;
   };
+  # ── GTK 主题（Qt 应用通过 QT_QPA_PLATFORMTHEME=gtk3 读取）──
+  # Clavis 图标/主题依赖 GTK 设置（qsimage 图标加载需要）
+  gtk = {
+    enable = true;
+    theme.name = "Adwaita";
+    iconTheme.name = "Papirus";
+    font.name = "LXGW WenKai Screen";
+    font.size = 10;
+    gtk3.extraConfig = {
+      gtk-cursor-theme-name = "Nordzy-catppuccin-mocha-dark";
+    };
+    gtk4.extraConfig = {
+      gtk-cursor-theme-name = "Nordzy-catppuccin-mocha-dark";
+    };
+  };
+
   # ── Clavis 配置目录（quickshell 用户配置）───────────────────
   # 指向 /etc/nixos 仓库中的 Clavis 源码（声明式管理）
   xdg.configFile."quickshell/clavis".source = ../modules/services/clavis/clavis-shell;
@@ -386,6 +514,38 @@ in
 
   # ── 自启动 systemd 服务 ────────────────────────────────────
   systemd.user.services = {
+    # 自动检测显示器 → 生成 output.kdl（最高分辨率+最高刷新率+VRR）
+    # 换显示器/4K → 重跑: systemctl --user restart niri-auto-output
+    niri-auto-output = {
+      Unit = {
+        Description = "Auto-detect monitors and generate niri output.kdl";
+        After = [ "niri.service" ];
+      };
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.bash}/bin/bash ${./scripts/niri-auto-output.sh}";
+      };
+      Install = {
+        WantedBy = [ "niri.service" ];
+      };
+    };
+    # 剪贴板历史 watcher（key clipboard watch = Clavis 内建 cliphist 监听）
+    # Alt+Shift+C 打开 Spotlight 剪贴板历史
+    clavis-clipboard-watch = {
+      Unit = {
+        Description = "Clavis clipboard history watcher";
+        After = [ "niri.service" ];
+      };
+      Service = {
+        Type = "simple";
+        ExecStart = "${clavis.key-cli}/bin/key clipboard watch";
+        Restart = "on-failure";
+        RestartSec = "2";
+      };
+      Install = {
+        WantedBy = [ "niri.service" ];
+      };
+    };
     # Clavis Shell（桌面 shell 主进程）
     clavis-shell = {
       Unit = {

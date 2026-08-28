@@ -24,7 +24,7 @@ Item {
         anchors.centerIn: parent
         rowSpacing: 8
         columnSpacing: 8
-        columns: root.vertical ? 1 : 8
+        columns: root.vertical ? 1 : 9
 
         // 直接调用同目录下的组件，无需 import
         Network {
@@ -33,6 +33,10 @@ Item {
         }
 
         BluetoothButton {
+            screen: root.screen
+        }
+
+        ClipboardButton {
             screen: root.screen
         }
 

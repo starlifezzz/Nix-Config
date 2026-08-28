@@ -51,6 +51,14 @@ in
 
   # ── Niri 滚动平铺 Wayland 合成器 ─────────────────────────────
   programs.niri.enable = true;
+  # 文件选择器：nautilus 的 portal 集成保留（Dolphin 作为默认文件管理器）
+  # note: niri 的 useNautilus 只是 portal 文件选择器，不影响默认文件管理器
+  programs.niri.useNautilus = true;
+
+  # 默认文件管理器 = dolphin（KDE，侧边栏设备/硬盘挂载最强）
+  # nautilus 侧边栏不显示未挂载硬盘，换成 dolphin 可右键挂载 NTFS 等
+  xdg.mime.defaultApplications."inode/directory" = [ "org.kde.dolphin.desktop" ];
+  xdg.mime.defaultApplications."x-scheme-handler/file" = [ "org.kde.dolphin.desktop" ];
 
   # ── DMS greeter 登录管理器（用户要求恢复）─────────────────
   # DMS (DankMaterialShell) greeter: quickshell 系，支持指纹交互
@@ -75,6 +83,23 @@ in
     # sufficient 链: fprintd (order 1) 成功→通过；失败→ unix (order 2) 密码
     rules.auth.fprintd.order = 1;
     rules.auth.unix.order = 2; # 密码 fallback（指纹失败时）
+    # gnome-keyring 解锁（登录时自动解锁 keyring，避免桌面弹"unlock login keyring"）
+    # 与 login PAM 一致：auth/password/session 都是 optional
+    rules.auth.gnome_keyring = {
+      order = 3;
+      control = "optional";
+      modulePath = "pam_gnome_keyring.so";
+    };
+    rules.password.gnome_keyring = {
+      control = "optional";
+      modulePath = "pam_gnome_keyring.so";
+      args = [ "use_authtok" ];
+    };
+    rules.session.gnome_keyring = {
+      control = "optional";
+      modulePath = "pam_gnome_keyring.so";
+      args = [ "auto_start" ];
+    };
   };
 
   # ── Clavis Shell（桌面 shell，替代 DMS shell）─────────────────
@@ -99,6 +124,18 @@ in
     imagemagick # magick 命令（Clavis overview 壁纸缓存必需）
     glib # gsettings（Clavis 配色同步系统主题需要）
     nordzy-cursor-theme # Catppuccin Mocha 光标主题（niri 需要光标，之前缺失导致 WARN）
+    # Clavis 脚本依赖（补齐缺失命令，修复电源按钮/通知/音量等控件）
+    gettext # envsubst（power-menu.sh 必需，电源按钮失效根因）
+    libnotify # notify-send（通知）
+    gnome-system-monitor # 系统监视器（Clavis 按钮）
+    pavucontrol # 音量控制
+    wlsunset # 夜间色温（Clavis 按键）
+    # 文件管理器：dolphin（KDE，侧边栏设备/硬盘挂载最强，NTFS 右键挂载）
+    kdePackages.dolphin
+    ntfs3g # NTFS 挂载（内核 ntfs3 未注册时 fallback）
+    satty # 截图编辑（替代 KDE Spectacle 的编辑功能，Wayland 原生）
+    kdePackages.polkit-kde-agent-1 # PolicyKit GUI 授权弹窗（Dolphin 挂载硬盘需要）
+    gnome-software # Flatpak 应用商店（libadwaita 风格，最接近 Clavis Material 3；管理 QQ/微信等 flatpak 应用）
   ];
 
   # UPower（Clavis 电池/电源模块需要；之前被禁用）
@@ -114,6 +151,9 @@ in
     XDG_SESSION_DESKTOP = "niri";
     DESKTOP_SESSION = "niri";
     NIXOS_OZONE_WL = "1"; # 强制 Electron 应用使用 Wayland
+    # Qt 走 GTK 主题（Clavis 读 GTK 图标主题；原版 dotfiles 用此值）
+    # 缺失导致 qsimage 图标加载失败（通知图标/头像不显示）
+    QT_QPA_PLATFORMTHEME = "gtk3";
     # 光标主题（niri + GTK 应用用；Catppuccin Mocha 与 Clavis 契合）
     XCURSOR_THEME = "Nordzy-catppuccin-mocha-dark";
     XCURSOR_SIZE = "24";
