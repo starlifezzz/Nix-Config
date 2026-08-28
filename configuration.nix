@@ -31,7 +31,7 @@
 
     # ✅ 系统服务模块
     ./modules/services/audio.nix # 音频与多媒体 (PipeWire, RTKit)
-    ./modules/services/desktop-cosmic.nix # 桌面环境与显示管理 (COSMIC, cosmic-greeter) — feat/cosmic 分支
+    ./modules/services/desktop-niri.nix # 桌面环境与显示管理 (Niri, DMS greeter) — Niri 分支
     ./modules/services/sandbox.nix # 沙盒与容器 (Flatpak)
     ./modules/services/system-daemons.nix # 系统级守护进程 (fwupd, earlyoom)
   ];

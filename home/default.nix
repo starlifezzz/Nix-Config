@@ -165,7 +165,7 @@
     ./vim.nix # Vim 文本编辑器配置
 
     # 桌面环境
-    ./cosmic.nix # COSMIC 详细设置（feat/cosmic 分支，原 kde.nix 已替换）
+    ./niri.nix # Niri 详细设置（Niri 分支）
     ./fcitx5.nix # fcitx5 输入法（用户级声明式配置）
 
     # ../configs/mpd-dsd.nix # MPD DSD 听歌配置
