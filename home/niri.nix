@@ -242,6 +242,14 @@
           opacity 0.9
       }
 
+      // ═══ 默认浮动（KDE/COSMIC 式堆叠）═══
+      // 用户反馈平铺难用 → 恢复全局浮动
+      // 单窗口切换: Alt+V（toggle-window-floating）
+      window-rule {
+          match app-id=r#"^.*$"#
+          open-floating true
+      }
+
       // ═══ 窗口模式（平铺/浮动）═══
       // DMS 支持窗口管理集成；如有需要 DMS 设置中心管理
 
@@ -249,8 +257,8 @@
       spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP"
       spawn-at-startup "fcitx5" "-d"
       spawn-at-startup "kdeconnect-indicator"
-      // PolicyKit 授权弹窗（Dolphin 挂载硬盘需要）
-      spawn-at-startup "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1"
+      // PolicyKit 授权弹窗：由 DMS 自带 agent 处理（样式统一）
+      // （移除了 polkit-kde-agent——避免与 DMS agent 冲突 "already exists"）
     '';
   };
 
@@ -464,22 +472,8 @@
     fi
   '';
 
-  # DMS greeter 设置（指纹优先）——仅首次初始化！
-  # greeterEnableFprint: true → DMS UI 先等待指纹，失败才 fallback 密码
-  # ⚠️ 之前每次登录重写 settings.json → 覆盖用户改的 DMS 设置（bar/主题重置）
-  # 改为: 文件不存在才写入（首次），之后完全由 DMS 管理
-  home.activation.syncDmsSettings = lib.hm.dag.entryAfter [ "syncDmsWallpaper" ] ''
-    if [ ! -f ~/.config/DankMaterialShell/settings.json ]; then
-      mkdir -p ~/.config/DankMaterialShell
-      cat > ~/.config/DankMaterialShell/settings.json <<JSON
-    {
-      "greeterEnableFprint": true,
-      "greeterEnableU2f": false,
-      "greeterRememberLastUser": true
-    }
-    JSON
-    fi
-  '';
+  # DMS greeter 设置: 已由 HM 接管（settings 声明，见 dms.nix）
+  # greeterEnableFprint 等在 home/dms-settings.json 中声明
 
   # ── 自启动 systemd 服务 ────────────────────────────────────
   systemd.user.services = {

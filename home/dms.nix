@@ -23,7 +23,10 @@
     # （不构建 GitHub flake 的 DMS，避开 master 的 AGENTS.md symlink bug）
     package = pkgs.dms-shell;
 
-    # 空 settings → HM 不写 settings.json → DMS 完全自主（设置永不被覆盖）
-    settings = { };
+    # ═══ DMS 设置完全由 HM 声明式管理 ═══
+    # 当前完整配置: home/dms-settings.json（530 字段，含 bar autoHide/greeter 指纹）
+    # 修改方法: 改 dms-settings.json 或 DMS 设置中心改后复制回来
+    # ⚠️ 声明式代价: 运行时改的设置会在下次 switch 被此文件覆盖
+    settings = lib.importJSON ./dms-settings.json;
   };
 }
