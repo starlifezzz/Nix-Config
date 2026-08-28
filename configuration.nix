@@ -198,10 +198,24 @@
       {
         imports = [
           ./home/default.nix
-          # DMS home-manager 模块由 flake.nix 注入（dms input）
         ];
       };
   };
+
+  # ═══════════════════════════════════════════════════════════
+  # DMS (DankMaterialShell) 桌面 shell —— 完全由 nixpkgs 管理
+  # 包 + NixOS 模块（更新 = nixpkgs 升级，无独立 flake input）
+  # settings.json 由 home/dms.nix 的 home.file 声明（530 字段）
+  # 注: 模块自动启用 power-profiles-daemon / accounts-daemon / i2c
+  # ═══════════════════════════════════════════════════════════
+  programs.dms-shell = {
+    enable = true;
+    # systemd 服务 + 可选依赖（dgop/matugen/cava/khal）自动处理
+  };
+
+  # GeoClue2 定位（DMS 动态主题需要：日出日落判定 → 白天浅色/夜晚深色）
+  # 之前缺失 → gammaIsDay 恒 false → 白天也深色
+  services.geoclue2.enable = true;
 
   # 系统版本
   system.stateVersion = "26.11";

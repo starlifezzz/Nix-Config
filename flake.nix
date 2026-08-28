@@ -7,10 +7,10 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # DankMaterialShell（GitHub input——只用作 home-manager 模块来源）
-    # 包用 nixpkgs 的 dms-shell（构建稳定 + 更新由 nixpkgs 管）
-    # 更新: nix flake update dms（模块）+ nixpkgs 升级 dms-shell（包）
-    dms.url = "github:AvengeMedia/DankMaterialShell";
+    # ═══ DMS (DankMaterialShell) 完全由 nixpkgs 管理 ═══
+    # 包 + NixOS 模块（programs.dms-shell）都在 nixpkgs
+    # 更新 = nixpkgs 升级（nix flake update nixpkgs）
+    # settings.json 由 home.file 声明（见 home/dms.nix）
   };
 
   outputs =
@@ -18,7 +18,6 @@
       self,
       nixpkgs,
       home-manager,
-      dms,
       ...
     }:
     let
@@ -31,17 +30,6 @@
 
           modules = [
             ./configuration.nix
-            # DMS home-manager 模块注入（官方 flake）
-            # dank-material-shell: 主模块（programs.dank-material-shell + dms.service）
-            # niri: niri 集成选项（niri.includes/keybinds/spawn）
-            {
-              home-manager.users.zhangchongjie.imports = [
-                # DMS 主模块（programs.dank-material-shell + dms.service）
-                # 注: dms.homeModules.niri 依赖 niri-flake（programs.niri），
-                #     我们用 home-manager 的 wayland.windowManager.niri，不兼容——niri 集成手动做
-                dms.homeModules.dank-material-shell
-              ];
-            }
 
             # ═══════════════════════════════════════════════════════════
             # Home Manager 集成（仅作为模块加载器）

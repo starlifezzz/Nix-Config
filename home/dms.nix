@@ -1,32 +1,26 @@
 # /etc/nixos/home/dms.nix
-# DMS (DankMaterialShell) 桌面 shell 配置（替代 Clavis Shell）
-# 源码: github:AvengeMedia/DankMaterialShell（7.8k stars，活跃维护）
-# 功能: 状态栏/启动器/控制中心/通知/剪贴板历史/锁屏/壁纸管理（原生支持 bar 自动隐藏）
+# DMS (DankMaterialShell) 桌面 shell 配置
+# ═══ 完全由 nixpkgs 管理 ═══
+#   - 包 + NixOS 模块: programs.dms-shell（见 configuration.nix）
+#   - 更新: nix flake update nixpkgs（无独立 DMS flake input）
 #
-# 集成策略:
-#   - 包: nixpkgs dms-shell（稳定版，构建无忧，更新由 nixpkgs 管）
-#   - 模块: GitHub flake（homeModules.dank-material-shell）
-#   - settings: 不声明（空）——让 DMS 完全自主管理 settings.json，
-#     避免 HM 声明覆盖 DMS 运行时修改（bar/主题/壁纸设置会重置）
-#   - niri 集成: 预置 include dms/*.kdl 分片（见 niri.nix extraConfig），
-#     DMS 设置中心直接写可写分片，不碰只读 config.kdl
+# ═══ 配置策略：动态配置不写死 ═══
+# settings.json 由 DMS **自主管理**（不整体声明）：
+#   - 动态行为（matugen 自动配色/壁纸/主题）需运行时更新——写死会冻结
+#   - 固定项（bar 自动隐藏/greeter 指纹）由激活脚本"仅首次初始化"写入
+#     （见 home/niri.nix 的 syncDmsSettings——文件存在则不覆盖）
 {
   pkgs,
   lib,
   ...
 }:
 {
-  programs.dank-material-shell = {
-    enable = true;
-    systemd.enable = true;
-    # 用 nixpkgs 稳定版（1.5.3）——构建稳定 + 更新由 nixpkgs
-    # （不构建 GitHub flake 的 DMS，避开 master 的 AGENTS.md symlink bug）
-    package = pkgs.dms-shell;
-
-    # ═══ DMS 设置完全由 HM 声明式管理 ═══
-    # 当前完整配置: home/dms-settings.json（530 字段，含 bar autoHide/greeter 指纹）
-    # 修改方法: 改 dms-settings.json 或 DMS 设置中心改后复制回来
-    # ⚠️ 声明式代价: 运行时改的设置会在下次 switch 被此文件覆盖
-    settings = lib.importJSON ./dms-settings.json;
-  };
+  # ═══ DMS 配置声明式管理 ═══
+  # settings.json 完整声明（home/dms-settings.json，530 字段）
+  #   - bar 状态栏配置（widgets/autoHide/位置）由 HM 接管
+  #   - greeter 指纹等固定项
+  # 注: 动态配色在独立文件 dms-colors.json（matugen 生成）——不受此声明影响
+  # 修改方法: 改 home/dms-settings.json → rebuild
+  home.file.".config/DankMaterialShell/settings.json".source =
+    ./dms-settings.json;
 }

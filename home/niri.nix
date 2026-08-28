@@ -472,8 +472,8 @@
     fi
   '';
 
-  # DMS greeter 设置: 已由 HM 接管（settings 声明，见 dms.nix）
-  # greeterEnableFprint 等在 home/dms-settings.json 中声明
+  # DMS 配置已由 HM 完整声明（见 dms.nix 的 home.file settings.json）
+
 
   # ── 自启动 systemd 服务 ────────────────────────────────────
   systemd.user.services = {
