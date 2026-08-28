@@ -52,90 +52,30 @@ in
   # ── Niri 滚动平铺 Wayland 合成器 ─────────────────────────────
   programs.niri.enable = true;
 
-  # ── greetd + nwg-hello 登录管理器（替代 DMS greeter）────────
-  # nwg-hello: GTK3 密码框 greeter（Sugar Candy 风格），与 Clavis 暗色主题协调
-  # 参考: https://github.com/nwg-piotr/nwg-hello
-  services.greetd = {
+  # ── DMS greeter 登录管理器（用户要求恢复）─────────────────
+  # DMS (DankMaterialShell) greeter: quickshell 系，支持指纹交互
+  # 与桌面 Clavis shell 同为 quickshell 生态，风格统一
+  services.displayManager.dms-greeter = {
     enable = true;
-    settings = {
-      default_session = {
-        # cage 是 Wayland 合成器，跑 nwg-hello greeter
-        command = "${pkgs.cage} -s -- ${pkgs.nwg-hello}";
-        user = "greeter";
-      };
-    };
+    compositor.name = "niri";
+    compositor.customConfig = "";
+    # 同步用户 DMS 配置到登录界面（壁纸/主题跟随桌面）
+    configHome = "/home/zhangchongjie";
   };
-
-  # greeter 用户需要 video/render/input 组才能访问 DRM/GPU/输入设备
-  # （NixOS 默认 greeter 无组 → cage 无法访问 /dev/dri → 登录界面崩溃）
-  users.users.greeter = {
-    isSystemUser = true;
-    group = "greeter";
-    extraGroups = [
-      "video" # DRM 设备访问（cage 需要）
-      "render" # GPU 渲染节点
-      "input" # 输入设备（鼠标/键盘）
-    ];
-  };
-  users.groups.greeter = { };
-
-  # nwg-hello 配置（主题/会话）
-  environment.etc."nwg-hello/nwg-hello.json".text = ''
-    {
-      "session_dirs": ["/run/current-system/sw/share/wayland-sessions"],
-      "custom_sessions": [],
-      "monitor_nums": [],
-      "form_on_monitors": [],
-      "delay_secs": 1,
-      "cmd-sleep": "systemctl suspend",
-      "cmd-reboot": "systemctl reboot",
-      "cmd-poweroff": "systemctl poweroff",
-      "gtk-theme": "Adwaita",
-      "gtk-icon-theme": "Papirus",
-      "gtk-cursor-theme": "Nordzy-catppuccin-mocha-dark",
-      "prefer-dark-theme": true,
-      "template-name": "",
-      "time-format": "%H:%M",
-      "date-format": "%A, %m月%d日",
-      "layer": "overlay",
-      "keyboard-mode": "on_demand",
-      "lang": "zh_CN.UTF-8",
-      "avatar-show": true,
-      "avatar-size": 100,
-      "avatar-border-width": 1,
-      "avatar-border-color": "#cba6f7",
-      "avatar-corner-radius": 15,
-      "avatar-circle": false,
-      "env-vars": ["XDG_CURRENT_DESKTOP=niri"]
-    }
-  '';
-
-  # greetd PAM：登录界面只用密码（一次验证）
-  # 说明: nwg-hello 是密码框 greeter，不支持指纹交互
-  #       用 text 完全覆盖 greetd 的 PAM（greetd 模块默认 substack login 含 fprintd，
-  #       会导致"输完密码还要指纹"的双重验证）
-  #       系统内（锁屏/sudo/终端）指纹照常（由各自 PAM 栈提供）
-  security.pam.services.greetd.text = ''
-    # Account management.
-    account required ${pkgs.pam}/lib/security/pam_unix.so
-
-    # Authentication management.
-    auth sufficient ${pkgs.pam}/lib/security/pam_unix.so likeauth try_first_pass
-    auth required ${pkgs.pam}/lib/security/pam_deny.so
-
-    # Password management.
-    password sufficient ${pkgs.pam}/lib/security/pam_unix.so nullok
-
-    # Session management.
-    session required ${pkgs.pam}/lib/security/pam_env.so conffile=/etc/pam/environment readenv=0
-    session required ${pkgs.pam}/lib/security/pam_unix.so
-    session required ${pkgs.pam}/lib/security/pam_loginuid.so
-    session optional ${pkgs.systemd}/lib/security/pam_systemd.so
-    session required ${pkgs.pam}/lib/security/pam_limits.so conf=${pkgs.buildPackages.pam}/etc/security/limits.conf
-  '';
 
   # 默认会话 = niri
   services.displayManager.defaultSession = "niri";
+
+  # dms-greeter PAM：只用指纹登录（一次验证）
+  # 指纹 sufficient（通过即成功）；密码作为紧急 fallback（保留）
+  # 说明: DMS greeter 是 quickshell 系，支持 fprintd 指纹交互
+  #       指纹通过后直接登录，不再二次询问
+  security.pam.services.dms-greeter = {
+    # 指纹优先，失败才问密码（用户要求）
+    # sufficient 链: fprintd (order 1) 成功→通过；失败→ unix (order 2) 密码
+    rules.auth.fprintd.order = 1;
+    rules.auth.unix.order = 2; # 密码 fallback（指纹失败时）
+  };
 
   # ── Clavis Shell（桌面 shell，替代 DMS shell）─────────────────
   # Clavis 是 quickshell 系全生态 shell（状态栏/启动器/控制中心/锁屏）

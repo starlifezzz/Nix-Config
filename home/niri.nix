@@ -12,7 +12,7 @@
 # 官方文档:
 #   niri 配置: https://niri-wm.github.io/niri/Configuration%3A-Introduction.html
 #   DMS: https://danklinux.com
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 let
   # Clavis 打包（与系统模块共用同一份源码）
@@ -332,6 +332,58 @@ in
   # 指向 /etc/nixos 仓库中的 Clavis 源码（声明式管理）
   xdg.configFile."quickshell/clavis".source = ../modules/services/clavis/clavis-shell;
 
+  # ── DMS greeter 壁纸同步（登录壁纸跟随桌面）────────────────
+  # DMS greeter 读 ~/.local/state/DankMaterialShell/session.json
+  # 方案: 启动脚本生成可写 session.json（初始 = 当前 Clavis 壁纸）
+  #       + systemd path unit 监控 Clavis config.json → 换壁纸自动同步
+  # ⚠️ 不用 xdg.stateFile（符号链接只读，无法被脚本更新）
+  home.activation.syncDmsWallpaper = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    mkdir -p ~/.local/state/DankMaterialShell
+    # 从 Clavis config 读当前壁纸
+    WALLPAPER="$(jq -r '.wallpaper.path // empty' ~/.config/clavis/config.json 2>/dev/null || echo "")"
+    if [ -z "$WALLPAPER" ] || [ ! -f "$WALLPAPER" ]; then
+      WALLPAPER="/home/zhangchongjie/Pictures/background/wallhaven-l36xyy.png"
+    fi
+    cat > ~/.local/state/DankMaterialShell/session.json <<JSON
+    {
+      "wallpaperPath": "$WALLPAPER",
+      "perMonitorWallpaper": false,
+      "monitorWallpapers": {},
+      "perModeWallpaper": false,
+      "wallpaperPathLight": "",
+      "wallpaperPathDark": "",
+      "monitorWallpapersLight": {},
+      "monitorWallpapersDark": {},
+      "monitorWallpaperFillModes": {},
+      "wallpaperFillMode": "Fit",
+      "wallpaperTransition": "fade",
+      "includedTransitions": ["none", "fade", "wipe", "disc", "stripes", "iris bloom", "pixelate", "portal"],
+      "wallpaperCyclingEnabled": false,
+      "wallpaperCyclingMode": "interval",
+      "wallpaperCyclingInterval": 300,
+      "wallpaperCyclingTime": "06:00",
+      "monitorCyclingSettings": {},
+      "nightModeEnabled": false,
+      "nightModeTemperature": 4500,
+      "nightModeHighTemperature": 6500,
+      "nightModeLowTemperature": 4000
+    }
+    JSON
+  '';
+
+  # DMS greeter 设置（指纹优先）
+  # greeterEnableFprint: true → DMS UI 先等待指纹，失败才 fallback 密码
+  home.activation.syncDmsSettings = lib.hm.dag.entryAfter [ "syncDmsWallpaper" ] ''
+    mkdir -p ~/.config/DankMaterialShell
+    cat > ~/.config/DankMaterialShell/settings.json <<JSON
+    {
+      "greeterEnableFprint": true,
+      "greeterEnableU2f": false,
+      "greeterRememberLastUser": true
+    }
+    JSON
+  '';
+
   # ── 自启动 systemd 服务 ────────────────────────────────────
   systemd.user.services = {
     # Clavis Shell（桌面 shell 主进程）
@@ -367,6 +419,34 @@ in
       Install = {
         WantedBy = [ "graphical-session.target" ];
       };
+    };
+  };
+
+  # ── 壁纸同步监控（Clavis 换壁纸 → 更新 DMS 登录壁纸）──────
+  systemd.user.paths."sync-dms-wallpaper" = {
+    Unit = {
+      Description = "Monitor Clavis wallpaper changes";
+      After = [ "graphical-session.target" ];
+    };
+    Path = {
+      # 监控 Clavis 壁纸配置变化
+      PathChanged = "%h/.config/clavis/config.json";
+      MakeDirectory = true;
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
+
+  # 同步服务（path 触发执行）
+  systemd.user.services."sync-dms-wallpaper" = {
+    Unit = {
+      Description = "Sync DMS greeter wallpaper from Clavis";
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.bash}/bin/bash -c 'W=\$(jq -r \".wallpaper.path // empty\" ~/.config/clavis/config.json 2>/dev/null || echo \"\"); if [ -n \"\$W\" ] && [ -f \"\$W\" ]; then jq --arg w \"\$W\" \".wallpaperPath = \\\$w\" ~/.local/state/DankMaterialShell/session.json > /tmp/session.tmp && mv /tmp/session.tmp ~/.local/state/DankMaterialShell/session.json; fi'";
     };
   };
 }
