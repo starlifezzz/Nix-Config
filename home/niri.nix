@@ -20,38 +20,13 @@
   ...
 }:
 
-let
-  # Clavis 打包（与系统模块共用同一份源码）
-  clavis = import ../modules/services/clavis/package.nix {
-    inherit (pkgs)
-      lib
-      stdenv
-      cmake
-      ninja
-      pkg-config
-      git
-      patchelf
-      python3
-      fetchFromGitHub
-      wrapQtAppsHook
-      ;
-    qt6Packages = pkgs.qt6Packages;
-    inherit (pkgs)
-      quickshell
-      pipewire
-      libcava
-      ncurses
-      fftw
-      ;
-  };
-in
 {
   # ── Niri 桌面组件（Wayland 生态）────────────────────────────
   # 状态栏/启动器/通知/壁纸/配色/锁屏/截图
   home.packages = with pkgs; [
     waybar # 状态栏（Catppuccin 渐变）
     fuzzel # 应用启动器
-    # mako 已移除：Clavis 接管通知（org.freedesktop.Notifications），避免 D-Bus 冲突
+    # mako 已移除：DMS 接管通知（org.freedesktop.Notifications）
     swaybg # 壁纸
     matugen # 壁纸自动配色（Material You）
     swaylock-effects # 锁屏（模糊特效）
@@ -90,7 +65,7 @@ in
       # 分辨率/刷新率由 niri-auto-output 脚本动态检测生成 output.kdl
       # （最高分辨率 + 最高刷新率 + VRR），换 4K 显示器自动适配
       # 见 extraConfig 的 include + systemd.services.niri-auto-output
-      # 布局（Clavis overview 需要透明 workspace 背景）
+      # 布局（DMS overview 需要透明 workspace 背景）
       layout = {
         gaps = 16;
         "background-color" = "transparent";
@@ -144,7 +119,7 @@ in
         };
         "Alt+L" = {
           _props."hotkey-overlay-title" = "Lock Screen";
-          spawn = [ "swaylock" ];
+          spawn = [ "dms" "ipc" "call" "lock" ];
         };
         "Alt+P" = {
           _props."hotkey-overlay-title" = "Power Menu";
@@ -177,7 +152,7 @@ in
         };
         "Alt+Shift+C" = {
           _props."hotkey-overlay-title" = "Clipboard History";
-          spawn = [ "key" "ipc" "call" "spotlight" "openMode" "clipboard" ];
+          spawn = [ "dms" "ipc" "call" "clipboard" "toggle" ];
         };
         "Alt+H" = {
           focus-column-left = { };
@@ -226,20 +201,15 @@ in
       // ═══ 自动显示器配置（niri-auto-output 脚本生成，最高分辨率+最高刷新率+VRR）═══
       include optional=true "output.kdl"
 
-      // Clavis 集成分片（Clavis 设置中心写入 ~/.config/niri/clavis/*.kdl）
-      // 必须预置 include，否则 Clavis 因 config.kdl 只读报"权限不够"
-      include optional=true "clavis/effects.kdl"
-      include optional=true "clavis/cursor.kdl"
-      include optional=true "clavis/colors.kdl"
-      include optional=true "clavis/wallpaper.kdl"
-      // 窗口模式分片（Clavis 设置中心平铺/浮动开关管理）
-      include optional=true "clavis/floating.kdl"
-
-      // Clavis overview 壁纸层（放 backdrop 后面，Clavis 文档 wallpaper-backends.md）
-      layer-rule {
-          match namespace="^clavis-overview-wallpaper$"
-          place-within-backdrop true
-      }
+      // ═══ DMS 集成分片（DMS 设置中心写入 ~/.config/niri/dms/*.kdl）═══
+      // 预置 include → DMS 检测到已包含 → 只写可写分片（不尝试改只读 config.kdl）
+      // 修复: DMS 键盘快捷键/窗口规则等设置无法保存（Fix failed）
+      include optional=true "dms/binds.kdl"
+      include optional=true "dms/binds-user.kdl"
+      include optional=true "dms/colors.kdl"
+      include optional=true "dms/layout.kdl"
+      include optional=true "dms/windowrules.kdl"
+      include optional=true "dms/wpblur.kdl"
 
       // background blur for all windows (niri 26.04 feature)
       window-rule {
@@ -272,10 +242,10 @@ in
           opacity 0.9
       }
 
-      // ═══ 窗口模式（平铺/浮动）由 Clavis 设置中心切换 ═══
-      // 规则在 clavis/floating.kdl（WindowModeService 管理），此处不再写死
+      // ═══ 窗口模式（平铺/浮动）═══
+      // DMS 支持窗口管理集成；如有需要 DMS 设置中心管理
 
-      // 基础服务（Clavis shell 由 clavis-shell.service 启动）
+      // 基础服务（DMS shell 由 dms.service 启动，见 programs.dank-material-shell）
       spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP"
       spawn-at-startup "fcitx5" "-d"
       spawn-at-startup "kdeconnect-indicator"
@@ -441,7 +411,7 @@ in
     force = true;
   };
   # ── GTK 主题（Qt 应用通过 QT_QPA_PLATFORMTHEME=gtk3 读取）──
-  # Clavis 图标/主题依赖 GTK 设置（qsimage 图标加载需要）
+  # DMS 图标/主题依赖 GTK 设置
   gtk = {
     enable = true;
     theme.name = "Adwaita";
@@ -456,22 +426,16 @@ in
     };
   };
 
-  # ── Clavis 配置目录（quickshell 用户配置）───────────────────
-  # 指向 /etc/nixos 仓库中的 Clavis 源码（声明式管理）
-  xdg.configFile."quickshell/clavis".source = ../modules/services/clavis/clavis-shell;
 
-  # ── DMS greeter 壁纸同步（登录壁纸跟随桌面）────────────────
-  # DMS greeter 读 ~/.local/state/DankMaterialShell/session.json
-  # 方案: 启动脚本生成可写 session.json（初始 = 当前 Clavis 壁纸）
-  #       + systemd path unit 监控 Clavis config.json → 换壁纸自动同步
-  # ⚠️ 不用 xdg.stateFile（符号链接只读，无法被脚本更新）
+  # ── DMS 壁纸初始化（登录壁纸跟随桌面）──────────────────────
+  # DMS 桌面换壁纸 → 写 ~/.local/state/DankMaterialShell/session.json
+  # DMS greeter 读同一文件 → 登录壁纸自动同步（原生机制，无需桥接）
+  # 此处仅初始化默认壁纸（首次登录时生效）
   home.activation.syncDmsWallpaper = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    # 仅首次初始化（session.json 不存在时）——DMS 换壁纸后不再被覆盖
+    if [ ! -f ~/.local/state/DankMaterialShell/session.json ]; then
     mkdir -p ~/.local/state/DankMaterialShell
-    # 从 Clavis config 读当前壁纸
-    WALLPAPER="$(jq -r '.wallpaper.path // empty' ~/.config/clavis/config.json 2>/dev/null || echo "")"
-    if [ -z "$WALLPAPER" ] || [ ! -f "$WALLPAPER" ]; then
-      WALLPAPER="/home/zhangchongjie/Pictures/background/wallhaven-l36xyy.png"
-    fi
+    WALLPAPER="/home/zhangchongjie/Pictures/background/wallhaven-l36xyy.png"
     cat > ~/.local/state/DankMaterialShell/session.json <<JSON
     {
       "wallpaperPath": "$WALLPAPER",
@@ -497,19 +461,24 @@ in
       "nightModeLowTemperature": 4000
     }
     JSON
+    fi
   '';
 
-  # DMS greeter 设置（指纹优先）
+  # DMS greeter 设置（指纹优先）——仅首次初始化！
   # greeterEnableFprint: true → DMS UI 先等待指纹，失败才 fallback 密码
+  # ⚠️ 之前每次登录重写 settings.json → 覆盖用户改的 DMS 设置（bar/主题重置）
+  # 改为: 文件不存在才写入（首次），之后完全由 DMS 管理
   home.activation.syncDmsSettings = lib.hm.dag.entryAfter [ "syncDmsWallpaper" ] ''
-    mkdir -p ~/.config/DankMaterialShell
-    cat > ~/.config/DankMaterialShell/settings.json <<JSON
+    if [ ! -f ~/.config/DankMaterialShell/settings.json ]; then
+      mkdir -p ~/.config/DankMaterialShell
+      cat > ~/.config/DankMaterialShell/settings.json <<JSON
     {
       "greeterEnableFprint": true,
       "greeterEnableU2f": false,
       "greeterRememberLastUser": true
     }
     JSON
+    fi
   '';
 
   # ── 自启动 systemd 服务 ────────────────────────────────────
@@ -524,43 +493,6 @@ in
       Service = {
         Type = "oneshot";
         ExecStart = "${pkgs.bash}/bin/bash ${./scripts/niri-auto-output.sh}";
-      };
-      Install = {
-        WantedBy = [ "niri.service" ];
-      };
-    };
-    # 剪贴板历史 watcher（key clipboard watch = Clavis 内建 cliphist 监听）
-    # Alt+Shift+C 打开 Spotlight 剪贴板历史
-    clavis-clipboard-watch = {
-      Unit = {
-        Description = "Clavis clipboard history watcher";
-        After = [ "niri.service" ];
-      };
-      Service = {
-        Type = "simple";
-        ExecStart = "${clavis.key-cli}/bin/key clipboard watch";
-        Restart = "on-failure";
-        RestartSec = "2";
-      };
-      Install = {
-        WantedBy = [ "niri.service" ];
-      };
-    };
-    # Clavis Shell（桌面 shell 主进程）
-    clavis-shell = {
-      Unit = {
-        Description = "Clavis Shell";
-        Requisite = [ "niri.service" ];
-        PartOf = [ "niri.service" ];
-        After = [ "niri.service" ];
-      };
-      Service = {
-        Type = "simple";
-        # QML_IMPORT_PATH: Clavis native 插件 + Qt5Compat 毛玻璃 + Lottie 天气动画
-        Environment = "QML_IMPORT_PATH=${clavis.clavis-shell}/lib/qt6/qml:${pkgs.qt6Packages.qt5compat}/lib/qt-6/qml:${pkgs.qt6Packages.qtlottie}/lib/qt-6/qml";
-        ExecStart = "${clavis.key-cli}/bin/key shell --foreground --no-duplicate";
-        Restart = "on-failure";
-        RestartSec = "2";
       };
       Install = {
         WantedBy = [ "niri.service" ];
@@ -582,31 +514,4 @@ in
     };
   };
 
-  # ── 壁纸同步监控（Clavis 换壁纸 → 更新 DMS 登录壁纸）──────
-  systemd.user.paths."sync-dms-wallpaper" = {
-    Unit = {
-      Description = "Monitor Clavis wallpaper changes";
-      After = [ "graphical-session.target" ];
-    };
-    Path = {
-      # 监控 Clavis 壁纸配置变化
-      PathChanged = "%h/.config/clavis/config.json";
-      MakeDirectory = true;
-    };
-    Install = {
-      WantedBy = [ "default.target" ];
-    };
-  };
-
-  # 同步服务（path 触发执行）
-  systemd.user.services."sync-dms-wallpaper" = {
-    Unit = {
-      Description = "Sync DMS greeter wallpaper from Clavis";
-      After = [ "graphical-session.target" ];
-    };
-    Service = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.bash}/bin/bash -c 'W=\$(jq -r \".wallpaper.path // empty\" ~/.config/clavis/config.json 2>/dev/null || echo \"\"); if [ -n \"\$W\" ] && [ -f \"\$W\" ]; then jq --arg w \"\$W\" \".wallpaperPath = \\\$w\" ~/.local/state/DankMaterialShell/session.json > /tmp/session.tmp && mv /tmp/session.tmp ~/.local/state/DankMaterialShell/session.json; fi'";
-    };
-  };
 }

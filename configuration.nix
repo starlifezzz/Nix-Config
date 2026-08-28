@@ -198,6 +198,7 @@
       {
         imports = [
           ./home/default.nix
+          # DMS home-manager 模块由 flake.nix 注入（dms input）
         ];
       };
   };

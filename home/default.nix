@@ -166,6 +166,7 @@
 
     # 桌面环境
     ./niri.nix # Niri 详细设置（Niri 分支）
+    ./dms.nix # DMS (DankMaterialShell) 桌面 shell（替代 Clavis）
     ./fcitx5.nix # fcitx5 输入法（用户级声明式配置）
 
     # ../configs/mpd-dsd.nix # MPD DSD 听歌配置
