@@ -1,1 +1,10 @@
-/nix/store/nlxcgvs4qmi7fv6gf2rrvljzq5ayk41n-home-manager-files/.config/cosmic/com.system76.CosmicPortal/v1/screenshot
+(
+    save_location: Clipboard,
+    choice: Rectangle,
+    last_rectangle: Some((
+        left: 257,
+        top: 431,
+        right: 477,
+        bottom: 800,
+    )),
+)
