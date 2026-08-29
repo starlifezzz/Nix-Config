@@ -29,7 +29,7 @@
     "amdgpu.gpu_recovery=1"
 
     # Navi 23 特定优化 - 调整值以平衡性能和稳定性
-    # "amdgpu.sched_hw_submission=128"
+    # "amdgpu.sched_hw_submission=128" # 用户待测：提升 0-5%（游戏负载高时），延迟略增
 
     # ═══════════════════════════════════════════════════════════
     # ✅ GPU 稳定性增强 - 解决 AMD RX 5500 图形环超时问题

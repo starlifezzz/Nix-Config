@@ -97,15 +97,12 @@
     # DMS 脚本依赖（补齐缺失命令）
     gettext # envsubst（power-menu.sh 必需，电源按钮失效根因）
     libnotify # notify-send（通知）
-    gnome-system-monitor # 系统监视器
-    pavucontrol # 音量控制
+    resources # 系统监视器
+    pwvucontrol # 音量控制
     wlsunset # 夜间色温（DMS 按键）
-    # 文件管理器：dolphin（KDE，侧边栏设备/硬盘挂载最强，NTFS 右键挂载）
-    kdePackages.dolphin
-    ntfs3g # NTFS 挂载（内核 ntfs3 未注册时 fallback）
     satty # 截图编辑（替代 KDE Spectacle 的编辑功能，Wayland 原生）
-    kdePackages.polkit-kde-agent-1 # PolicyKit GUI 授权弹窗（Dolphin 挂载硬盘需要）
     gnome-software # Flatpak 应用商店（libadwaita，管理 QQ/微信等 flatpak 应用）
+    nautilus # 文件管理器（DMS 读 GTK 图标主题，缺失导致 qsimage 图标加载失败）
   ];
 
   # UPower（DMS 电池/电源模块需要）
