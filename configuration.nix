@@ -168,6 +168,12 @@
   # 依赖：本机 USB 指纹锁 06cb:00f0；与 SDDM/KDE 无冲突（fprintd 是独立 D-Bus 服务）
   services.fprintd.enable = true;
 
+  # ── system76-scheduler（官方 COSMIC Wiki Optimization 推荐）──
+  # 出处: https://wiki.nixos.org/wiki/COSMIC —— "You can slightly improve the
+  #       performance of your Cosmic installation by enabling system76's scheduler"
+  # 作用: system76 调度器（进程优先级/负载优化）——提升 COSMIC 桌面响应
+  services.system76-scheduler.enable = true;
+
   # 设置 /etc/nixos 目录权限，允许 zhangchongjie 用户完全控制
   systemd.tmpfiles.rules = [
     "d /etc/nixos 0775 zhangchongjie users -"

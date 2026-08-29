@@ -72,4 +72,12 @@
   };
 
   dconf.enable = true;
+
+  # ── Floorp（Firefox 系）跟随 COSMIC 主题 ─────────────────────
+  # 官方 COSMIC Wiki Theming 章节: 浏览器默认用 libadwaita 主题，
+  # 需禁用 widget.gtk.libadwaita-colors.enabled 才跟随桌面主题
+  home.file.".floorp/user.js".text = ''
+    // 禁用 libadwaita 主题（跟随 COSMIC 外观）
+    user_pref("widget.gtk.libadwaita-colors.enabled", false);
+  '';
 }
