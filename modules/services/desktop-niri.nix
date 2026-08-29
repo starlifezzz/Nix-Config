@@ -128,6 +128,8 @@
     GTK_IM_MODULE = "fcitx";
     QT_IM_MODULE = "fcitx";
     XMODIFIERS = "@im=fcitx";
+    # 强制 Electron 应用使用 Vulkan 渲染（Wayland 下默认 OpenGL，导致部分应用闪烁/黑屏）
+    NIRI_RENDERER = "vulkan";
   };
 
   # ── XDG Portal - niri 环境 ─────────────────────────────────

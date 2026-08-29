@@ -10,7 +10,7 @@
       }
     }
   },
-  "matugenScheme": "scheme-fidelity",
+  "matugenScheme": "scheme-content",
   "matugenContrast": 0,
   "runUserMatugenTemplates": true,
   "matugenTargetMonitor": "",
@@ -20,7 +20,7 @@
   "widgetBackgroundCustomColor": "#6750A4",
   "widgetBackgroundCustomStrength": 0.5,
   "widgetColorMode": "default",
-  "controlCenterTileColorMode": "secondary",
+  "controlCenterTileColorMode": "primaryContainer",
   "buttonColorMode": "primary",
   "cornerRadius": 12,
   "niriLayoutGapsOverride": -1,
@@ -314,7 +314,7 @@
   "iconThemeDark": "Papirus-Dark",
   "iconThemeLight": "Papirus-Light",
   "iconThemePerMode": true,
-  "lastAppliedIconTheme": "Papirus-Light",
+  "lastAppliedIconTheme": "Papirus-Dark",
   "cursorSettings": {
     "theme": "Nordzy-catppuccin-frappe-dark",
     "size": 24,
