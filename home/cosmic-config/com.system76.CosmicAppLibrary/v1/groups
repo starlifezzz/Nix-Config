@@ -1,1 +1,84 @@
-/nix/store/waxiv0c7q3chmc4bwnmd7593l1lywkr7-home-manager-files/.config/cosmic/com.system76.CosmicAppLibrary/v1/groups
+[
+    (
+        name: "cosmic-office",
+        icon: "folder-symbolic",
+        filter: Categories(
+            categories: [
+                "Office",
+            ],
+            exclude: [
+                "com.qq.QQ",
+                "com.tencent.WeChat",
+            ],
+            include: [
+                "org.gnome.Totem",
+                "org.gnome.eog",
+                "simple-scan",
+                "thunderbird",
+                "org.kde.haruna",
+                "com.system76.CosmicPlayer",
+                "io.github.tdesktop_x64.TDesktop",
+                "com.system76.CosmicEdit",
+            ],
+        ),
+    ),
+    (
+        name: "cosmic-system",
+        icon: "folder-symbolic",
+        filter: Categories(
+            categories: [
+                "System",
+            ],
+            exclude: [
+                "com.system76.CosmicStore",
+                "com.system76.CosmicTerm",
+                "com.qq.QQ",
+                "com.tencent.WeChat",
+                "org.bleachbit.BleachBit",
+                "com.mitchellh.ghostty",
+                "com.system76.CosmicScreenshot",
+            ],
+            include: [
+                "gnome-language-selector",
+                "im-config",
+                "org.freedesktop.IBus.Setup",
+                "system76-driver",
+                "fcitx5-configtool",
+                "org.fcitx.fcitx5-migrator",
+                "org.kde.kdeconnect.app",
+                "org.kde.kdeconnect.nonplasma",
+                "org.kde.kdeconnect.sms",
+            ],
+        ),
+    ),
+    (
+        name: "cosmic-utilities",
+        icon: "folder-symbolic",
+        filter: Categories(
+            categories: [
+                "Utility",
+            ],
+            exclude: [
+                "com.system76.CosmicEdit",
+                "com.system76.CosmicFiles",
+                "com.qq.QQ",
+                "com.tencent.WeChat",
+            ],
+            include: [
+                "nm-connection-editor",
+                "org.remmina.Remmina",
+                "org.bleachbit.BleachBit",
+                "com.mitchellh.ghostty",
+                "com.system76.CosmicScreenshot",
+            ],
+        ),
+    ),
+    (
+        name: "游戏",
+        icon: "folder-symbolic",
+        filter: AppIds([
+            "com.heroicgameslauncher.hgl",
+            "com.mtkennerly.ludusavi",
+        ]),
+    ),
+]

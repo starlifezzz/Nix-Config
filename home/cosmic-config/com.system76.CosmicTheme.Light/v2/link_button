@@ -1,1 +1,14 @@
-/nix/store/waxiv0c7q3chmc4bwnmd7593l1lywkr7-home-manager-files/.config/cosmic/com.system76.CosmicTheme.Light/v2/link_button
+(
+    base: "#00000000",
+    hover: "#00000000",
+    pressed: "#00000000",
+    selected: "#00000000",
+    selected_text: "#185529FF",
+    focus: "#185529FF",
+    divider: "#18552933",
+    on: "#185529FF",
+    disabled: "#00000000",
+    on_disabled: "#0C2A1480",
+    border: "#161616FF",
+    disabled_border: "#16161680",
+)

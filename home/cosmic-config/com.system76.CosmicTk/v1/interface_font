@@ -1,1 +1,6 @@
-/nix/store/waxiv0c7q3chmc4bwnmd7593l1lywkr7-home-manager-files/.config/cosmic/com.system76.CosmicTk/v1/interface_font
+(
+    family: "LXGW WenKai Screen",
+    weight: Normal,
+    stretch: Normal,
+    style: Normal,
+)
