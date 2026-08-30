@@ -209,7 +209,7 @@
   "scrollTitleEnabled": true,
   "mediaAdaptiveWidthEnabled": true,
   "audioVisualizerEnabled": true,
-  "mediaUseAlbumArtAccent": false,
+  "mediaUseAlbumArtAccent": true,
   "audioScrollMode": "volume",
   "audioWheelScrollAmount": 5,
   "audioDeviceScrollVolumeEnabled": false,
@@ -249,11 +249,12 @@
   "greeterLockDateFormat": "",
   "greeterFontFamily": "霞鹜文楷 屏幕阅读版",
   "greeterWallpaperFillMode": "",
-  "greeterPamExternallyManaged": false,
+  "greeterPamExternallyManaged": true,
   "greeterSyncPending": true,
   "greeterSyncBaseline": {
     "showSeconds": false,
-    "greeterFontFamily": ""
+    "greeterFontFamily": "",
+    "greeterPamExternallyManaged": false
   },
   "mediaSize": 1,
   "appLauncherViewMode": "list",
@@ -314,7 +315,7 @@
   "iconThemeDark": "Papirus-Dark",
   "iconThemeLight": "Papirus-Light",
   "iconThemePerMode": true,
-  "lastAppliedIconTheme": "Papirus-Dark",
+  "lastAppliedIconTheme": "Papirus-Light",
   "cursorSettings": {
     "theme": "Nordzy-catppuccin-frappe-dark",
     "size": 24,
@@ -560,6 +561,9 @@
   "niriOutputSettings": {
     "DP-1": {
       "vrrOnDemand": true
+    },
+    "Philips Consumer Electronics Company PHL 325E1 0x000020FD": {
+      "vrrOnDemand": true
     }
   },
   "hyprlandOutputSettings": {},
@@ -596,6 +600,10 @@
         "memUsage",
         "notificationButton",
         "battery",
+        {
+          "id": "dankKDEConnect",
+          "enabled": true
+        },
         "controlCenterButton"
       ],
       "spacing": 4,

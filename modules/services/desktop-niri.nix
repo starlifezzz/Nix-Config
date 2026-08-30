@@ -26,15 +26,11 @@
 
   # ── Niri 滚动平铺 Wayland 合成器 ─────────────────────────────
   programs.niri.enable = true;
-  # 文件选择器：nautilus 的 portal 集成保留（Dolphin 作为默认文件管理器）
+  # 文件选择器：useNautilus 启用 GTK4 原生文件选择对话框（与 Nautilus 默认管理器一致）
   # note: niri 的 useNautilus 只是 portal 文件选择器，不影响默认文件管理器
-  programs.niri.useNautilus = true;
-
-  # 默认文件管理器 = dolphin（KDE，侧边栏设备/硬盘挂载最强）
-  # nautilus 侧边栏不显示未挂载硬盘，换成 dolphin 可右键挂载 NTFS 等
-  xdg.mime.defaultApplications."inode/directory" = [ "org.kde.dolphin.desktop" ];
-  xdg.mime.defaultApplications."x-scheme-handler/file" = [ "org.kde.dolphin.desktop" ];
-
+  # programs.niri.useNautilus = true;
+  xdg.mime.defaultApplications."inode/directory" = [ "org.gnome.Nautilus.desktop" ];
+  xdg.mime.defaultApplications."x-scheme-handler/file" = [ "org.gnome.Nautilus.desktop" ];
   # ── DMS greeter 登录管理器（用户要求恢复）─────────────────
   # DMS (DankMaterialShell) greeter: quickshell 系，支持指纹交互
   # 与桌面 DMS shell 同为 quickshell 生态，风格统一
@@ -97,12 +93,15 @@
     # DMS 脚本依赖（补齐缺失命令）
     gettext # envsubst（power-menu.sh 必需，电源按钮失效根因）
     libnotify # notify-send（通知）
-    resources # 系统监视器
     pwvucontrol # 音量控制
     wlsunset # 夜间色温（DMS 按键）
     satty # 截图编辑（替代 KDE Spectacle 的编辑功能，Wayland 原生）
     gnome-software # Flatpak 应用商店（libadwaita，管理 QQ/微信等 flatpak 应用）
     nautilus # 文件管理器（DMS 读 GTK 图标主题，缺失导致 qsimage 图标加载失败）
+    file-roller # 压缩/解压
+    mission-center # DMS 控制中心（Wayland 原生）
+    xdg-desktop-portal-wlr # ← 加这个！niri 录屏/投屏必需
+    qt6.qtimageformats 
   ];
 
   # UPower（DMS 电池/电源模块需要）
@@ -124,7 +123,6 @@
     # Wayland 下 IM 模块留空（fcitx5 走 text-input-v3，不启用 XIM 桥接）
     GTK_IM_MODULE = "fcitx";
     QT_IM_MODULE = "fcitx";
-    XMODIFIERS = "@im=fcitx";
     # 强制 Electron 应用使用 Vulkan 渲染（Wayland 下默认 OpenGL，导致部分应用闪烁/黑屏）
     NIRI_RENDERER = "vulkan";
   };
@@ -133,10 +131,20 @@
   xdg.portal = {
     enable = true;
     extraPortals = [
-      pkgs.xdg-desktop-portal-gtk
+      pkgs.xdg-desktop-portal-gnome
+      pkgs.kdePackages.xdg-desktop-portal-kde
+      pkgs.xdg-desktop-portal-wlr
     ];
     config = {
-      common.default = [ "gtk" ];
+      niri.default = lib.mkForce [
+        "wlr"
+        "gnome"
+      ];
+      "org.kde.kdeconnect".default = [ "kde" ];
+      "org.freedesktop.impl.portal.FileChooser".default = [ "gnome" ];
+      "org.freedesktop.impl.portal.OpenURI".default = [ "gnome" ];
+      "org.freedesktop.impl.portal.ScreenCast".default = [ "wlr" ];
+      "org.freedesktop.impl.portal.Screenshot".default = [ "wlr" ];
     };
   };
 
