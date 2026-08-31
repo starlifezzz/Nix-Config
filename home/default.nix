@@ -86,7 +86,6 @@
     remmina
     kdePackages.filelight
     mihomo
-    loupe
     gnome-disk-utility
 
     # ═══════════════════════════════════════════════════════════
