@@ -15,8 +15,6 @@
 {
   pkgs,
   lib,
-  config,
-  nixosConfig,
   ...
 }:
 
@@ -131,7 +129,12 @@
         };
         "Alt+L" = {
           _props."hotkey-overlay-title" = "Lock Screen";
-          spawn = [ "dms" "ipc" "call" "lock" ];
+          spawn = [
+            "dms"
+            "ipc"
+            "call"
+            "lock"
+          ];
         };
         "Alt+P" = {
           _props."hotkey-overlay-title" = "Power Menu";
@@ -164,7 +167,13 @@
         };
         "Alt+Shift+C" = {
           _props."hotkey-overlay-title" = "Clipboard History";
-          spawn = [ "dms" "ipc" "call" "clipboard" "toggle" ];
+          spawn = [
+            "dms"
+            "ipc"
+            "call"
+            "clipboard"
+            "toggle"
+          ];
         };
         "Alt+H" = {
           focus-column-left = { };
@@ -272,7 +281,7 @@
       // DMS 支持窗口管理集成；如有需要 DMS 设置中心管理
 
       // 基础服务（DMS shell 由 dms.service 启动，见 programs.dank-material-shell）
-      spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP"
+      // spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP"
       // fcitx5 已由 i18n.inputMethod 的 XDG autostart 启动——此处不重复
       // （之前双实例: "Failed to create addon: dbus ... another fcitx already running"）
       spawn-at-startup "kdeconnect-indicator"
@@ -419,24 +428,6 @@
     force = true;
   };
 
-  # ── swaylock-effects 锁屏 (模糊特效) ─────────────────────────
-  xdg.configFile."swaylock/config" = {
-    text = ''
-      ignore-empty-password
-      screenshot
-      effect-blur=10x5
-      color=1e1e2e
-      ring-color=cba6f7
-      key-hl-color=89b4fa
-      line-color=00000000
-      inside-color=00000000
-      separator-color=00000000
-      text-color=cdd6f4
-      font=LXGW WenKai Screen
-      font-size=24
-    '';
-    force = true;
-  };
   # ── GTK 主题（Qt 应用通过 QT_QPA_PLATFORMTHEME=gtk3 读取）──
   # DMS 图标/主题依赖 GTK 设置
   gtk = {
@@ -454,7 +445,6 @@
       gtk-cursor-theme-name = "Nordzy-catppuccin-mocha-dark";
     };
   };
-
 
   # ── DMS 壁纸初始化（登录壁纸跟随桌面）──────────────────────
   # DMS 桌面换壁纸 → 写 ~/.local/state/DankMaterialShell/session.json
@@ -494,7 +484,6 @@
   '';
 
   # DMS 配置已由 HM 完整声明（见 dms.nix 的 home.file settings.json）
-
 
   # ── 自启动 systemd 服务 ────────────────────────────────────
   systemd.user.services = {

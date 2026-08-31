@@ -170,6 +170,9 @@
   # 依赖：本机 USB 指纹锁 06cb:00f0；与 SDDM/KDE 无冲突（fprintd 是独立 D-Bus 服务）
   services.fprintd.enable = true;
 
+  # 禁用 speech-dispatcher（语音合成）——用户不用，且子进程全僵尸（sd_voxin 等）
+  services.speechd.enable = false;
+
   # ── i2c-dev 设备权限（ddcutil 调外接显示器亮度）────────────
   # 依据: https://www.ddcutil.com/i2c_permissions
   # 内核创建 /dev/i2c-N 默认 root:root，需 udev 规则改为 i2c 组
@@ -184,6 +187,9 @@
   systemd.tmpfiles.rules = [
     "d /etc/nixos 0775 zhangchongjie users -"
     "d /run/polkit-1/rules.d 0755 root root -"
+    # 指纹设备（06cb:00f0）保持常开——udev ADD 规则只对插入生效，
+    # 开机后设备已存在需 tmpfiles 写入（防止 xhci reset/指纹超时）
+    "w /sys/bus/usb/devices/3-3.4/power/control - - - - on"
   ];
 
   # ═══════════════════════════════════════════════════════════

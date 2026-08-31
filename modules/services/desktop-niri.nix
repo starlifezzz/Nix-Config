@@ -83,7 +83,6 @@
     slurp # 区域选择
     ffmpeg # 录屏 GIF 后处理
     gpu-screen-recorder # 屏幕录制
-    pulseaudio # 仅提供 pactl 命令（DMS 需要；不启用服务，系统用 PipeWire）
     matugen # Material 动态配色
     ddcutil # 显示器亮度控制（DMS 亮度模块用）
     brightnessctl # 笔记本背光亮度（DMS 亮度模块用）
@@ -111,7 +110,7 @@
   # ── XDG 会话变量 ───────────────────────────────────────────
   environment.sessionVariables = {
     TZ = "Asia/Shanghai";
-    XDG_CURRENT_DESKTOP = "niri";
+    XDG_CURRENT_DESKTOP = "niri:wlroots";
     XDG_SESSION_DESKTOP = "niri";
     DESKTOP_SESSION = "niri";
     NIXOS_OZONE_WL = "1"; # 强制 Electron 应用使用 Wayland
@@ -126,6 +125,7 @@
     QT_IM_MODULE = "fcitx";
     # 强制 Electron 应用使用 Vulkan 渲染（Wayland 下默认 OpenGL，导致部分应用闪烁/黑屏）
     NIRI_RENDERER = "vulkan";
+    LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.pipewire ];
   };
 
   # ── XDG Portal - niri 环境 ─────────────────────────────────
