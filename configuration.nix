@@ -175,7 +175,10 @@
   # 内核创建 /dev/i2c-N 默认 root:root，需 udev 规则改为 i2c 组
   services.udev.extraRules = ''
     SUBSYSTEM=="i2c-dev", GROUP="i2c", MODE="0660"
+    # 指纹设备（06cb:00f0）保持常开——防止周期挂起导致 xhci reset/指纹超时
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="06cb", ATTR{power/control}="on"
   '';
+
 
   # 设置 /etc/nixos 目录权限，允许 zhangchongjie 用户完全控制
   systemd.tmpfiles.rules = [

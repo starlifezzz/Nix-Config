@@ -315,7 +315,7 @@
   "iconThemeDark": "Papirus-Dark",
   "iconThemeLight": "Papirus-Light",
   "iconThemePerMode": true,
-  "lastAppliedIconTheme": "Papirus-Light",
+  "lastAppliedIconTheme": "Papirus-Dark",
   "cursorSettings": {
     "theme": "Nordzy-catppuccin-frappe-dark",
     "size": 24,
@@ -599,9 +599,12 @@
         "cpuUsage",
         "memUsage",
         "notificationButton",
-        "battery",
         {
           "id": "dankKDEConnect",
+          "enabled": true
+        },
+        {
+          "id": "separator",
           "enabled": true
         },
         "controlCenterButton"
@@ -610,8 +613,8 @@
       "innerPadding": 4,
       "barInsetPadding": -1,
       "bottomGap": 0,
-      "transparency": 0.15,
-      "widgetTransparency": 0.15,
+      "transparency": 0.2,
+      "widgetTransparency": 0.45,
       "squareCorners": false,
       "noBackground": false,
       "maximizeWidgetIcons": false,

@@ -101,7 +101,7 @@
     file-roller # 压缩/解压
     mission-center # DMS 控制中心（Wayland 原生）
     xdg-desktop-portal-wlr # ← 加这个！niri 录屏/投屏必需
-    qt6.qtimageformats 
+    qt6.qtimageformats
   ];
 
   # UPower（DMS 电池/电源模块需要）
@@ -131,21 +131,10 @@
   xdg.portal = {
     enable = true;
     extraPortals = [
-      pkgs.xdg-desktop-portal-gnome
-      pkgs.kdePackages.xdg-desktop-portal-kde
       pkgs.xdg-desktop-portal-wlr
     ];
-    config = {
-      niri.default = lib.mkForce [
-        "wlr"
-        "gnome"
-      ];
-      "org.kde.kdeconnect".default = [ "kde" ];
-      "org.freedesktop.impl.portal.FileChooser".default = [ "gnome" ];
-      "org.freedesktop.impl.portal.OpenURI".default = [ "gnome" ];
-      "org.freedesktop.impl.portal.ScreenCast".default = [ "wlr" ];
-      "org.freedesktop.impl.portal.Screenshot".default = [ "wlr" ];
-    };
+    # 新增下面这一行，显式排除掉冲突的后端
+    configPackages = [ pkgs.xdg-desktop-portal-wlr ];
   };
 
   # ── D-Bus 配置（broker 以获得更好的 Portal 支持）─────────────
