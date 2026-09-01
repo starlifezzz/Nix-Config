@@ -490,6 +490,22 @@
 
   # DMS 配置已由 HM 完整声明（见 dms.nix 的 home.file settings.json）
 
+  # ── systemd path 监听（DMS 快捷键自动同步）───────────────
+  systemd.user.paths."sync-dms-binds" = {
+    Unit = {
+      Description = "Watch DMS keybinds file";
+      After = [ "graphical-session.target" ];
+    };
+    Path = {
+      # 监听 DMS 快捷键变化（设置中心加/减即触发）
+      PathChanged = "%h/.config/niri/dms/binds.kdl";
+      MakeDirectory = true;
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
+
   # ── 自启动 systemd 服务 ────────────────────────────────────
   systemd.user.services = {
     # 自动检测显示器 → 生成 output.kdl（最高分辨率+最高刷新率+VRR）
@@ -505,6 +521,17 @@
       };
       Install = {
         WantedBy = [ "niri.service" ];
+      };
+    };
+    # 监听 DMS 快捷键变化 → 自动同步到仓库（binds.kdl → dms-binds.kdl）
+    # DMS 设置中心加/减快捷键 → path 触发 → 自动备份（换 PC 可恢复）
+    sync-dms-binds = {
+      Unit = {
+        Description = "Sync DMS keybinds to repo";
+      };
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.bash}/bin/bash -c 'cp %h/.config/niri/dms/binds.kdl /etc/nixos/home/dms-binds.kdl'";
       };
     };
   };
