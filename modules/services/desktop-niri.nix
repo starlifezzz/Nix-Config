@@ -101,7 +101,7 @@
     mission-center # DMS 控制中心（Wayland 原生）
     xdg-desktop-portal-wlr # ← 加这个！niri 录屏/投屏必需
     qt6.qtimageformats
-    loupe
+    loupe # 图像查看器
   ];
 
   # UPower（DMS 电池/电源模块需要）

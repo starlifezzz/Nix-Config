@@ -6,16 +6,7 @@
   boot.kernelParams = [
     # ✅ 移除 amdgpu.runpm=0 - Linux 7.0 中运行时电源管理已足够稳定
 
-    # ═══════════════════════════════════════════════════════════
-    # ✅ 禁用 MPO (Multi-Plane Overlay) — 修复 6600XT 桌面卡顿/闪烁
-    # ═══════════════════════════════════════════════════════════
-    # 原因: RDNA2 (Navi 23) 在 Linux 下 MPO 硬件合成路径有已知缺陷，
-    #       导致桌面/滚动/窗口动画卡顿（COSMIC 与 KDE 均受影响，KDE 有
-    #       软件规避所以感知弱，COSMIC 直接暴露）。
-    # 依据: 内核文档 amdgpu(4) 的 disable_mpo 参数（官方），社区大量 6600XT
-    #       用户实测禁用后桌面恢复流畅 (LTT forum #1486309 等)。
-    # 效果: 桌面合成走纯 GPU 直接扫描输出，消除 MPO 抖动；游戏性能无感知损失。
-    "amdgpu.disable_mpo=1"
+    # "amdgpu.disable_mpo=1" ❌ 参数已移除（内核 6.x 起）——被忽略
 
     # # ✅ PCIe ASPM 节能模式（桌面用户推荐）
     # "pcie_aspm=powersupersave"

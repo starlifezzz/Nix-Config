@@ -315,7 +315,7 @@
   "iconThemeDark": "Papirus-Dark",
   "iconThemeLight": "Papirus-Light",
   "iconThemePerMode": true,
-  "lastAppliedIconTheme": "Papirus-Dark",
+  "lastAppliedIconTheme": "Papirus-Light",
   "cursorSettings": {
     "theme": "Nordzy-catppuccin-frappe-dark",
     "size": 24,
@@ -367,7 +367,7 @@
   "muteSoundsWhenMediaPlaying": true,
   "acMonitorTimeout": 30,
   "acLockTimeout": 15,
-  "acSuspendTimeout": 0,
+  "acSuspendTimeout": 1200,
   "acSuspendBehavior": 0,
   "acProfileName": "",
   "acPostLockMonitorTimeout": 0,
@@ -556,7 +556,11 @@
   "updaterAllowAUR": true,
   "updaterIgnoredPackages": [],
   "displayNameMode": "model",
-  "screenPreferences": {},
+  "screenPreferences": {
+    "wallpaper": [
+      "all"
+    ]
+  },
   "showOnLastDisplay": {},
   "niriOutputSettings": {
     "DP-1": {

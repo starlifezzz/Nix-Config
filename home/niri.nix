@@ -165,6 +165,11 @@
           "spawn-sh" =
             "grim -g \"$(slurp)\" - | satty --filename - --output-filename /tmp/screenshot.png; wl-copy < /tmp/screenshot.png";
         };
+        # Mod+E 打开文件管理器（DMS 设置中心添加——声明到 HM，换 PC 自动同步）
+        "Mod+E" = {
+          _props."hotkey-overlay-title" = "启动文件管理器";
+          spawn = [ "nautilus" ];
+        };
         "Alt+Shift+C" = {
           _props."hotkey-overlay-title" = "Clipboard History";
           spawn = [
