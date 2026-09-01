@@ -170,6 +170,16 @@
   # 依赖：本机 USB 指纹锁 06cb:00f0；与 SDDM/KDE 无冲突（fprintd 是独立 D-Bus 服务）
   services.fprintd.enable = true;
 
+  # 指纹设备保持常开（systemd 服务——udev-settle 后确保 power/control=on）
+  systemd.services.fingerprint-usb-power = {
+    wantedBy = [ "multi-user.target" ];
+    after = [ "systemd-udev-settle.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.bash}/bin/bash -c 'echo on > /sys/bus/usb/devices/3-3.4/power/control'";
+    };
+  };
+
   # 禁用 speech-dispatcher（语音合成）——用户不用，且子进程全僵尸（sd_voxin 等）
   services.speechd.enable = false;
 
