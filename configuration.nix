@@ -232,9 +232,6 @@
   # ── SMART 磁盘健康监控（NVMe/SSD 温度/寿命预警）──
   services.smartd.enable = true;
 
-  # ── irqbalance：多核中断平衡（Ryzen 5600 桌面响应优化）──
-  services.irqbalance.enable = true;
-
   # GeoClue2 定位（DMS 动态主题需要：日出日落判定 → 白天浅色/夜晚深色）
   # 之前缺失 → gammaIsDay 恒 false → 白天也深色
   services.geoclue2.enable = true;

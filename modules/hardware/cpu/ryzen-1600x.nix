@@ -9,7 +9,6 @@
 
   boot.kernelParams = [
     "processor.max_cstate=5"
-    "init_on_alloc=1"
     # "pcie_aspm=off"
     # ✅ 新增：HDMI/DP 音频输出
     "amdgpu.audio=1"
@@ -23,8 +22,7 @@
 
   boot.kernel.sysctl = {
     "kernel.sched_autogroup_enabled" = lib.mkForce 1;
-    "kernel.sched_migration_cost_ns" = lib.mkForce 100000;
-    "vm.swappiness" = lib.mkForce 15; # 8GB 内存保持较高值
+    "vm.swappiness" = lib.mkForce 1; # 与 kernel.nix 一致，最小化 swap 使用
     "vm.vfs_cache_pressure" = lib.mkForce 50;
     "kernel.numa_balancing" = lib.mkForce 1;
   };

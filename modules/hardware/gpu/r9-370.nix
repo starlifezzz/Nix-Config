@@ -18,8 +18,10 @@
     # ✅ HDMI/DP 音频输出（GPU 专属配置）
     "amdgpu.audio=1"
     
-    # ✅ PCIe ASPM 节能模式
-    "pcie_aspm=powersupersave"
+    # ✅ PCIe ASPM —— 阻止深度省电避免 R9 370 (GCN1) DP 掉信号黑屏
+    # powersupersave 曾导致显示器空闲后链路深度休眠无法唤醒 → 突然黑屏无响应
+    # 修复：performance（关闭 ASPM 省电），代价是 PCIe 链路常开功耗略高
+    "pcie_aspm=performance"
     
     # Southern Islands 支持
     "amdgpu.si_support=1"

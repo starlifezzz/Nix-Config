@@ -65,7 +65,10 @@
     };
   };
 
+  # ── irqbalance：多核中断平衡（Ryzen 5600 桌面响应优化）──
+  services.irqbalance.enable = true;
   # ✅ 温度监控工具
+  
   environment.systemPackages = with pkgs; [
     lm_sensors # 传感器读取工具
   ];
