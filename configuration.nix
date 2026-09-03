@@ -175,16 +175,7 @@
   # 桌面登录走 dms-greeter（PAM 无 auto_start）——keyring 保持空密码自动解锁
   security.pam.services.login.enableGnomeKeyring = lib.mkForce false;
 
-  # 指纹设备（06cb:00f0 Synaptics）保持常开
-  # ⚠️ USB 路径会变（3-3.4 → 3-2.4 等）——脚本动态按 idVendor 找，不硬编码
-  systemd.services.fingerprint-usb-power = {
-    wantedBy = [ "multi-user.target" ];
-    after = [ "systemd-udev-settle.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.bash}/bin/bash ${./home/scripts/fingerprint-usb-power.sh}";
-    };
-  };
+
 
   # 禁用 speech-dispatcher（语音合成）——用户不用，且子进程全僵尸（sd_voxin 等）
   services.speechd.enable = false;
