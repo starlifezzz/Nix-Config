@@ -66,11 +66,10 @@
       modulePath = "pam_gnome_keyring.so";
       args = [ "use_authtok" ];
     };
-    rules.session.gnome_keyring = {
-      control = "optional";
-      modulePath = "pam_gnome_keyring.so";
-      args = [ "auto_start" ];
-    };
+    # ⚠️ 移除 session.gnome_keyring auto_start（治本）
+    # 之前: 密码登录时 auto_start 用密码设 keyring → 指纹登录无法解锁 → "unlock login keyring" 弹框
+    # 现在: greeter 不设 keyring 密码 → keyring 保持空密码 → 指纹/密码都自动解锁
+    # （保留 auth/password optional——不设密码，仅初始化）
   };
 
   # ── DMS Shell 运行时依赖（桌面 shell 本体由 home-manager 模块管理）────
