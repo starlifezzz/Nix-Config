@@ -43,13 +43,3 @@ echo "$GENERATED" > "$OUTPUT_KDL"
 
 # 重载 niri 配置应用新 output
 niri msg action load-config-file 2>/dev/null || true
-
-# ═══ 同步 DMS 快捷键（binds.kdl → 仓库备份）═══
-# DMS 设置中心加的快捷键存在 ~/.config/niri/dms/binds.kdl（DMS 自主）
-# 执行本脚本时同步到仓库——换 PC 可参考/恢复
-# 注意: 声明到 HM 的快捷键在 home/niri.nix（config.kdl），DMS 额外加的在这里备份
-DMS_BINDS="${XDG_CONFIG_HOME:-$HOME/.config}/niri/dms/binds.kdl"
-REPO_BINDS="/etc/nixos/home/dms-binds.kdl"
-if [ -f "$DMS_BINDS" ]; then
-  cp "$DMS_BINDS" "$REPO_BINDS"
-fi

@@ -4,20 +4,25 @@
 #   - 包 + NixOS 模块: programs.dms-shell（见 configuration.nix）
 #   - 更新: nix flake update nixpkgs（无独立 DMS flake input）
 #
-# ═══ 配置策略：动态配置不写死 ═══
-# settings.json 由 DMS **自主管理**（不整体声明）：
-#   - 动态行为（matugen 自动配色/壁纸/主题）需运行时更新——写死会冻结
-#   - 固定项（bar 自动隐藏/greeter 指纹）由激活脚本"仅首次初始化"写入
-#     （见 home/niri.nix 的 syncDmsSettings——文件存在则不覆盖）
+# ═══ 配置策略：声明式，复制即一致 ═══
+# settings.json 由 home.file **声明式部署**（只读软链指向 /nix/store 副本）：
+#   - 任何机器 clone 本仓库 → nixos-rebuild → settings.json 完全一致，无需手动同步
+#   - DMS 检测到只读 settings.json 时，设置中心改动会弹"只读 + 复制新值"提示
+#   - 若在设置中心改了想回写：dms ipc call settings dump 导出 → 覆盖 home/dms-settings.json
+#   - 动态状态（壁纸/会话）仍由 DMS 写在 ~/.local/state/DankMaterialShell/session.json，不冻结
 {
   pkgs,
   lib,
   ...
 }:
 {
-  # ═══ DMS 配置：DMS 自主 + HM 仓库同步 ═══
-  # settings.json 由 DMS 运行时管理（真实文件可写——HM 部署软链会只读导致 DMS 设置失效）
-  # home/dms-settings.json 是同步副本（版本控制/回滚）
-  # 工作流: DMS 设置中心改 → ./scripts/sync-dms-settings.sh（同步到 HM）→ rebuild
-  # ⚠️ 不部署 settings.json（避免 clobber + 只读冲突）
+  # ═══ DMS 配置：声明式部署 settings.json ═══
+  # source: 指向仓库副本（/nix/store 只读）→ 复制即一致
+  # force:  旧的真实文件存在时也行，HM 会覆盖并备份
+  # ⚠️ home.file 路径相对于 $HOME，DMS 读 ~/.config/DankMaterialShell/settings.json，
+  #    所以必须带 .config/ 前缀（否则会误放到 ~/DankMaterialShell/）
+  home.file.".config/DankMaterialShell/settings.json" = {
+    source = ./dms-settings.json;
+    force = true;
+  };
 }

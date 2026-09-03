@@ -22,7 +22,6 @@
   # ── Niri 桌面组件（Wayland 生态）────────────────────────────
   # 状态栏/启动器/通知/壁纸/配色/锁屏/截图
   home.packages = with pkgs; [
-    waybar # 状态栏（Catppuccin 渐变）
     fuzzel # 应用启动器
     # mako 已移除：DMS 接管通知（org.freedesktop.Notifications）
     swaybg # 壁纸
@@ -91,16 +90,6 @@
           _props."hotkey-overlay-title" = "Open Terminal";
           spawn = [ "ghostty-ime" ];
         };
-        "Alt+D" = {
-          _props."hotkey-overlay-title" = "Run Application";
-          spawn = [
-            "key"
-            "ipc"
-            "call"
-            "spotlight"
-            "toggle"
-          ];
-        };
         "Alt+B" = {
           _props."hotkey-overlay-title" = "Open Browser";
           spawn = [ "floorp" ];
@@ -127,15 +116,7 @@
           _props."hotkey-overlay-title" = "Toggle Floating";
           "toggle-window-floating" = { };
         };
-        "Alt+L" = {
-          _props."hotkey-overlay-title" = "Lock Screen";
-          spawn = [
-            "dms"
-            "ipc"
-            "call"
-            "lock"
-          ];
-        };
+        # Alt+D / Alt+L 由 dms-binds.kdl (binds-user.kdl) 统一管理，避免冲突
         "Alt+P" = {
           _props."hotkey-overlay-title" = "Power Menu";
           spawn = [ "wlogout" ];
@@ -308,106 +289,6 @@
   # 注意: 壁纸是静态资源，路径可跨机器；新 PC 需替换此文件。
   # 放置: home/wallpaper.jpg（用户可随时更换，换后运行 matugen 重新配色）
 
-  # ── Waybar 状态栏 (Catppuccin Mocha 渐变) ───────────────────
-  xdg.configFile."waybar/config" = {
-    text = ''
-      {
-        "layer": "top",
-        "position": "top",
-        "height": 32,
-        "modules-left": ["hyprland/workspaces"],
-        "modules-center": ["clock"],
-        "modules-right": ["network", "pulseaudio", "cpu", "memory", "tray"],
-        "hyprland/workspaces": {
-          "format": "{name}",
-          "active-only": false
-        },
-        "clock": {
-          "format": " {:%H:%M}",
-          "format-alt": " {:%Y-%m-%d}"
-        },
-        "network": {
-          "format-wifi": " {essid}",
-          "format-ethernet": " {ifname}",
-          "format-disconnected": "⚠️"
-        },
-        "pulseaudio": {
-          "format": " {volume}%"
-        },
-        "cpu": {
-          "format": " {usage}%"
-        },
-        "memory": {
-          "format": " {}%"
-        },
-        "tray": {
-          "spacing": 8
-        }
-      }
-    '';
-    force = true;
-  };
-
-  xdg.configFile."waybar/style.css" = {
-    text = ''
-      * {
-        font-family: "LXGW WenKai Screen", "Font Awesome 6 Free";
-        font-size: 13px;
-      }
-
-      window#waybar {
-        background: rgba(30, 30, 46, 0.85);
-        color: #cdd6f4;
-        border-bottom: 1px solid #313244;
-      }
-
-      #workspaces button {
-        padding: 0 8px;
-        color: #cdd6f4;
-        background: transparent;
-        border-radius: 8px;
-      }
-
-      #workspaces button.active {
-        background: #cba6f7;
-        color: #1e1e2e;
-        border-radius: 8px;
-      }
-
-      #clock, #network, #pulseaudio, #cpu, #memory {
-        padding: 0 10px;
-        color: #cdd6f4;
-        background: transparent;
-      }
-
-      #network {
-        color: #89b4fa;
-      }
-
-      #pulseaudio {
-        color: #a6e3a1;
-      }
-
-      #cpu {
-        color: #f9e2af;
-      }
-
-      #memory {
-        color: #f38ba8;
-      }
-
-      #tray {
-        padding: 0 10px;
-      }
-
-      #tray menu {
-        background: #1e1e2e;
-        color: #cdd6f4;
-      }
-    '';
-    force = true;
-  };
-
   # ── Fuzzel 启动器 (Catppuccin Mocha) ────────────────────────
   xdg.configFile."fuzzel/fuzzel.ini" = {
     text = ''
@@ -490,20 +371,12 @@
 
   # DMS 配置已由 HM 完整声明（见 dms.nix 的 home.file settings.json）
 
-  # ── systemd path 监听（DMS 快捷键自动同步）───────────────
-  systemd.user.paths."sync-dms-binds" = {
-    Unit = {
-      Description = "Watch DMS keybinds file";
-      After = [ "graphical-session.target" ];
-    };
-    Path = {
-      # 监听 DMS 快捷键变化（设置中心加/减即触发）
-      PathChanged = "%h/.config/niri/dms/binds.kdl";
-      MakeDirectory = true;
-    };
-    Install = {
-      WantedBy = [ "default.target" ];
-    };
+  # ── DMS 快捷键（声明式部署到 niri 分片，复制即一致）──
+  # binds-user.kdl 由 HM 部署（只读软链），换 PC rebuild 即自动生成快捷键
+  # DMS 设置中心改快捷键 → 提示只读 → dms ipc ... 导出 → 更新 home/dms-binds.kdl
+  home.file.".config/niri/dms/binds-user.kdl" = {
+    source = ./dms-binds.kdl;
+    force = true;
   };
 
   # ── 自启动 systemd 服务 ────────────────────────────────────
@@ -523,17 +396,5 @@
         WantedBy = [ "niri.service" ];
       };
     };
-    # 监听 DMS 快捷键变化 → 自动同步到仓库（binds.kdl → dms-binds.kdl）
-    # DMS 设置中心加/减快捷键 → path 触发 → 自动备份（换 PC 可恢复）
-    sync-dms-binds = {
-      Unit = {
-        Description = "Sync DMS keybinds to repo";
-      };
-      Service = {
-        Type = "oneshot";
-        ExecStart = "${pkgs.bash}/bin/bash -c 'cp %h/.config/niri/dms/binds.kdl /etc/nixos/home/dms-binds.kdl'";
-      };
-    };
   };
-
 }
