@@ -4,7 +4,7 @@
   # ═══════════════════════════════════════════════════════════
   # SSD 优化模块
   # ═══════════════════════════════════════════════════════════
-  
+
   # SSD 优化 - 定期 TRIM
   services.fstrim = {
     enable = true;
@@ -23,11 +23,9 @@
   # 注意: 日志仅保留到本次关机，需持久审计时改回 persistent
   # 回滚: 删除此块后 rebuild
   # ═══════════════════════════════════════════════════════════
-  services.journald = {
-    storage = "volatile";
-    extraConfig = ''
-      RuntimeMaxUse=128M
-    '';
+  services.journald.settings.Journal = {
+    Storage = "volatile";
+    RuntimeMaxUse = "128M";
   };
 
   # ═══════════════════════════════════════════════════════════
@@ -53,12 +51,12 @@
       "nosuid"
     ];
   };
-  
+
   # 内核参数优化 - SSD 专用优化
   boot.kernel.sysctl = {
     # SSD 优化：禁用交换预读
     "vm.page-cluster" = lib.mkDefault 0;
-    
+
     # Linux 7.0 内存管理优化（针对SSD）
     # dirty_ratio 15→20：本机 31G 内存充裕，降低小写回频次
     # 作用: 更高的脏页阈值 → 更少小写回 → 减少 SSD 写放大
@@ -69,9 +67,9 @@
     "vm.dirty_writeback_centisecs" = 500; # 脏页写回间隔设为5秒
 
     # XFS性能优化（针对SSD/NVMe）
-    "fs.xfs.inherit_nodump" = 1;        # 继承nodump标志
-    "fs.xfs.inherit_noatime" = 1;       # 继承noatime标志（减少写入）
-    "fs.xfs.inherit_nosymlinks" = 1;    # 继承nosymlinks标志
+    "fs.xfs.inherit_nodump" = 1; # 继承nodump标志
+    "fs.xfs.inherit_noatime" = 1; # 继承noatime标志（减少写入）
+    "fs.xfs.inherit_nosymlinks" = 1; # 继承nosymlinks标志
     "fs.xfs.filestream_centisecs" = 3000; # 文件流分配器超时
   };
 }

@@ -4,6 +4,7 @@
 {
   lib,
   pkgs,
+  inputs,
   ...
 }:
 
@@ -226,6 +227,8 @@
   # ═══════════════════════════════════════════════════════════
   programs.dms-shell = {
     enable = true;
+    # 用 flake 构建（含 #3171 指纹修复——v1.5.3 的 30 秒解锁 bug）
+    # package = inputs.dms.packages.${pkgs.stdenv.hostPlatform.system}.default;
     # systemd 服务 + 可选依赖（dgop/matugen/cava/khal）自动处理
   };
 
@@ -235,6 +238,15 @@
   # GeoClue2 定位（DMS 动态主题需要：日出日落判定 → 白天浅色/夜晚深色）
   # 之前缺失 → gammaIsDay 恒 false → 白天也深色
   services.geoclue2.enable = true;
+
+  # DMS greeter 状态检查消除（让 dms greeter status 通过）
+  # DMS 读 /etc/greetd/config.toml 找 dms 命令——NixOS 用 store 配置（文件不存在）
+  # 创建声明式文件（greetd 实际仍用 store 配置——此文件仅 DMS 检查用）
+  environment.etc."greetd/config.toml".text = ''
+    [default_session]
+    command = "dms-greeter --command niri"
+    user = "dms-greeter"
+  '';
 
   # 系统版本
   system.stateVersion = "26.11";
