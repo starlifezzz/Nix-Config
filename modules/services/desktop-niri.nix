@@ -128,10 +128,13 @@
   xdg.portal = {
     enable = true;
     extraPortals = [
+      pkgs.xdg-desktop-portal-gnome
+      pkgs.xdg-desktop-portal-gtk
       pkgs.xdg-desktop-portal-wlr
     ];
     # 新增下面这一行，显式排除掉冲突的后端
-    configPackages = [ pkgs.xdg-desktop-portal-wlr ];
+    # configPackages = [ pkgs.xdg-desktop-portal-wlr ];
+    configPackages = lib.mkForce [ pkgs.xdg-desktop-portal-gnome ];
   };
 
   # ── D-Bus 配置（broker 以获得更好的 Portal 支持）─────────────
