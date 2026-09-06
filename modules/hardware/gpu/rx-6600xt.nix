@@ -54,7 +54,8 @@
     ];
   };
 
-  boot.initrd.kernelModules = [ "amdgpu" ];
+  # 建议： 除非你有加密分区或特殊启动画面需求，请删除 boot.initrd.kernelModules = [ "amdgpu" ];，让系统在主系统阶段自动加载驱动。
+  # boot.initrd.kernelModules = [ "amdgpu" ];
 
   # ✅ GPU 监控工具
   environment.systemPackages = with pkgs; [

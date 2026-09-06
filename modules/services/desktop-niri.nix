@@ -50,26 +50,23 @@
   # 说明: DMS greeter 是 quickshell 系，支持 fprintd 指纹交互
   #       指纹通过后直接登录，不再二次询问
   security.pam.services.dms-greeter = {
-    # 指纹优先，失败才问密码（用户要求）
-    # sufficient 链: fprintd (order 1) 成功→通过；失败→ unix (order 2) 密码
-    rules.auth.fprintd.order = 1;
-    rules.auth.unix.order = 2; # 密码 fallback（指纹失败时）
-    # gnome-keyring 解锁（登录时自动解锁 keyring，避免桌面弹"unlock login keyring"）
-    # 与 login PAM 一致：auth/password/session 都是 optional
-    rules.auth.gnome_keyring = {
-      order = 3;
+    rules.auth.fprintd = {
+      order = 1;
+      control = "sufficient";
+      modulePath = "${pkgs.fprintd}/lib/security/pam_fprintd.so";
+    };
+    rules.auth.unix = {
+      order = 2;
+      control = lib.mkForce "required";
+      modulePath = lib.mkForce "pam_unix.so";
+    };
+    # session 阶段必须保留 gnome_keyring 以完成解锁
+    # 空密码 keyring 在指纹登录时也能正常解锁
+    rules.session.gnome_keyring = {
       control = "optional";
       modulePath = "pam_gnome_keyring.so";
+      args = [ "auto_start" ];
     };
-    rules.password.gnome_keyring = {
-      control = "optional";
-      modulePath = "pam_gnome_keyring.so";
-      args = [ "use_authtok" ];
-    };
-    # ⚠️ 移除 session.gnome_keyring auto_start（治本）
-    # 之前: 密码登录时 auto_start 用密码设 keyring → 指纹登录无法解锁 → "unlock login keyring" 弹框
-    # 现在: greeter 不设 keyring 密码 → keyring 保持空密码 → 指纹/密码都自动解锁
-    # （保留 auth/password optional——不设密码，仅初始化）
   };
 
   # ── DMS Shell 运行时依赖（桌面 shell 本体由 home-manager 模块管理）────
@@ -124,7 +121,7 @@
     QT_IM_MODULE = "fcitx";
     # 强制 Electron 应用使用 Vulkan 渲染（Wayland 下默认 OpenGL，导致部分应用闪烁/黑屏）
     NIRI_RENDERER = "vulkan";
-    LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.pipewire ];
+    # LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.pipewire ];
   };
 
   # ── XDG Portal - niri 环境 ─────────────────────────────────
@@ -146,4 +143,11 @@
 
   # 打印服务（默认禁用，与 COSMIC 分支一致）
   services.printing.enable = false;
+
+  # ── 禁用指纹读取器 USB Autosuspend（修复熄屏后首次指纹失效）──
+  # TODO: 将 "XXXX:XXXX" 替换为实际指纹设备 USB ID（lsusb 获取）
+  services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ATTR{idVendor}=="06cb", ATTR{idProduct}=="00f0", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+  '';
+
 }
