@@ -742,7 +742,7 @@
     "clipboardClickToPaste": false,
     "clipboardEnterToPaste": false,
     "clipboardRememberTypeFilter": false,
-    "clipboardTypeFilter": "text",
+    "clipboardTypeFilter": "all",
     "clipboardVisibleEntryActions": [
         "pin",
         "edit",
