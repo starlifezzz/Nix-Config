@@ -50,6 +50,8 @@
     settings = {
       # 输入设备
       input = {
+        # niri Mod（Alt+右键 resize 窗口）= 物理 Alt（input 直属节点）
+        "mod-key" = "Alt";
         keyboard.xkb = {
           layout = "us";
           options = "ctrl:nocaps";
@@ -86,123 +88,9 @@
         };
       };
 
-      # 快捷键（声明式结构化）
-      binds = {
-        "Alt+Return" = {
-          _props."hotkey-overlay-title" = "Open Terminal";
-          spawn = [ "ghostty-ime" ];
-        };
-        "Alt+B" = {
-          _props."hotkey-overlay-title" = "Open Browser";
-          spawn = [ "floorp" ];
-        };
-        "Alt+Q" = {
-          close-window = { };
-        };
-        "Alt+F" = {
-          maximize-column = { };
-        };
-        "Alt+Shift+F" = {
-          fullscreen-window = { };
-        };
-        # 外接显示器亮度（DMS 控制中心不含 DDC——用命令行步进）
-        "Alt+Shift+Up" = {
-          _props."hotkey-overlay-title" = "Brightness Up";
-          "spawn-sh" = "${pkgs.bash}/bin/bash ${./scripts/brightness-step.sh} up";
-        };
-        "Alt+Shift+Down" = {
-          _props."hotkey-overlay-title" = "Brightness Down";
-          "spawn-sh" = "${pkgs.bash}/bin/bash ${./scripts/brightness-step.sh} down";
-        };
-        "Alt+V" = {
-          _props."hotkey-overlay-title" = "Toggle Floating";
-          "toggle-window-floating" = { };
-        };
-        # Alt+D / Alt+L 由 dms-binds.kdl (binds-user.kdl) 统一管理，避免冲突
-        "Alt+P" = {
-          _props."hotkey-overlay-title" = "Power Menu";
-          spawn = [ "wlogout" ];
-        };
-        "Alt+M" = {
-          _props."hotkey-overlay-title" = "Open Dashboard";
-          spawn = [
-            "key"
-            "ipc"
-            "call"
-            "keystone"
-            "dashboard"
-          ];
-        };
-        "Alt+Shift+W" = {
-          _props."hotkey-overlay-title" = "Open Hub";
-          spawn = [
-            "key"
-            "ipc"
-            "call"
-            "keystone"
-            "hub"
-          ];
-        };
-        "Ctrl+Alt+A" = {
-          _props."hotkey-overlay-title" = "Screenshot Region";
-          "spawn-sh" =
-            "grim -g \"$(slurp)\" - | satty --filename - --output-filename /tmp/screenshot.png; wl-copy < /tmp/screenshot.png";
-        };
-        # Mod+E 打开文件管理器（DMS 设置中心添加——声明到 HM，换 PC 自动同步）
-        "Mod+E" = {
-          _props."hotkey-overlay-title" = "启动文件管理器";
-          spawn = [ "nautilus" ];
-        };
-        "Alt+Shift+C" = {
-          _props."hotkey-overlay-title" = "Clipboard History";
-          spawn = [
-            "dms"
-            "ipc"
-            "call"
-            "clipboard"
-            "toggle"
-          ];
-        };
-        "Alt+H" = {
-          focus-column-left = { };
-        };
-        "Alt+J" = {
-          focus-column-right = { };
-        };
-        "Alt+Shift+H" = {
-          move-column-left = { };
-        };
-        "Alt+Shift+J" = {
-          move-column-right = { };
-        };
-        "Alt+1" = {
-          focus-workspace = 1;
-        };
-        "Alt+2" = {
-          focus-workspace = 2;
-        };
-        "Alt+3" = {
-          focus-workspace = 3;
-        };
-        "Alt+4" = {
-          focus-workspace = 4;
-        };
-        "Alt+Shift+1" = {
-          "move-column-to-workspace" = 1;
-        };
-        "Alt+Shift+2" = {
-          "move-column-to-workspace" = 2;
-        };
-        "Alt+Shift+3" = {
-          "move-column-to-workspace" = 3;
-        };
-        "Alt+Shift+4" = {
-          "move-column-to-workspace" = 4;
-        };
-        "Alt+E" = {
-          quit = { };
-        };
-      };
+      # ═══ 快捷键：全部由 DMS 设置中心管理（binds.kdl——官方路径）═══
+      # config.kdl 不声明快捷键——只 include dms/binds.kdl（见 extraConfig）
+      # 同步: sync-dms-settings.sh（cp binds.kdl → 仓库）+ activation 首次恢复
     };
 
     # 复杂/重复节点保持 KDL（window-rule ×5、spawn-at-startup ×4、include、layer-rule）
@@ -217,7 +105,6 @@
       // 预置 include → DMS 检测到已包含 → 只写可写分片（不尝试改只读 config.kdl）
       // 修复: DMS 键盘快捷键/窗口规则等设置无法保存（Fix failed）
       include optional=true "dms/binds.kdl"
-      include optional=true "dms/binds-user.kdl"
       include optional=true "dms/cursor.kdl"
       include optional=true "dms/colors.kdl"
       include optional=true "dms/input.kdl"
@@ -375,13 +262,16 @@
 
   # DMS 配置已由 HM 完整声明（见 dms.nix 的 home.file settings.json）
 
-  # ── DMS 快捷键（声明式部署到 niri 分片，复制即一致）──
-  # binds-user.kdl 由 HM 部署（只读软链），换 PC rebuild 即自动生成快捷键
-  # DMS 设置中心改快捷键 → 提示只读 → dms ipc ... 导出 → 更新 home/dms-binds.kdl
-  home.file.".config/niri/dms/binds-user.kdl" = {
-    source = ./dms-binds.kdl;
-    force = true;
-  };
+  # ── DMS 快捷键首次恢复（换机）──
+  # binds.kdl 是 DMS 设置中心管理的用户文件——不部署（只读锁会阻止 DMS 写）
+  # 换机: 仓库 dms-binds.kdl → 用户目录（仅首次/文件不存在——不覆盖 DMS 改动）
+  home.activation.restoreDmsBinds = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    mkdir -p "$HOME/.config/niri/dms"
+    if [ ! -f "$HOME/.config/niri/dms/binds.kdl" ]; then
+      cp ${./dms-binds.kdl} "$HOME/.config/niri/dms/binds.kdl"
+      echo "restoreDmsBinds: 已从仓库恢复快捷键 binds.kdl"
+    fi
+  '';
 
   # ── 自启动 systemd 服务 ────────────────────────────────────
   systemd.user.services = {

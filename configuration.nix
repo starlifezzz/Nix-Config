@@ -186,8 +186,7 @@
   # 内核创建 /dev/i2c-N 默认 root:root，需 udev 规则改为 i2c 组
   services.udev.extraRules = ''
     SUBSYSTEM=="i2c-dev", GROUP="i2c", MODE="0660"
-    # 指纹设备（06cb:00f0）保持常开——防止周期挂起导致 xhci reset/指纹超时
-    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="06cb", ATTR{power/control}="on"
+    # 指纹 06cb:00f0 的 udev 规则统一在 modules/services/desktop-niri.nix（含 autosuspend）
   '';
 
 
@@ -195,9 +194,8 @@
   systemd.tmpfiles.rules = [
     "d /etc/nixos 0775 zhangchongjie users -"
     "d /run/polkit-1/rules.d 0755 root root -"
-    # 指纹设备（06cb:00f0）保持常开——udev ADD 规则只对插入生效，
-    # 开机后设备已存在需 tmpfiles 写入（防止 xhci reset/指纹超时）
-    "w /sys/bus/usb/devices/3-3.4/power/control - - - - on"
+    # 注: 指纹 power/control 曾用 tmpfiles 硬编码 USB 路径（3-3.4）——设备路径每次重启变化
+    # → 必然失效——已删除；现在依赖 desktop-niri.nix udev 规则 + usbcore.autosuspend=-1
   ];
 
   # ═══════════════════════════════════════════════════════════

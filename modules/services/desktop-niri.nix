@@ -75,11 +75,8 @@
   environment.systemPackages = with pkgs; [
     quickshell # DMS 依赖（Quickshell QML 框架）
     cliphist # 剪贴板历史
-    wl-clipboard # wl-copy/wl-paste
-    slurp # 区域选择
     ffmpeg # 录屏 GIF 后处理
     gpu-screen-recorder # 屏幕录制
-    matugen # Material 动态配色
     ddcutil # 显示器亮度控制（DMS 亮度模块用）
     brightnessctl # 笔记本背光亮度（DMS 亮度模块用）
     imagemagick # 壁纸处理（DMS 壁纸缓存/效果）
@@ -134,7 +131,10 @@
     ];
     # 新增下面这一行，显式排除掉冲突的后端
     # configPackages = [ pkgs.xdg-desktop-portal-wlr ];
-    configPackages = lib.mkForce [ pkgs.xdg-desktop-portal-gnome ];
+    configPackages = [
+      pkgs.xdg-desktop-portal-gnome
+      pkgs.xdg-desktop-portal-wlr
+    ];
   };
 
   # ── D-Bus 配置（broker 以获得更好的 Portal 支持）─────────────

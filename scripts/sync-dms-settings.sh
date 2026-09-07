@@ -24,6 +24,16 @@ if [ -z "$DUMP" ] || ! printf '%s' "$DUMP" | python3 -m json.tool >/dev/null 2>&
   exit 1
 fi
 
+# 同步快捷键 binds.kdl（DMS 设置中心管理——git 仓库做文件同步）
+BINDS_SRC="$HOME/.config/niri/dms/binds.kdl"
+BINDS_DST="/etc/nixos/home/dms-binds.kdl"
+if [ -f "$BINDS_SRC" ]; then
+  cp "$BINDS_SRC" "$BINDS_DST"
+  echo "✅ 已同步快捷键 → $BINDS_DST"
+else
+  echo "⚠️ 未找到 $BINDS_SRC（DMS 尚未生成）——跳过快捷键同步"
+fi
+
 # 美化缩进后写入仓库
 printf '%s' "$DUMP" | python3 -m json.tool --no-ensure-ascii > "$DST"
 echo "✅ 已从运行中的 DMS 同步配置 → $DST"
