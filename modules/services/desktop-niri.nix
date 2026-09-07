@@ -53,7 +53,7 @@
     rules.auth.fprintd = {
       order = 1;
       control = "sufficient";
-      modulePath = "${pkgs.fprintd}/lib/security/pam_fprintd.so";
+      modulePath = lib.mkForce "pam_fprintd.so";
     };
     rules.auth.unix = {
       order = 2;
@@ -147,10 +147,11 @@
   # 打印服务（默认禁用，与 COSMIC 分支一致）
   services.printing.enable = false;
 
+  # ──────────  指纹相关  ─────────────
   # ── 禁用指纹读取器 USB Autosuspend（修复熄屏后首次指纹失效）──
   # TODO: 将 "XXXX:XXXX" 替换为实际指纹设备 USB ID（lsusb 获取）
   services.udev.extraRules = ''
     SUBSYSTEM=="usb", ATTR{idVendor}=="06cb", ATTR{idProduct}=="00f0", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
   '';
 
-}
+} 
