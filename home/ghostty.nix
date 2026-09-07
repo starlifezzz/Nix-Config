@@ -31,7 +31,7 @@ in
       command = "${pkgs.zellij}/bin/zellij";
       # theme = "Lovelace";
       theme = "dankcolors";
-      background-opacity = 0.92;
+      background-opacity = 0.87;
       background-opacity-cells = true; # ➕ 新增：zellij 内也透明
       background-blur = true; # ✅ 保留！官方合法，Plasma 上有效
 
