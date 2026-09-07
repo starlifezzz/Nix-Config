@@ -37,6 +37,8 @@
     colloid-gtk-theme
     # 音量控制（niri 快捷键用）
     playerctl
+    # Wayland 剪贴板持久化（Klipper 等价物——应用关闭后剪贴板保持）
+    wl-clip-persist
   ];
 
   # ── niri 窗口管理器（home-manager 声明式接管，替代手写 config.kdl）──
@@ -271,6 +273,8 @@
       // fcitx5 已由 i18n.inputMethod 的 XDG autostart 启动——此处不重复
       // （之前双实例: "Failed to create addon: dbus ... another fcitx already running"）
       spawn-at-startup "kdeconnect-indicator"
+      // 剪贴板持久化（wl-clip-persist——应用关闭后 Ctrl+V 仍有效）
+      spawn-at-startup "wl-clip-persist" "--clipboard" "regular"
       // PolicyKit 授权弹窗：由 DMS 自带 agent 处理（样式统一）
       // （移除了 polkit-kde-agent——避免与 DMS agent 冲突 "already exists"）
     '';
