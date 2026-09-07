@@ -8,7 +8,7 @@
 # settings.json 由 home.file **声明式部署**（只读软链指向 /nix/store 副本）：
 #   - 任何机器 clone 本仓库 → nixos-rebuild → settings.json 完全一致，无需手动同步
 #   - DMS 检测到只读 settings.json 时，设置中心改动会弹"只读 + 复制新值"提示
-#   - 若在设置中心改了想回写：dms ipc call settings dump 导出 → 覆盖 home/dms-settings.json
+#   - 若在设置中心改了想回写：dms ipc call settings dump 导出 → 覆盖 home/dms-shell/settings.json
 #   - 动态状态（壁纸/会话）仍由 DMS 写在 ~/.local/state/DankMaterialShell/session.json，不冻结
 {
   pkgs,
@@ -22,7 +22,7 @@
   # ⚠️ home.file 路径相对于 $HOME，DMS 读 ~/.config/DankMaterialShell/settings.json，
   #    所以必须带 .config/ 前缀（否则会误放到 ~/DankMaterialShell/）
   home.file.".config/DankMaterialShell/settings.json" = {
-    source = ./dms-settings.json;
+    source = ./dms-shell/settings.json;
     force = true;
   };
 }

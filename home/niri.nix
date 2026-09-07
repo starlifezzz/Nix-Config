@@ -121,39 +121,9 @@
           }
       }
 
-      // ═══ 游戏窗口排除背景模糊（性能关键）═══
-      // 全局 blur 会让全屏游戏每帧被高斯模糊 → GPU 占用暴增（75帧→50帧）
-      // 实测: Steam/Proton 游戏 app-id = "steam_app_default"（RE2 实测确认）
-      window-rule {
-          match app-id=r#"(?i)(^re2$|^re[0-9]$|resident|wine|proton|dxvk|^gamescope$|steam_app_default)"#
-          background-effect {
-              blur false
-          }
-      }
-
-      // rounded corners for all windows
-      window-rule {
-          match app-id=r#"^.*$"#
-          geometry-corner-radius 12
-          clip-to-geometry true
-      }
-
-      // terminal semi-transparent
-      window-rule {
-          match app-id=r#"^ghostty|^com\.mitchellh\.ghostty$"#
-          opacity 0.9
-      }
-
-      // ═══ 默认浮动（KDE/COSMIC 式堆叠）═══
-      // 用户反馈平铺难用 → 恢复全局浮动
-      // 单窗口切换: Alt+V（toggle-window-floating）
-      window-rule {
-          match app-id=r#"^.*$"#
-          open-floating true
-      }
-
-      // ═══ 窗口模式（平铺/浮动）═══
-      // DMS 支持窗口管理集成；如有需要 DMS 设置中心管理
+      // ═══ 窗口规则：全部由 DMS 设置中心管理（windowrules.kdl）═══
+      // 默认平铺；单窗口规则（浮动/尺寸/无模糊/透明度）→ DMS UI 设置
+      // 同步: sync-dms-settings.sh + activation 首次恢复（换机）
 
       // 基础服务（DMS shell 由 dms.service 启动，见 programs.dank-material-shell）
       // spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP"
@@ -262,15 +232,17 @@
 
   # DMS 配置已由 HM 完整声明（见 dms.nix 的 home.file settings.json）
 
-  # ── DMS 快捷键首次恢复（换机）──
-  # binds.kdl 是 DMS 设置中心管理的用户文件——不部署（只读锁会阻止 DMS 写）
-  # 换机: 仓库 dms-binds.kdl → 用户目录（仅首次/文件不存在——不覆盖 DMS 改动）
-  home.activation.restoreDmsBinds = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  # ── DMS 配置首次恢复（换机）──
+  # binds.kdl/windowrules.kdl 是 DMS 设置中心管理的用户文件——不部署（只读锁会阻止 DMS 写）
+  # 换机: 仓库 dms-shell/ → 用户目录（仅首次/文件不存在——不覆盖 DMS 改动）
+  home.activation.restoreDmsConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/.config/niri/dms"
-    if [ ! -f "$HOME/.config/niri/dms/binds.kdl" ]; then
-      cp ${./dms-binds.kdl} "$HOME/.config/niri/dms/binds.kdl"
-      echo "restoreDmsBinds: 已从仓库恢复快捷键 binds.kdl"
-    fi
+    for f in binds.kdl windowrules.kdl; do
+      if [ ! -f "$HOME/.config/niri/dms/$f" ]; then
+        cp ${./dms-shell}/$f "$HOME/.config/niri/dms/$f"
+        echo "restoreDmsConfig: 已恢复 $f"
+      fi
+    done
   '';
 
   # ── 自启动 systemd 服务 ────────────────────────────────────

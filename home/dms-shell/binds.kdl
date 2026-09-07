@@ -1,7 +1,9 @@
 binds {
     Alt+D hotkey-overlay-title="Default Launcher: Toggle" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
     Alt+L hotkey-overlay-title="锁屏" { spawn "dms" "ipc" "call" "lock" "lock"; }
+    Mod+S hotkey-overlay-title="设置切换显示" { spawn "dms" "ipc" "call" "settings" "toggle"; }
     Mod+Shift+C hotkey-overlay-title="查看剪切板" { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
+    Super+E hotkey-overlay-title="启用文件管理" { spawn "dms" "ipc" "call" "defaultApp" "fileManager"; }
     Alt+Page_Down hotkey-overlay-title="Move to Workspace Down" { move-column-to-workspace-down; }
     Alt+Page_Up hotkey-overlay-title="Move to Workspace Up" { move-column-to-workspace-up; }
     Ctrl+Shift+1 { move-column-to-workspace 1; }
@@ -12,21 +14,20 @@ binds {
     Mod+2 { focus-workspace 2; }
     Mod+3 { focus-workspace 3; }
     Mod+4 { focus-workspace 4; }
-    Ctrl+Shift+F { fullscreen-window; }
+    Ctrl+Shift+F hotkey-overlay-title="全屏" { fullscreen-window; }
     Ctrl+Shift+H { move-column-left; }
     Ctrl+Shift+J { move-column-right; }
-    Mod+Q { close-window; }
+    Mod+Q hotkey-overlay-title="关闭窗口（无法关zellij)" { close-window; }
+    Mod+V hotkey-overlay-title="浮动/平铺 窗口切换" { toggle-window-floating; }
     Super+H { focus-column-left; }
     Super+J { focus-column-right; }
-    Super+V hotkey-overlay-title="Toggle Floating" { toggle-window-floating; }
     Mod+Ctrl+A hotkey-overlay-title="截图（选区）" { screenshot; }
     Ctrl+E hotkey-overlay-title="退出NIRI" { quit; }
     Ctrl+Shift+Down hotkey-overlay-title="Brightness Down" { spawn-sh "bash /etc/nixos/scripts/brightness-step.sh down"; }
     Ctrl+Shift+Up hotkey-overlay-title="Brightness Up" { spawn-sh "bash /etc/nixos/scripts/brightness-step.sh up"; }
     Ctrl+Shift+W hotkey-overlay-title="Open Hub" { spawn "key" "ipc" "call" "keystone" "hub"; }
     Mod+B hotkey-overlay-title="打开浏览器" { spawn "floorp"; }
-    Mod+P hotkey-overlay-title="Power Menu" { spawn "wlogout"; }
-    Mod+Return hotkey-overlay-title="Open Terminal" { spawn "ghostty-ime"; }
-    Super+E hotkey-overlay-title="启动文件管理器" { spawn "nautilus"; }
+    Mod+P hotkey-overlay-title="电源菜单" { spawn "wlogout"; }
+    Mod+Return hotkey-overlay-title="打开终端" { spawn "ghostty-ime"; }
     Super+M hotkey-overlay-title="Open Dashboard" { spawn "key" "ipc" "call" "keystone" "dashboard"; }
 }
