@@ -82,3 +82,19 @@ window-rule {
     default-column-width { fixed 1100; }
     default-window-height { fixed 750; }
 }
+
+// @id=wr_1788791405891844145 @name=Remmina
+window-rule {
+    match app-id="^org.remmina.Remmina$"
+    open-floating true
+    default-column-width { fixed 800; }
+    default-window-height { fixed 600; }
+}
+
+// @id=wr_1788841522983390489 @name=x64.TDesktop
+window-rule {
+    match app-id="^io.github.tdesktop_x64.TDesktop$"
+    open-floating true
+    default-column-width { fixed 1150; }
+    default-window-height { fixed 750; }
+}
