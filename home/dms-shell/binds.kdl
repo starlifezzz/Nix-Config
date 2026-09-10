@@ -14,10 +14,10 @@ binds {
     Mod+2 { focus-workspace 2; }
     Mod+3 { focus-workspace 3; }
     Mod+4 { focus-workspace 4; }
-    Ctrl+Shift+F hotkey-overlay-title="全屏" { fullscreen-window; }
     Ctrl+Shift+H { move-column-left; }
     Ctrl+Shift+J { move-column-right; }
     Mod+Q hotkey-overlay-title="关闭窗口（无法关zellij)" { close-window; }
+    Mod+Shift+F hotkey-overlay-title="全屏" { fullscreen-window; }
     Mod+V hotkey-overlay-title="浮动/平铺 窗口切换" { toggle-window-floating; }
     Super+H { focus-column-left; }
     Super+J { focus-column-right; }
