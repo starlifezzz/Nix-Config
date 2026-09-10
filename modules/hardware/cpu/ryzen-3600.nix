@@ -34,6 +34,9 @@
 
     # NUMA 内存平衡
     "kernel.numa_balancing" = lib.mkForce 1;
+
+        # 启用 TCP BBR 拥塞控制
+    "net.ipv4.tcp_congestion_control" = "bbr";
   };
 
    # ═══════════════════════════════════════════════════════════

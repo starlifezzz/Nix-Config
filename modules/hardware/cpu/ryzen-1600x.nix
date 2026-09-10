@@ -25,6 +25,8 @@
     "vm.swappiness" = lib.mkForce 1; # 与 kernel.nix 一致，最小化 swap 使用
     "vm.vfs_cache_pressure" = lib.mkForce 50;
     "kernel.numa_balancing" = lib.mkForce 1;
+    # 启用 TCP BBR 拥塞控制
+    "net.ipv4.tcp_congestion_control" = "bbr";
   };
 
   # ═══════════════════════════════════════════════════════════
