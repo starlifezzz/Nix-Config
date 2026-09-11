@@ -1,6 +1,7 @@
 binds {
     Alt+D hotkey-overlay-title="Default Launcher: Toggle" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
     Alt+L hotkey-overlay-title="锁屏" { spawn "dms" "ipc" "call" "lock" "lock"; }
+    Mod+Ctrl+A hotkey-overlay-title="截图（选区）" { spawn "dms" "ipc" "call" "niri" "screenshot"; }
     Mod+S hotkey-overlay-title="设置切换显示" { spawn "dms" "ipc" "call" "settings" "toggle"; }
     Mod+Shift+C hotkey-overlay-title="查看剪切板" { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
     Super+E hotkey-overlay-title="启用文件管理" { spawn "dms" "ipc" "call" "defaultApp" "fileManager"; }
@@ -21,7 +22,6 @@ binds {
     Mod+V hotkey-overlay-title="浮动/平铺 窗口切换" { toggle-window-floating; }
     Super+H { focus-column-left; }
     Super+J { focus-column-right; }
-    Mod+Ctrl+A hotkey-overlay-title="截图（选区）" { screenshot; }
     Ctrl+E hotkey-overlay-title="退出NIRI" { quit; }
     Ctrl+Shift+Down hotkey-overlay-title="Brightness Down" { spawn-sh "bash /etc/nixos/scripts/brightness-step.sh down"; }
     Ctrl+Shift+Up hotkey-overlay-title="Brightness Up" { spawn-sh "bash /etc/nixos/scripts/brightness-step.sh up"; }

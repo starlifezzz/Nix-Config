@@ -98,3 +98,9 @@ window-rule {
     default-column-width { fixed 1150; }
     default-window-height { fixed 750; }
 }
+
+// @id=wr_1789109528433967775 @name=com.gabm.satty
+window-rule {
+    match app-id="^com.gabm.satty$"
+    open-floating true
+}

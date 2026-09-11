@@ -107,7 +107,12 @@
       include optional=true "dms/binds.kdl"
       include optional=true "dms/cursor.kdl"
       include optional=true "dms/colors.kdl"
-      include optional=true "dms/input.kdl"
+      // ═══ 不 include dms/input.kdl ═══
+      // 原因：niri 的「input 指点设备段」不合并（后者覆盖前者）——DMS 的 input.kdl
+      // 只写 mouse{accel-speed}、不含 accel-profile，会覆盖掉 settings 里的
+      // mouse{accel-profile "flat"} → 回退默认 adaptive（鼠标加速开启）。
+      // DMS v1.5.3 无输入设置 UI，该文件是静态模板（且桌面无需触控板设置），
+      // 故直接排除，让下面的 settings.input 生效（accel-profile flat）。
       include optional=true "dms/alttab.kdl"
       include optional=true "dms/layout.kdl"
       include optional=true "dms/windowrules.kdl"
