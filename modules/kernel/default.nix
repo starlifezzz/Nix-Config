@@ -10,12 +10,14 @@
         consoleMode = "max";
       };
       efi.canTouchEfiVariables = true;
+      # 引导菜单等待时间：默认 5s → 2s（减少启动停顿；需要选代时开机能按空格暂停）
+      timeout = 2;
     };
 
     kernelPackages = pkgs.linuxPackages_zen;
 
     kernelParams = [
-      "loglevel=3"
+      # loglevel 交由 NixOS 默认（boot.consoleLogLevel=4）；原 "loglevel=3" 会被它在后覆盖，已删
       "udev.log_level=3"
 
       # ═══════════════════════════════════════════════════════════
@@ -31,7 +33,7 @@
       "usbcore.autosuspend=-1" # 禁用 USB 自动挂起
       "usbcore.usbfs_memory_mb=1024" # USBFS 内存
 
-      "spectre_v2=on"
+      "spectre_v2=auto"
       "acpi_enforce_resources=lax"
     ];
 
