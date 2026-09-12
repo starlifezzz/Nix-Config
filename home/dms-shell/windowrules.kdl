@@ -104,3 +104,19 @@ window-rule {
     match app-id="^com.gabm.satty$"
     open-floating true
 }
+
+// @id=wr_1789120196323407403 @name=ente
+window-rule {
+    match app-id="^io.ente.auth$"
+    open-floating true
+    default-column-width { fixed 800; }
+    default-window-height { fixed 600; }
+}
+
+// @id=wr_1789121577633985653 @name=Ticktock
+window-rule {
+    match app-id="^Ticktock$"
+    open-floating true
+    default-column-width { fixed 1150; }
+    default-window-height { fixed 750; }
+}
