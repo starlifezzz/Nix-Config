@@ -311,7 +311,7 @@
             "enabled": true
         }
     ],
-    "networkPreference": "auto",
+    "networkPreference": "wifi",
     "iconThemeDark": "Papirus-Dark",
     "iconThemeLight": "Papirus-Light",
     "iconThemePerMode": true,

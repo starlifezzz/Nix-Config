@@ -46,10 +46,12 @@
     "kernel.numa_balancing" = lib.mkForce 1;
 
     # 内存优化 - 针对现代系统优化
-    "vm.swappiness" = lib.mkForce 1; # 最小化 swap 使用
+    "vm.swappiness" = lib.mkForce 100; # zram 场景推荐（swap 仅在 RAM，无磁盘写入）
     "vm.vfs_cache_pressure" = lib.mkForce 50; # 降低 VFS 缓存压力
     # 启用 TCP BBR 拥塞控制
     "net.ipv4.tcp_congestion_control" = "bbr";
+    "net.core.default_qdisc" = "fq"; # BBR 必需的排队规则
+    "net.ipv4.tcp_notsent_lowat" = 16384; # 减少发送缓冲，降低延迟
   };
 
   # ═══════════════════════════════════════════════════════════
