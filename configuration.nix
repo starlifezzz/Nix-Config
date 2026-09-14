@@ -111,11 +111,6 @@
 
     # 全局依赖库
     ffmpeg-full # 完整的 FFmpeg（多媒体库）
-    unzip # Zip 解压缩工具
-
-    # Nix 代码格式化工具
-    nixfmt # Nix 格式化器
-    nixd # Nix 语言服务器
 
     # 图标主题
     papirus-icon-theme
