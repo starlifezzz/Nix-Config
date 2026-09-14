@@ -104,7 +104,6 @@
     },
     "fontFamily": "霞鹜文楷 屏幕阅读版",
     "monoFontFamily": "霞鹜文楷等宽",
-    "soundLogin": true,
     "acMonitorTimeout": 120,
     "acLockTimeout": 30,
     "acSuspendTimeout": 1200,
