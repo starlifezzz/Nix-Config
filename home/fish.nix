@@ -26,6 +26,9 @@
       rebuild-test = "sudo nixos-rebuild test --flake /etc/nixos#nixos";
       rebuild-boot = "sudo nixos-rebuild boot --flake /etc/nixos#nixos";
 
+      # ═══ NixOS 用户级管理（Home Manager standalone本地版） ═══
+      hs = "home-manager switch -f /etc/nixos/home/default.nix -I home-manager=/etc/nixos/home-manager";
+
       # ═══ 垃圾回收与优化（手动紧急清理，日常由 nix.gc.automatic 处理） ═══
       gc = "sudo nix-collect-garbage -d";
       optimise = "sudo nix-store --optimise";
@@ -53,7 +56,7 @@
       rebuild-update = ''
         nix flake update --flake /etc/nixos && \
         sudo nixos-rebuild switch --flake /etc/nixos#nixos && \
-        home-manager switch -f /etc/nixos/home/default.nix
+        home-manager switch -f /etc/nixos/home/default.nix -I home-manager=/etc/nixos/home-manager
       '';
 
       # 提交配置并重建（解决 "Git tree is dirty" 警告）
