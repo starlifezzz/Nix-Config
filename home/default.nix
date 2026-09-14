@@ -92,7 +92,12 @@
     kdePackages.filelight
     mihomo
     gnome-disk-utility
+    unzip # Zip 解压缩工具
 
+    # Nix 代码格式化工具
+    nixfmt # Nix 格式化器
+    nixd # Nix 语言服务器
+    
     # ═══════════════════════════════════════════════════════════
     # 版本控制和编辑器
     vscode # vscode 编辑器
