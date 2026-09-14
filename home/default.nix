@@ -18,6 +18,9 @@
   # 禁用 Nixpkgs 版本检查（因为我们在用 unstable）
   home.enableNixpkgsReleaseCheck = false;
 
+  # 允许 unfree 包（standalone 模式不继承系统级配置）
+  nixpkgs.config.allowUnfree = true;
+
   # ═══════════════════════════════════════════════════════════
   # 启用 Home Manager systemd 服务 - 关键配置！
   # ═══════════════════════════════════════════════════════════
@@ -144,6 +147,9 @@
   home.shellAliases = {
     # 强制 Flatpak 默认使用 --user 参数，避免占用系统根分区
     flatpak = "flatpak --user";
+    # Home Manager standalone 模式：手动切换配置
+    # home-switch = "home-manager switch --flake /etc/nixos#zhangchongjie";
+    home-switch = "home-manager switch -f /etc/nixos/home/default.nix";
   };
 
   # ═══════════════════════════════════════════════════════════

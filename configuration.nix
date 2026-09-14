@@ -104,7 +104,7 @@
   # 系统软件包 - 仅保留系统级必需的工具
   environment.systemPackages = with pkgs; [
     # 系统核心工具
-    home-manager # Home Manager（NixOS 集成模式）
+    home-manager # Home Manager CLI（standalone 模式，不引 flake）
 
     # KDE Connect（手机与电脑互联）— 用户明确保留，不依赖 Plasma 桌面
     kdePackages.kdeconnect-kde
@@ -176,8 +176,6 @@
   # 桌面登录走 dms-greeter（PAM 无 auto_start）——keyring 保持空密码自动解锁
   security.pam.services.login.enableGnomeKeyring = lib.mkForce false;
 
-
-
   # 禁用 speech-dispatcher（语音合成）——用户不用，且子进程全僵尸（sd_voxin 等）
   services.speechd.enable = false;
 
@@ -189,7 +187,6 @@
     # 指纹 06cb:00f0 的 udev 规则统一在 modules/services/desktop-niri.nix（含 autosuspend）
   '';
 
-
   # 设置 /etc/nixos 目录权限，允许 zhangchongjie 用户完全控制
   systemd.tmpfiles.rules = [
     "d /etc/nixos 0775 zhangchongjie users -"
@@ -199,23 +196,14 @@
   ];
 
   # ═══════════════════════════════════════════════════════════
-  # Home Manager 全局配置（NixOS 集成模式）
+  # Home Manager: standalone 模式（不再由 NixOS 模块管理）
+  # 用法：home-manager switch -f /etc/nixos/home/default.nix
   # ═══════════════════════════════════════════════════════════
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-
-    users.zhangchongjie =
-      {
-        lib,
-        ...
-      }:
-      {
-        imports = [
-          ./home/default.nix
-        ];
-      };
-  };
+  # 在 configuration.nix 中添加
+  nix.nixPath = [
+    "nixpkgs=${pkgs.path}"
+    "home-manager=/etc/nixos/home-manager"
+  ];
 
   # ═══════════════════════════════════════════════════════════
   # DMS (DankMaterialShell) 桌面 shell —— 完全由 nixpkgs 管理

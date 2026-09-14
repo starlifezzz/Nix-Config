@@ -18,11 +18,12 @@
       cd2up = "cd ../..";
       cd3up = "cd ../../..";
 
-      # ═══ NixOS 系统管理（Flakes） ═══
+      # ═══ NixOS 系统管理（Flakes + Home Manager standalone） ═══
       # 来源：https://nixos.org/manual/nixos/stable/#sec-changing-config
       # 去掉 -E：避免 "$HOME is not owned by you" 警告
       # TUN 模式下代理在网络层生效，不依赖环境变量
-      rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#nixos";
+      # rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#nixos && home-manager switch -f /etc/nixos/home/default.nix";
+      rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#nixos && home-manager switch -f /etc/nixos/home/default.nix -I home-manager=/etc/nixos/home-manager";
       rebuild-test = "sudo nixos-rebuild test --flake /etc/nixos#nixos";
       rebuild-boot = "sudo nixos-rebuild boot --flake /etc/nixos#nixos";
 
@@ -52,7 +53,8 @@
       # /etc/nixos 已通过 tmpfiles.rules 授权给 zhangchongjie，无需 sudo
       rebuild-update = ''
         nix flake update --flake /etc/nixos && \
-        sudo nixos-rebuild switch --flake /etc/nixos#nixos
+        sudo nixos-rebuild switch --flake /etc/nixos#nixos && \
+        home-manager switch -f /etc/nixos/home/default.nix
       '';
 
       # 提交配置并重建（解决 "Git tree is dirty" 警告）

@@ -96,49 +96,15 @@
     # 复杂/重复节点保持 KDL（window-rule ×5、spawn-at-startup ×4、include、layer-rule）
     extraConfig = ''
       // ═══ 自动显示器配置（niri-auto-output 脚本生成，最高分辨率+最高刷新率+VRR）═══
-      include optional=true "output.kdl"
-      // DMS 显示器设置（DMS 设置中心管理：VRR/分辨率/位置等）
-      // 注: 在 output.kdl 之后 include → DMS 设置优先（自动检测为 fallback）
-      include optional=true "dms/outputs.kdl"
+      // 注: niri 26.04 不支持 include optional=true，文件不存在会报错
+      // DMS 集成分片同理——由 activation 恢复到 ~/.config/niri/dms/
+      // include 语句在 DMS 写入后取消注释即可
 
-      // ═══ DMS 集成分片（DMS 设置中心写入 ~/.config/niri/dms/*.kdl）═══
-      // 预置 include → DMS 检测到已包含 → 只写可写分片（不尝试改只读 config.kdl）
-      // 修复: DMS 键盘快捷键/窗口规则等设置无法保存（Fix failed）
-      include optional=true "dms/binds.kdl"
-      include optional=true "dms/cursor.kdl"
-      include optional=true "dms/colors.kdl"
-      // ═══ 不 include dms/input.kdl ═══
-      // 原因：niri 的「input 指点设备段」不合并（后者覆盖前者）——DMS 的 input.kdl
-      // 只写 mouse{accel-speed}、不含 accel-profile，会覆盖掉 settings 里的
-      // mouse{accel-profile "flat"} → 回退默认 adaptive（鼠标加速开启）。
-      // DMS v1.5.3 无输入设置 UI，该文件是静态模板（且桌面无需触控板设置），
-      // 故直接排除，让下面的 settings.input 生效（accel-profile flat）。
-      include optional=true "dms/alttab.kdl"
-      include optional=true "dms/layout.kdl"
-      include optional=true "dms/windowrules.kdl"
-      include optional=true "dms/wpblur.kdl"
-
-      // background blur for all windows (niri 26.04 feature)
-      window-rule {
-          match app-id=r#"^.*$"#
-          background-effect {
-              blur true
-          }
-      }
-
-      // ═══ 窗口规则：全部由 DMS 设置中心管理（windowrules.kdl）═══
-      // 默认平铺；单窗口规则（浮动/尺寸/无模糊/透明度）→ DMS UI 设置
-      // 同步: sync-dms-settings.sh + activation 首次恢复（换机）
-
+      // ═══ 窗口规则 ═══
       // 基础服务（DMS shell 由 dms.service 启动，见 programs.dank-material-shell）
-      // spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP"
-      // fcitx5 已由 i18n.inputMethod 的 XDG autostart 启动——此处不重复
-      // （之前双实例: "Failed to create addon: dbus ... another fcitx already running"）
       spawn-at-startup "kdeconnect-indicator"
       // 剪贴板持久化（wl-clip-persist——应用关闭后 Ctrl+V 仍有效）
       spawn-at-startup "wl-clip-persist" "--clipboard" "regular"
-      // PolicyKit 授权弹窗：由 DMS 自带 agent 处理（样式统一）
-      // （移除了 polkit-kde-agent——避免与 DMS agent 冲突 "already exists"）
     '';
   };
 
