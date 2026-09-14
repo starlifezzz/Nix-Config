@@ -10,15 +10,20 @@
             }
         }
     },
-    "matugenScheme": "scheme-content",
-    "popupTransparency": 0.4,
+    "matugenScheme": "scheme-fidelity",
+    "matugenSmartMode": true,
+    "popupTransparency": 0.5,
+    "floatingWindowTransparency": 0.71,
+    "widgetBackgroundColor": "sc",
     "controlCenterTileColorMode": "primaryContainer",
     "cornerRadius": 12,
     "keyboardTrackLayout": "window",
     "showWeekNumber": true,
+    "clockFormat": "24h",
     "showSeconds": true,
     "animationSpeed": 2,
     "customAnimationDuration": 200,
+    "springBounce": 2,
     "m3ElevationLightDirection": "autoBar",
     "blurEnabled": true,
     "wallpaperFillMode": "Fit",
@@ -77,8 +82,10 @@
         "apps": "list"
     },
     "dankLauncherV2UnloadOnClose": true,
-    "useAutoLocation": true,
     "networkPreference": "wifi",
+    "iconThemeDark": "Papirus-Dark",
+    "iconThemeLight": "Papirus-Light",
+    "iconThemePerMode": true,
     "cursorSettings": {
         "theme": "Nordzy-catppuccin-frappe-dark",
         "size": 24,
@@ -97,7 +104,7 @@
     },
     "fontFamily": "霞鹜文楷 屏幕阅读版",
     "monoFontFamily": "霞鹜文楷等宽",
-    "textRenderQuality": 1,
+    "soundLogin": true,
     "acMonitorTimeout": 120,
     "acLockTimeout": 30,
     "acSuspendTimeout": 1200,
@@ -207,7 +214,7 @@
             "hoverPopouts": true,
             "hoverPopoutDelay": 150,
             "attachToScreenEdge": false,
-            "islandFloating": false,
+            "islandFloating": true,
             "islandHomeLayout": [
                 {
                     "id": "media",
@@ -243,7 +250,13 @@
             "islandHomeClockDisplay": "both",
             "islandHomeCompactTight": false,
             "islandInteractionMode": "hybrid",
-            "islandReducedMotion": false
+            "islandReducedMotion": false,
+            "islandCompactThickness": 38,
+            "islandOuterGap": 4,
+            "islandAlongOffset": 0,
+            "islandTransparency": 0.54,
+            "islandHighContrast": false,
+            "islandSatelliteBackground": false
         }
     ],
     "desktopClockCustomColor": {
