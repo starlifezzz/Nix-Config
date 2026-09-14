@@ -44,7 +44,7 @@
   # ── niri 窗口管理器（home-manager 声明式接管，替代手写 config.kdl）──
   wayland.windowManager.niri = {
     enable = true;
-    # checkConfig: 生成后自动 niri validate（build 期暴露语法错误）
+    checkConfig = false; # 运行时相对 include 指向 ~/.config/niri/dms/，构建时文件不存在会验证失败
 
     # 声明式配置（settings → config.kdl，类型检查）
     settings = {
@@ -96,11 +96,31 @@
     # 复杂/重复节点保持 KDL（window-rule ×5、spawn-at-startup ×4、include、layer-rule）
     extraConfig = ''
       // ═══ 自动显示器配置（niri-auto-output 脚本生成，最高分辨率+最高刷新率+VRR）═══
-      // 注: niri 26.04 不支持 include optional=true，文件不存在会报错
-      // DMS 集成分片同理——由 activation 恢复到 ~/.config/niri/dms/
-      // include 语句在 DMS 写入后取消注释即可
+      include "output.kdl"
+      // DMS 显示器设置（DMS 设置中心管理：VRR/分辨率/位置等）
+      include "dms/outputs.kdl"
 
-      // ═══ 窗口规则 ═══
+      // ═══ DMS 集成分片（DMS 设置中心写入 ~/.config/niri/dms/*.kdl）═══
+      // 预置 include → DMS 检测到已包含 → 只写可写分片（不尝试改只读 config.kdl）
+      // 修复: DMS 键盘快捷键/窗口规则等设置无法保存（Fix failed）
+      include "dms/binds.kdl"
+      include "dms/cursor.kdl"
+      include "dms/colors.kdl"
+      // ═══ 不 include dms/input.kdl ═══
+      // 原因：niri 的「input 指点设备段」不合并（后者覆盖前者）——DMS 的 input.kdl
+      // 只写 mouse{accel-speed}、不含 accel-profile，会覆盖掉 settings 里的
+      // mouse{accel-profile "flat"} → 回退默认 adaptive（鼠标加速开启）。
+      // DMS v1.5.3 无输入设置 UI，该文件是静态模板（且桌面无需触控板设置），
+      // 故直接排除，让下面的 settings.input 生效（accel-profile flat）。
+      include "dms/alttab.kdl"
+      include "dms/layout.kdl"
+      include "dms/windowrules.kdl"
+      include "dms/wpblur.kdl"
+
+      // ═══ 窗口规则：全部由 DMS 设置中心管理（windowrules.kdl）═══
+      // 默认平铺；单窗口规则（浮动/尺寸/无模糊/透明度）→ DMS UI 设置
+      // 同步: sync-dms-settings.sh + activation 首次恢复（换机）
+
       // 基础服务（DMS shell 由 dms.service 启动，见 programs.dank-material-shell）
       spawn-at-startup "kdeconnect-indicator"
       // 剪贴板持久化（wl-clip-persist——应用关闭后 Ctrl+V 仍有效）
@@ -204,11 +224,11 @@
   # DMS 配置已由 HM 完整声明（见 dms.nix 的 home.file settings.json）
 
   # ── DMS 配置首次恢复（换机）──
-  # binds.kdl/windowrules.kdl 是 DMS 设置中心管理的用户文件——不部署（只读锁会阻止 DMS 写）
+  # 所有 dms/*.kdl 由 DMS 设置中心管理——不部署（只读锁会阻止 DMS 写）
   # 换机: 仓库 dms-shell/ → 用户目录（仅首次/文件不存在——不覆盖 DMS 改动）
   home.activation.restoreDmsConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/.config/niri/dms"
-    for f in binds.kdl windowrules.kdl; do
+    for f in binds.kdl windowrules.kdl cursor.kdl colors.kdl alttab.kdl layout.kdl wpblur.kdl; do
       if [ ! -f "$HOME/.config/niri/dms/$f" ]; then
         cp ${./dms-shell}/$f "$HOME/.config/niri/dms/$f"
         echo "restoreDmsConfig: 已恢复 $f"

@@ -22,7 +22,6 @@
       # 来源：https://nixos.org/manual/nixos/stable/#sec-changing-config
       # 去掉 -E：避免 "$HOME is not owned by you" 警告
       # TUN 模式下代理在网络层生效，不依赖环境变量
-      # rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#nixos && home-manager switch -f /etc/nixos/home/default.nix";
       rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#nixos && home-manager switch -f /etc/nixos/home/default.nix -I home-manager=/etc/nixos/home-manager";
       rebuild-test = "sudo nixos-rebuild test --flake /etc/nixos#nixos";
       rebuild-boot = "sudo nixos-rebuild boot --flake /etc/nixos#nixos";

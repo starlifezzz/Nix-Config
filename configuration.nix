@@ -199,9 +199,8 @@
   # Home Manager: standalone 模式（不再由 NixOS 模块管理）
   # 用法：home-manager switch -f /etc/nixos/home/default.nix
   # ═══════════════════════════════════════════════════════════
-  # 在 configuration.nix 中添加
+  # 本地 home-manager 源（离线，不拉 GitHub）
   nix.nixPath = [
-    "nixpkgs=${pkgs.path}"
     "home-manager=/etc/nixos/home-manager"
   ];
 
